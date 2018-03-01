@@ -1,0 +1,6 @@
+**/.project
+**/.classpath
+**/.settings
+indigodc-orchestrator-plugin/target/
+indigodc-orchestrator-plugin/lib/
+a4c-tmp/**
