@@ -3,32 +3,52 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>es.upv</groupId>
-  <artifactId>a4c-indigodc-plugin</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>alien4cloud-indigodc-provider</artifactId>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>a4c-indigodc-plugin</name>
+  <name>alien4cloud-indigodc-provider</name>
   <url>http://maven.apache.org</url>
+  
+  <repositories>
+    <repository>
+      <id>fastconnect</id>
+      <name>your custom repo</name>
+      <url>https://fastconnect.org/maven/content/repositories/opensource/</url>
+    </repository>
+</repositories>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.version>3.7.0</maven.compiler.version>
+    <java.version>1.8</java.version>
+    <snakeyaml.version>1.18</snakeyaml.version>
+    <provider.common.clientId>none</provider.common.clientId>
+    <provider.common.clientSecret>none</provider.common.clientSecret>
+    <provider.common.user>none</provider.common.user>
+    <provider.common.password>none</provider.common.password>
   </properties>
 
   <dependencies>
+<!-- https://mvnrepository.com/artifact/alien4cloud/alien4cloud-core -->
+<dependency>
+    <groupId>alien4cloud</groupId>
+    <artifactId>alien4cloud-core</artifactId>
+    <version>1.4.3.2</version>
+    <scope>provided</scope>
+</dependency>
+
   
-  <dependency>
-      <groupId>alien4cloud</groupId>
-      <artifactId>alien4cloud-core</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-  
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
+<!-- https://mvnrepository.com/artifact/junit/junit -->
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>test</scope>
+</dependency>
+
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
 <dependency>
     <groupId>commons-cli</groupId>
@@ -98,6 +118,143 @@
     <artifactId>okio</artifactId>
     <version>1.14.0</version>
 </dependency>
-    
+          <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
+      </dependency>
   </dependencies>
+  
+  
+   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources/META-INF</directory>
+        <targetPath>META-INF</targetPath>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/resources/provider/</directory>
+        <targetPath>provider</targetPath>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/webapp</directory>
+         <includes>
+          <include>**</include>
+        </includes>
+        <targetPath>ui</targetPath>
+      </resource>
+
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.14.1</version>
+        <configuration>
+          <argLine>${argLine}</argLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.16</version>
+        <configuration>
+          <argLine>${argLine}</argLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <appendAssemblyId>false</appendAssemblyId>
+          <attach>false</attach>
+          <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
+          <descriptors>
+            <descriptor>src/main/assembly/assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>external.atlassian.jgitflow</groupId>
+        <artifactId>jgitflow-maven-plugin</artifactId>
+        <version>1.0-m5.1-alien</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>attach-distribution</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>target/${project.artifactId}-${project.version}.zip</file>
+                  <type>zip</type>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+</build>
+  
+  
 </project>

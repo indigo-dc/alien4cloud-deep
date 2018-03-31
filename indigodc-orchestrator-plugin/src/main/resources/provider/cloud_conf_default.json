@@ -1,0 +1,10 @@
+{
+  "clientId": "${provider.common.clientId}",
+  "clientSecret": "${provider.common.clientSecret}",
+  "tokenEndpoint": "https://iam.recas.ba.infn.it/token",
+  "clientScopes": "openid profile email offline_access",
+  "orchestratorEndpoint": "http://paas-orchestrator.cloud.ba.infn.it:8080",
+  "iamHost": "https://iam.recas.ba.infn.it",
+  "user": "${provider.common.user}",
+  "password": "${provider.common.password}"
+}

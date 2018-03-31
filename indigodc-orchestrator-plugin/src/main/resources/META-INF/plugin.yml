@@ -1,0 +1,10 @@
+id: alien4cloud-indigodc-provider
+name: Alien 4 Cloud - IndigoDC Provider
+version: ${project.version}
+description: Alien 4 Cloud Plugin Provider  for the IndigoDC Orchestrator
+configuration_class: es.upv.indigodc.PluginConfiguration
+#ui_entry_point: scripts/plugin.js
+component_descriptors:
+  - bean_name: indigodc-orchestrator-factory
+    name: IndigoDC Orchestrator
+    description: Alien 4 Cloud Plugin Provider  for the IndigoDC Orchestrator

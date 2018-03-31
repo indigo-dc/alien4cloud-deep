@@ -1,0 +1,579 @@
+tosca_definitions_version: alien_dsl_1_4_0
+
+metadata:
+  template_name: TestApp
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN14
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    admin_username:
+      type: string
+      required: true
+      default: admin
+    fe_cpus:
+      type: integer
+      required: false
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    wn_num:
+      type: integer
+      required: false
+      default: 1
+      description: "the number of resources"
+    wn_mem:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+    wn_cpus:
+      type: integer
+      required: false
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    admin_token:
+      type: string
+      required: true
+      default: token
+    fe_mem:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+  node_templates:
+    wn_node:
+      type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
+      properties:
+        front_end_ip: "127.0.0.1"
+        hybrid: false
+      requirements:
+        - host:
+            node: lrms_wn
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        wn:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+    lrms_wn:
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: { get_input: wn_num }
+            default_instances: 1
+        endpoint:
+          properties:
+            private_ip: true
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: wn_cpus }
+            mem_size: { get_input: wn_mem }
+    lrms_server:
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            image: "linux-ubuntu-16.04-vmi"
+        endpoint:
+          properties:
+            dns_name: kubeserver
+            private_ip: true
+            protocol: tcp
+            port: 6443
+            secure: true
+            network_name: PUBLIC
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+    lrms_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
+      properties:
+        admin_username: { get_input: admin_username }
+        admin_token: { get_input: admin_token }
+        wn_ips: 
+        hybrid: false
+      requirements:
+        - host:
+            node: lrms_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        lrms:
+          properties:
+            type: kubernetes
+    jupyterhub:
+      type: tosca.nodes.indigo.JupyterHub
+      properties:
+        spawner: kubernetes
+      requirements:
+        - dependency:
+            node: lrms_front_end
+            capability: tosca.capabilities.Node
+            relationship: tosca.relationships.DependsOn
+        - host:
+            node: lrms_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+  outputs:
+    lrms_server_public_address:
+      value: { get_attribute: [ lrms_server, public_address ] }
+    lrms_server_public_ip_address:
+      value: { get_attribute: [ lrms_server, public_ip_address ] }
+  workflows:
+    install:
+      steps:
+        Compute_install:
+          node: lrms_wn
+          activity:
+            delegate: install
+          on-success:
+            - Kubernetes_initial
+        Kubernetes_initial:
+          node: wn_node
+          activity:
+            set_state: initial
+          on-success:
+            - Kubernetes_creating
+        Kubernetes_creating:
+          node: wn_node
+          activity:
+            set_state: creating
+          on-success:
+            - Kubernetes_created
+        Kubernetes_created:
+          node: wn_node
+          activity:
+            set_state: created
+          on-success:
+            - Kubernetes_configuring
+        Kubernetes_configuring:
+          node: wn_node
+          activity:
+            set_state: configuring
+          on-success:
+            - configure_Kubernetes
+        configure_Kubernetes:
+          node: wn_node
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.configure
+          on-success:
+            - Kubernetes_configured
+        Kubernetes_configured:
+          node: wn_node
+          activity:
+            set_state: configured
+          on-success:
+            - Kubernetes_starting
+        Kubernetes_starting:
+          node: wn_node
+          activity:
+            set_state: starting
+          on-success:
+            - start_Kubernetes
+        start_Kubernetes:
+          node: wn_node
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.start
+          on-success:
+            - Kubernetes_started
+        Kubernetes_started:
+          node: wn_node
+          activity:
+            set_state: started
+        Compute_install_1:
+          node: lrms_server
+          activity:
+            delegate: install
+          on-success:
+            - Kubernetes_initial_1
+            - JupyterHub_initial
+        Kubernetes_initial_1:
+          node: lrms_front_end
+          activity:
+            set_state: initial
+          on-success:
+            - Kubernetes_creating_1
+        Kubernetes_creating_1:
+          node: lrms_front_end
+          activity:
+            set_state: creating
+          on-success:
+            - Kubernetes_created_1
+        Kubernetes_created_1:
+          node: lrms_front_end
+          activity:
+            set_state: created
+          on-success:
+            - Kubernetes_configuring_1
+        Kubernetes_configuring_1:
+          node: lrms_front_end
+          activity:
+            set_state: configuring
+          on-success:
+            - configure_Kubernetes_1
+        configure_Kubernetes_1:
+          node: lrms_front_end
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.configure
+          on-success:
+            - Kubernetes_configured_1
+        Kubernetes_configured_1:
+          node: lrms_front_end
+          activity:
+            set_state: configured
+          on-success:
+            - Kubernetes_starting_1
+        Kubernetes_starting_1:
+          node: lrms_front_end
+          activity:
+            set_state: starting
+          on-success:
+            - start_Kubernetes_1
+        start_Kubernetes_1:
+          node: lrms_front_end
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.start
+          on-success:
+            - Kubernetes_started_1
+        Kubernetes_started_1:
+          node: lrms_front_end
+          activity:
+            set_state: started
+          on-success:
+            - JupyterHub_configuring
+        JupyterHub_initial:
+          node: jupyterhub
+          activity:
+            set_state: initial
+          on-success:
+            - JupyterHub_creating
+        JupyterHub_creating:
+          node: jupyterhub
+          activity:
+            set_state: creating
+          on-success:
+            - JupyterHub_created
+        JupyterHub_created:
+          node: jupyterhub
+          activity:
+            set_state: created
+          on-success:
+            - Kubernetes_configuring_1
+            - JupyterHub_configuring
+        JupyterHub_configuring:
+          node: jupyterhub
+          activity:
+            set_state: configuring
+          on-success:
+            - configure_JupyterHub
+        configure_JupyterHub:
+          node: jupyterhub
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.configure
+          on-success:
+            - JupyterHub_configured
+        JupyterHub_configured:
+          node: jupyterhub
+          activity:
+            set_state: configured
+          on-success:
+            - JupyterHub_starting
+        JupyterHub_starting:
+          node: jupyterhub
+          activity:
+            set_state: starting
+          on-success:
+            - start_JupyterHub
+        start_JupyterHub:
+          node: jupyterhub
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.start
+          on-success:
+            - JupyterHub_started
+        JupyterHub_started:
+          node: jupyterhub
+          activity:
+            set_state: started
+    uninstall:
+      steps:
+        Compute_uninstall:
+          node: lrms_wn
+          activity:
+            delegate: uninstall
+        Kubernetes_stopping:
+          node: wn_node
+          activity:
+            set_state: stopping
+          on-success:
+            - stop_Kubernetes
+        stop_Kubernetes:
+          node: wn_node
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.stop
+          on-success:
+            - Kubernetes_stopped
+        Kubernetes_stopped:
+          node: wn_node
+          activity:
+            set_state: stopped
+          on-success:
+            - Kubernetes_deleting
+        Kubernetes_deleting:
+          node: wn_node
+          activity:
+            set_state: deleting
+          on-success:
+            - delete_Kubernetes
+        delete_Kubernetes:
+          node: wn_node
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.delete
+          on-success:
+            - Kubernetes_deleted
+        Kubernetes_deleted:
+          node: wn_node
+          activity:
+            set_state: deleted
+          on-success:
+            - Compute_uninstall
+        Compute_uninstall_1:
+          node: lrms_server
+          activity:
+            delegate: uninstall
+        Kubernetes_stopping_1:
+          node: lrms_front_end
+          activity:
+            set_state: stopping
+          on-success:
+            - stop_Kubernetes_1
+        stop_Kubernetes_1:
+          node: lrms_front_end
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.stop
+          on-success:
+            - Kubernetes_stopped_1
+        Kubernetes_stopped_1:
+          node: lrms_front_end
+          activity:
+            set_state: stopped
+          on-success:
+            - Kubernetes_deleting_1
+        Kubernetes_deleting_1:
+          node: lrms_front_end
+          activity:
+            set_state: deleting
+          on-success:
+            - delete_Kubernetes_1
+        delete_Kubernetes_1:
+          node: lrms_front_end
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.delete
+          on-success:
+            - Kubernetes_deleted_1
+        Kubernetes_deleted_1:
+          node: lrms_front_end
+          activity:
+            set_state: deleted
+          on-success:
+            - Compute_uninstall_1
+        JupyterHub_stopping:
+          node: jupyterhub
+          activity:
+            set_state: stopping
+          on-success:
+            - stop_JupyterHub
+        stop_JupyterHub:
+          node: jupyterhub
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.stop
+          on-success:
+            - JupyterHub_stopped
+        JupyterHub_stopped:
+          node: jupyterhub
+          activity:
+            set_state: stopped
+          on-success:
+            - JupyterHub_deleting
+            - Kubernetes_stopping_1
+        JupyterHub_deleting:
+          node: jupyterhub
+          activity:
+            set_state: deleting
+          on-success:
+            - delete_JupyterHub
+        delete_JupyterHub:
+          node: jupyterhub
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.delete
+          on-success:
+            - JupyterHub_deleted
+        JupyterHub_deleted:
+          node: jupyterhub
+          activity:
+            set_state: deleted
+          on-success:
+            - Compute_uninstall_1
+    start:
+      steps:
+        Compute_start:
+          node: lrms_wn
+          activity:
+            delegate: start
+          on-success:
+            - Kubernetes_starting
+        Kubernetes_starting:
+          node: wn_node
+          activity:
+            set_state: starting
+          on-success:
+            - start_Kubernetes
+        start_Kubernetes:
+          node: wn_node
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.start
+          on-success:
+            - Kubernetes_started
+        Kubernetes_started:
+          node: wn_node
+          activity:
+            set_state: started
+        Compute_start_1:
+          node: lrms_server
+          activity:
+            delegate: start
+          on-success:
+            - JupyterHub_starting
+            - Kubernetes_starting_1
+        Kubernetes_starting_1:
+          node: lrms_front_end
+          activity:
+            set_state: starting
+          on-success:
+            - start_Kubernetes_1
+        start_Kubernetes_1:
+          node: lrms_front_end
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.start
+          on-success:
+            - Kubernetes_started_1
+        Kubernetes_started_1:
+          node: lrms_front_end
+          activity:
+            set_state: started
+          on-success:
+            - JupyterHub_starting
+        JupyterHub_starting:
+          node: jupyterhub
+          activity:
+            set_state: starting
+          on-success:
+            - start_JupyterHub
+        start_JupyterHub:
+          node: jupyterhub
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.start
+          on-success:
+            - JupyterHub_started
+        JupyterHub_started:
+          node: jupyterhub
+          activity:
+            set_state: started
+    stop:
+      steps:
+        Compute_stop:
+          node: lrms_wn
+          activity:
+            delegate: stop
+        Kubernetes_stopping:
+          node: wn_node
+          activity:
+            set_state: stopping
+          on-success:
+            - stop_Kubernetes
+        stop_Kubernetes:
+          node: wn_node
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.stop
+          on-success:
+            - Kubernetes_stopped
+        Kubernetes_stopped:
+          node: wn_node
+          activity:
+            set_state: stopped
+          on-success:
+            - Compute_stop
+        Compute_stop_1:
+          node: lrms_server
+          activity:
+            delegate: stop
+        Kubernetes_stopping_1:
+          node: lrms_front_end
+          activity:
+            set_state: stopping
+          on-success:
+            - stop_Kubernetes_1
+        stop_Kubernetes_1:
+          node: lrms_front_end
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.stop
+          on-success:
+            - Kubernetes_stopped_1
+        Kubernetes_stopped_1:
+          node: lrms_front_end
+          activity:
+            set_state: stopped
+          on-success:
+            - Compute_stop_1
+        JupyterHub_stopping:
+          node: jupyterhub
+          activity:
+            set_state: stopping
+          on-success:
+            - stop_JupyterHub
+        stop_JupyterHub:
+          node: jupyterhub
+          activity:
+            call_operation: tosca.interfaces.node.lifecycle.Standard.stop
+          on-success:
+            - JupyterHub_stopped
+        JupyterHub_stopped:
+          node: jupyterhub
+          activity:
+            set_state: stopped
+          on-success:
+            - Compute_stop_1
