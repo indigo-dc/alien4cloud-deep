@@ -69,41 +69,42 @@ public class OrchestratorConnector {
   public static final int STATUS_UNKNOWN = 1;
   
   private static final Logger LOGGER = Logger.getLogger(OrchestratorConnector.class.getName());
-  private SslContextBuilder sslContextBuilder;
-  private SSLContext sslContext;
+  //private SslContextBuilder sslContextBuilder;
+  //private SSLContext sslContext;
  
   public OrchestratorConnector() {
     
-    sslContextBuilder = new SslContextBuilder();
-    sslContextBuilder.addCertificate("MIIFOTCCBCGgAwIBAgIQDihOdHgl4y/X+WgnoPumYjANBgkqhkiG9w0BAQsFADBk" + 
-        "MQswCQYDVQQGEwJOTDEWMBQGA1UECBMNTm9vcmQtSG9sbGFuZDESMBAGA1UEBxMJ" + 
-        "QW1zdGVyZGFtMQ8wDQYDVQQKEwZURVJFTkExGDAWBgNVBAMTD1RFUkVOQSBTU0wg" + 
-        "Q0EgMzAeFw0xNzEyMTMwMDAwMDBaFw0yMDEyMTcxMjAwMDBaMHwxCzAJBgNVBAYT" + 
-        "AklUMREwDwYDVQQHEwhGcmFzY2F0aTEuMCwGA1UEChMlSXN0aXR1dG8gTmF6aW9u" + 
-        "YWxlIGRpIEZpc2ljYSBOdWNsZWFyZTELMAkGA1UECxMCQkExHTAbBgNVBAMTFGlh" + 
-        "bS5yZWNhcy5iYS5pbmZuLml0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC" + 
-        "AQEAs6nUoL9jy29dkKM3v4SLiY7dtC3S5ZkHIP+6fbCz284bxzv7DxM7gme47MuX" + 
-        "rrl9tG8RGH5WnK/ST0tj5+KP/CaC5Nf36j1c/e8SlZuOiTsSqmZYXmkDZtGRmzWI" + 
-        "cPcOFNVNduHAPd9scpgQkP/+McLi2xV7xKRPlZRpq3ezg7kwWQ12SIjl/W5GgVEf" + 
-        "s+qgqX3mqVFC9erBYlUVsdIE2O4T7IdbVGVEOk/Q/RgY3PUGia7GNiRliD5POecF" + 
-        "ynTmFCCjlGtlVM4YooPgaAUHELQcmc0c+eTyOoaBtb2644vUAUJK3vIK3tnjy6VL" + 
-        "rClDDHt4Un408x+dwEeX7jf2gQIDAQABo4IBzTCCAckwHwYDVR0jBBgwFoAUZ/2I" + 
-        "IBQnmMcJ0iUZu+lREWN1UGIwHQYDVR0OBBYEFG8UOkbHg9VHfgPdQ0TcHaokU0H4" + 
-        "MB8GA1UdEQQYMBaCFGlhbS5yZWNhcy5iYS5pbmZuLml0MA4GA1UdDwEB/wQEAwIF" + 
-        "oDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwawYDVR0fBGQwYjAvoC2g" + 
-        "K4YpaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL1RFUkVOQVNTTENBMy5jcmwwL6At" + 
-        "oCuGKWh0dHA6Ly9jcmw0LmRpZ2ljZXJ0LmNvbS9URVJFTkFTU0xDQTMuY3JsMEwG" + 
-        "A1UdIARFMEMwNwYJYIZIAYb9bAEBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3" + 
-        "LmRpZ2ljZXJ0LmNvbS9DUFMwCAYGZ4EMAQICMG4GCCsGAQUFBwEBBGIwYDAkBggr" + 
-        "BgEFBQcwAYYYaHR0cDovL29jc3AuZGlnaWNlcnQuY29tMDgGCCsGAQUFBzAChixo" + 
-        "dHRwOi8vY2FjZXJ0cy5kaWdpY2VydC5jb20vVEVSRU5BU1NMQ0EzLmNydDAMBgNV" + 
-        "HRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCCyBPHs2L3/LTrBxFx38cDb2RX" + 
-        "UvNrLD3b6MH8wXtdT29mlCJLlPTHP/ZLwB0NI4i+ojR4m1AfGUQx164y66crkdZV" + 
-        "PijVgWtyH5PSa1+jf1d3mD+eEyfKLX7htyw1CUx1ubGWT1Hgeq0Ltuej8TxQu42R" + 
-        "lofP8t5BChrCHFfkDZm9OqLqXxT2joIAkL3+xmrc1+ghUTU6OWKxOBm6fM7ybhjO" + 
-        "0Lfk2K3RRvdNTFtMR6Eaaohtx1wmYEXNjBVSAuMvvjpt/F74gMixiOhPwUJ388hu" + 
-        "18FUuwOXw1vALUbHxL91rhBKRfqL8322KWmqdo8goXJeRYT6gcmQlvBmpDtD");
-    sslContext = sslContextBuilder.build();
+    //sslContextBuilder = new SslContextBuilder();
+    //sslContextBuilder.addCertificate(
+//    sslContextBuilder.addCertificate("MIIFOTCCBCGgAwIBAgIQDihOdHgl4y/X+WgnoPumYjANBgkqhkiG9w0BAQsFADBk" + 
+//        "MQswCQYDVQQGEwJOTDEWMBQGA1UECBMNTm9vcmQtSG9sbGFuZDESMBAGA1UEBxMJ" + 
+//        "QW1zdGVyZGFtMQ8wDQYDVQQKEwZURVJFTkExGDAWBgNVBAMTD1RFUkVOQSBTU0wg" + 
+//        "Q0EgMzAeFw0xNzEyMTMwMDAwMDBaFw0yMDEyMTcxMjAwMDBaMHwxCzAJBgNVBAYT" + 
+//        "AklUMREwDwYDVQQHEwhGcmFzY2F0aTEuMCwGA1UEChMlSXN0aXR1dG8gTmF6aW9u" + 
+//        "YWxlIGRpIEZpc2ljYSBOdWNsZWFyZTELMAkGA1UECxMCQkExHTAbBgNVBAMTFGlh" + 
+//        "bS5yZWNhcy5iYS5pbmZuLml0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC" + 
+//        "AQEAs6nUoL9jy29dkKM3v4SLiY7dtC3S5ZkHIP+6fbCz284bxzv7DxM7gme47MuX" + 
+//        "rrl9tG8RGH5WnK/ST0tj5+KP/CaC5Nf36j1c/e8SlZuOiTsSqmZYXmkDZtGRmzWI" + 
+//        "cPcOFNVNduHAPd9scpgQkP/+McLi2xV7xKRPlZRpq3ezg7kwWQ12SIjl/W5GgVEf" + 
+//        "s+qgqX3mqVFC9erBYlUVsdIE2O4T7IdbVGVEOk/Q/RgY3PUGia7GNiRliD5POecF" + 
+//        "ynTmFCCjlGtlVM4YooPgaAUHELQcmc0c+eTyOoaBtb2644vUAUJK3vIK3tnjy6VL" + 
+//        "rClDDHt4Un408x+dwEeX7jf2gQIDAQABo4IBzTCCAckwHwYDVR0jBBgwFoAUZ/2I" + 
+//        "IBQnmMcJ0iUZu+lREWN1UGIwHQYDVR0OBBYEFG8UOkbHg9VHfgPdQ0TcHaokU0H4" + 
+//        "MB8GA1UdEQQYMBaCFGlhbS5yZWNhcy5iYS5pbmZuLml0MA4GA1UdDwEB/wQEAwIF" + 
+//        "oDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwawYDVR0fBGQwYjAvoC2g" + 
+//        "K4YpaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL1RFUkVOQVNTTENBMy5jcmwwL6At" + 
+//        "oCuGKWh0dHA6Ly9jcmw0LmRpZ2ljZXJ0LmNvbS9URVJFTkFTU0xDQTMuY3JsMEwG" + 
+//        "A1UdIARFMEMwNwYJYIZIAYb9bAEBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3" + 
+//        "LmRpZ2ljZXJ0LmNvbS9DUFMwCAYGZ4EMAQICMG4GCCsGAQUFBwEBBGIwYDAkBggr" + 
+//        "BgEFBQcwAYYYaHR0cDovL29jc3AuZGlnaWNlcnQuY29tMDgGCCsGAQUFBzAChixo" + 
+//        "dHRwOi8vY2FjZXJ0cy5kaWdpY2VydC5jb20vVEVSRU5BU1NMQ0EzLmNydDAMBgNV" + 
+//        "HRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCCyBPHs2L3/LTrBxFx38cDb2RX" + 
+//        "UvNrLD3b6MH8wXtdT29mlCJLlPTHP/ZLwB0NI4i+ojR4m1AfGUQx164y66crkdZV" + 
+//        "PijVgWtyH5PSa1+jf1d3mD+eEyfKLX7htyw1CUx1ubGWT1Hgeq0Ltuej8TxQu42R" + 
+//        "lofP8t5BChrCHFfkDZm9OqLqXxT2joIAkL3+xmrc1+ghUTU6OWKxOBm6fM7ybhjO" + 
+//        "0Lfk2K3RRvdNTFtMR6Eaaohtx1wmYEXNjBVSAuMvvjpt/F74gMixiOhPwUJ388hu" + 
+//        "18FUuwOXw1vALUbHxL91rhBKRfqL8322KWmqdo8goXJeRYT6gcmQlvBmpDtD");
+    
   }
 
   public AccessToken obtainAuthTokens(CloudConfiguration cloudConfiguration) throws IOException, NoSuchFieldException  {
@@ -118,7 +119,7 @@ public class OrchestratorConnector {
     URL requestURL = new URL(cloudConfiguration.getTokenEndpoint());
     
     AccessToken at = null;
-    
+    SSLContext sslContext = getSSLContext(cloudConfiguration);
     OrchestratorResponse r = restCall(requestURL, sbuf.toString(), null, true, sslContext, 
         GET_CALL);
     ObjectMapper mapper = new ObjectMapper();
@@ -144,7 +145,8 @@ public class OrchestratorConnector {
     headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
     
     URL requestURL = new URL(sbuf.toString());
-    
+
+    SSLContext sslContext = getSSLContext(cloudConfiguration);
     return restCall(requestURL, null, headers, isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, 
         GET_CALL);
   }
@@ -162,7 +164,8 @@ public class OrchestratorConnector {
     headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
     
     URL requestURL = new URL(sbuf.toString());
-    
+
+    SSLContext sslContext = getSSLContext(cloudConfiguration);
     return restCall(requestURL, yamlTopology, headers, isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, 
         POST_CALL);
   }
@@ -181,7 +184,8 @@ public class OrchestratorConnector {
 	    headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
 	    
 	    URL requestURL = new URL(sbuf.toString());
-	    
+
+	    SSLContext sslContext = getSSLContext(cloudConfiguration);
 	    return restCall(requestURL, null, headers,isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, 
 	        GET_CALL);
 	  }
@@ -201,7 +205,8 @@ public class OrchestratorConnector {
     headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
     
     URL requestURL = new URL(sbuf.toString());
-    
+
+    SSLContext sslContext = getSSLContext(cloudConfiguration);
     return restCall(requestURL, null, headers,isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, 
         DELETE_CALL);
   }
@@ -289,6 +294,15 @@ public class OrchestratorConnector {
 	    return vals.get(0).asText();
 	  else
 		  throw new NoSuchElementException("The response for deployment doesn't contain an uuid field");
+  }
+  
+  private SSLContext getSSLContext(CloudConfiguration cloudConfiguration) {
+
+    SslContextBuilder sslContextBuilder = new SslContextBuilder();
+    sslContextBuilder.addCertificate(cloudConfiguration.getIamHostCert());
+    sslContextBuilder.addCertificate(cloudConfiguration.getOrchestratorEndpointCert());
+    sslContextBuilder.addCertificate(cloudConfiguration.getTokenEndpointCert());
+    return sslContextBuilder.build();
   }
   
   private String getRequest(int request) throws NoSuchFieldException {

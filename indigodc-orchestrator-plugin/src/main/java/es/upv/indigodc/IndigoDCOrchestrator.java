@@ -1,6 +1,9 @@
 package es.upv.indigodc;
 
+import static com.google.common.collect.Maps.newHashMap;
+
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +20,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
 
 import alien4cloud.exception.NotFoundException;
 import alien4cloud.orchestrators.plugin.ILocationConfiguratorPlugin;
@@ -30,6 +35,7 @@ import alien4cloud.paas.exception.PluginConfigurationException;
 import alien4cloud.paas.model.AbstractMonitorEvent;
 import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.InstanceInformation;
+import alien4cloud.paas.model.InstanceStatus;
 import alien4cloud.paas.model.NodeOperationExecRequest;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
@@ -122,9 +128,9 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
       OrchestratorResponse result;
       try {
     	String UUIDTopologyDeployment = mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()).getIndigoDCDeploymentId();
-        result = orchestratorConnector.callUndeploy(configuration, deploymentContext.getDeploymentPaaSId());
-        log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
+    	log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
         log.info("uuid: " + UUIDTopologyDeployment);
+    	result = orchestratorConnector.callUndeploy(configuration, UUIDTopologyDeployment);        
         mappingService.registerDeploymentInfo(UUIDTopologyDeployment, deploymentContext.getDeploymentPaaSId(), DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
       } catch (Exception e) {
   		log.error(Util.throwableToString(e));
@@ -139,6 +145,7 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
   public void getEventsSince(Date date, int maxEvents, IPaaSCallback<AbstractMonitorEvent[]> eventCallback) {
 	// TODO: implement an event listener for the orchestrator
     eventCallback.onSuccess(eventService.flushEvents());
+    log.info("call getEventsSince");
     
   }
 
@@ -146,14 +153,77 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
   public void getInstancesInformation(PaaSTopologyDeploymentContext deploymentContext,
       IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback) {
     // TODO Auto-generated method stub
-	  log.info("call");
-    
+	  log.info("call getInstancesInformation");
+//      final Map<String, Map<String, InstanceInformation>> topologyInfo = newHashMap();
+//      final String groupID = deploymentContext.getDeploymentPaaSId();
+//      deploymentContext.getPaaSTopology().getNonNatives().forEach(paaSNodeTemplate -> {
+//          Map<String, InstanceInformation> instancesInfo = newHashMap();
+//          final String appID = groupID + "/" + paaSNodeTemplate.getId().toLowerCase();
+//
+//          try {
+//              // Marathon tasks are alien instances
+//              final Collection<Task> tasks = marathonClient.getAppTasks(appID).getTasks();
+//              tasks.forEach(task -> {
+//                  final InstanceInformation instanceInformation = this.getInstanceInformation(task);
+//                  instancesInfo.put(task.getId(), instanceInformation);
+//              });
+//
+//              topologyInfo.put(paaSNodeTemplate.getId(), instancesInfo);
+//          } catch (Exception e) {
+//              switch (e.getStatus()) {
+//              case 404: // The app cannot be found in marathon - we display no information
+//                  break;
+//              default:
+//            	  callback.onFailure(e);
+//              }
+//          }
+//      });
+//      callback.onSuccess(topologyInfo);
   }
+//  
+//  protected InstanceInformation getInstanceInformation(Task task) {
+//      final Map<String, String> runtimeProps = newHashMap();
+//
+//      // Outputs Marathon endpoints as host:port1,port2, ...
+//      final Collection<String> ports = Collections2.transform(task.getPorts(), Functions.toStringFunction());
+//      runtimeProps.put("endpoint", "http://".concat(task.getHost().concat(":").concat(String.join(",", ports))));
+//
+//      InstanceStatus instanceStatus;
+//      String state;
+//
+//      // Leverage Mesos's TASK_STATUS - TODO: add Mesos 1.0 task states
+//      switch (task.getState()) {
+//      case "TASK_RUNNING":
+//          state = "started";
+//          // Retrieve health checks results - if no healthcheck then assume healthy
+//          instanceStatus = Optional.ofNullable(task.getHealthCheckResults())
+//                  .map(healthCheckResults -> healthCheckResults.stream().findFirst().map(HealthCheckResult::isAlive)
+//                          .map(alive -> alive ? InstanceStatus.SUCCESS : InstanceStatus.FAILURE).orElse(InstanceStatus.PROCESSING))
+//                  .orElse(InstanceStatus.SUCCESS);
+//          break;
+//      case "TASK_STARTING":
+//          state = "starting";
+//          instanceStatus = InstanceStatus.PROCESSING;
+//          break;
+//      case "TASK_STAGING":
+//          state = "creating";
+//          instanceStatus = InstanceStatus.PROCESSING;
+//          break;
+//      case "TASK_ERROR":
+//          state = "stopped";
+//          instanceStatus = InstanceStatus.FAILURE;
+//          break;
+//      default:
+//          state = "uninitialized"; // Unknown
+//          instanceStatus = InstanceStatus.PROCESSING;
+//      }
+//
+//      return new InstanceInformation(state, instanceStatus, runtimeProps, runtimeProps, newHashMap());
+//  }
 
   @Override
   public void getStatus(PaaSDeploymentContext deploymentContext, IPaaSCallback<DeploymentStatus> callback) {
-	  log.info("call");
-    final String a4cDeploymentId = deploymentContext.getDeploymentPaaSId();
+	  log.info("call get status");
 	String UUIDTopologyDeployment = mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()).getIndigoDCDeploymentId();
     final CloudConfiguration configuration = cloudConfigurationHolder.getCloudConfiguration();
     try {

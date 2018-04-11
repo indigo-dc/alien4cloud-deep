@@ -57,9 +57,10 @@ public class OrchestratorConnectorTest {
     d.setParameters(new Deployment.Parameters(1));
     d.setCallback("http://localhost:8080/callback");
     d.setTemplate(yamlIndigoDC);
-    //String callJson = mapper.writeValueAsString(d).replaceAll("\\", "").replaceAll("\"", "\\\\\"");
+    String callJson = mapper.writeValueAsString(d).replaceAll("\\\\n", "\\n")
+    		.replace("\\\\\\", "\\");
     
-    String callJson = String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
+    //String callJson = String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
     log.info("call to be sent to the orchestrator: \n" + callJson);
     CloudConfiguration cc = getRealConfiguration();
     OrchestratorResponse or = oc.callDeploy(cc, callJson);
