@@ -50,12 +50,12 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
   public List<PluginArchive> pluginArchives() {
       if (archives == null) {
           archives = Lists.newArrayList();
-          try {
-              addToArchive(archives, "provider/common/configuration");
-          } catch (ParsingException e) {
-              log.error(e.getMessage());
-              throw new PluginParseException(e.getMessage());
-          }
+//          try {
+//              addToArchive(archives, "provider/common/configuration");
+//          } catch (ParsingException e) {
+//              log.error(e.getMessage());
+//              throw new PluginParseException(e.getMessage());
+//          }
       }
       return archives;
   }

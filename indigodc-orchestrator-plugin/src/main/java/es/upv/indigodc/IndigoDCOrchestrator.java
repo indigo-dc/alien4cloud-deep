@@ -39,6 +39,7 @@ import alien4cloud.paas.model.InstanceStatus;
 import alien4cloud.paas.model.NodeOperationExecRequest;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
+import es.upv.indigodc.Util;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import es.upv.indigodc.location.LocationConfiguratorFactory;
@@ -57,6 +58,13 @@ import lombok.extern.slf4j.Slf4j;
 public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfiguration>{
   
   public static String TYPE = "IndigoDC";
+  
+  public static String TMP_ORCHETRATOR_DEMO = "{\n" + 
+      "  \"template\" : \"tosca_definitions_version: tosca_simple_yaml_1_0\\n\\nimports:\\n  - indigo_custom_types: https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml\\n\\ndescription: >\\n  TOSCA test for launching a Kubernetes Virtual Cluster.\\n\\ntopology_template:\\n  inputs:\\n    wn_num:\\n      type: integer\\n      description: Number of WNs in the cluster\\n      default: 1\\n      required: yes\\n    fe_cpus:\\n      type: integer\\n      description: Numer of CPUs for the front-end node\\n      default: 2\\n      required: yes\\n    fe_mem:\\n      type: scalar-unit.size\\n      description: Amount of Memory for the front-end node\\n      default: 2 GB\\n      required: yes\\n    wn_cpus:\\n      type: integer\\n      description: Numer of CPUs for the WNs\\n      default: 1\\n      required: yes\\n    wn_mem:\\n      type: scalar-unit.size\\n      description: Amount of Memory for the WNs\\n      default: 2 GB\\n      required: yes\\n\\n    admin_username:\\n      type: string\\n      description: Username of the admin user\\n      default: kubeuser\\n    admin_token:\\n      type: string\\n      description: Access Token for the admin user\\n      default: not_very_secret_token\\n\\n  node_templates:\\n\\n    jupyterhub:\\n      type: tosca.nodes.indigo.JupyterHub\\n      properties:\\n        spawner: kubernetes\\n      requirements:\\n        - host: lrms_server\\n        - dependency: lrms_front_end\\n\\n    lrms_front_end:\\n      type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes\\n      properties:\\n        admin_username:  { get_input: admin_username }\\n        admin_token: { get_input: admin_token }\\n      requirements:\\n        - host: lrms_server\\n\\n    lrms_server:\\n      type: tosca.nodes.indigo.Compute\\n      capabilities:\\n        endpoint:\\n          properties:\\n            dns_name: kubeserver\\n            network_name: PUBLIC\\n            port: 8000\\n            protocol: tcp\\n        host:\\n          properties:\\n            num_cpus: { get_input: fe_cpus }\\n            mem_size: { get_input: fe_mem }\\n        os:\\n          properties:\\n            image: ubuntu-16.04-vmi\\n            #type: linux\\n            #distribution: ubuntu\\n            #version: 16.04\\n\\n    wn_node:\\n      type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes\\n      properties:\\n        front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }\\n      requirements:\\n        - host: lrms_wn\\n\\n    lrms_wn:\\n      type: tosca.nodes.indigo.Compute\\n      capabilities:\\n        scalable:\\n          properties:\\n            count: { get_input: wn_num }\\n        host:\\n          properties:\\n            num_cpus: { get_input: wn_cpus }\\n            mem_size: { get_input: wn_mem }\\n        os:\\n          properties:\\n            image: ubuntu-16.04-vmi\\n            #type: linux\\n            #distribution: ubuntu\\n            #version: 16.04\\n\\n  outputs:\\n    jupyterhub_url:\\n      value: { concat: [ 'http://', get_attribute: [ lrms_server, public_address, 0 ], ':8000' ] }\\n    cluster_ip:\\n      value: { get_attribute: [ lrms_server, public_address, 0 ] }\\n    cluster_creds:\\n      value: { get_attribute: [ lrms_server, endpoint, credential, 0 ] }\",\n" + 
+      "  \"parameters\" : {\n" + 
+      "    \n" + 
+      "  }\n" + 
+      "}";
   
   
   @Resource(name = "cloud-configuration-manager")
@@ -97,7 +105,7 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
     CloudConfiguration configuration = cloudConfigurationHolder.getCloudConfiguration();//deploymentContext.getDeployment().getOrchestratorId();
     String yamlPaasTopology;
     try {
-      yamlPaasTopology = builderService.buildApp(deploymentContext, 1);
+      yamlPaasTopology = TMP_ORCHETRATOR_DEMO;//builderService.buildApp(deploymentContext, 1);
       OrchestratorResponse response = orchestratorConnector.callDeploy(configuration, yamlPaasTopology);
       String uuid = OrchestratorConnector.getUUIDTopologyDeployment(response);
       log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
@@ -131,7 +139,8 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
     	log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
         log.info("uuid: " + UUIDTopologyDeployment);
     	result = orchestratorConnector.callUndeploy(configuration, UUIDTopologyDeployment);        
-        mappingService.registerDeploymentInfo(UUIDTopologyDeployment, deploymentContext.getDeploymentPaaSId(), DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
+        mappingService.registerDeploymentInfo(UUIDTopologyDeployment, deploymentContext.getDeploymentPaaSId(), 
+            DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
       } catch (Exception e) {
   		log.error(Util.throwableToString(e));
         callback.onFailure(e);
@@ -145,7 +154,7 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
   public void getEventsSince(Date date, int maxEvents, IPaaSCallback<AbstractMonitorEvent[]> eventCallback) {
 	// TODO: implement an event listener for the orchestrator
     eventCallback.onSuccess(eventService.flushEvents());
-    log.info("call getEventsSince");
+    //log.info("call getEventsSince");
     
   }
 
