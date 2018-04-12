@@ -23,8 +23,10 @@ if [ -z "$JAVA_OPTIONS" ] ; then
     JAVA_OPTIONS="-server -showversion -XX:+AggressiveOpts -Xmx2g -Xms2g -XX:+HeapDumpOnOutOfMemoryError -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC"
 fi
 
+JAVA_DEBUG_OPTIONS="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
+
 # $JAVA_EXT_OPTIONS are extended JVM options than can be filled before A4C start
-$JAVA $JAVA_OPTIONS $JAVA_EXT_OPTIONS \
+$JAVA $JAVA_OPTIONS $JAVA_EXT_OPTIONS $JAVA_DEBUG_OPTIONS \
     -cp config/:alien4cloud-ui-standalone.war \
     org.springframework.boot.loader.WarLauncher
     "$@"
