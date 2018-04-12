@@ -1,0 +1,60 @@
+tosca_definitions_version: alien_dsl_1_4_0
+
+metadata:
+  template_name: TestApp
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - indigo-types:1.0.0
+  - tosca-normative-types:1.0.0-ALIEN14
+
+topology_template:
+  node_templates:
+    Compute:
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        endpoint:
+          properties:
+            private_ip: true
+            protocol: tcp
+            secure: true
+            network_name: PUBLIC
+            initiator: source
+  workflows:
+    install:
+      steps:
+        Compute_install:
+          node: Compute
+          activity:
+            delegate: install
+    uninstall:
+      steps:
+        Compute_uninstall:
+          node: Compute
+          activity:
+            delegate: uninstall
+    start:
+      steps:
+        Compute_start:
+          node: Compute
+          activity:
+            delegate: start
+    stop:
+      steps:
+        Compute_stop:
+          node: Compute
+          activity:
+            delegate: stop

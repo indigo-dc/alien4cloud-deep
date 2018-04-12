@@ -16,7 +16,8 @@ RUN apt-get -y install vim htop
 
 ARG user_uid=1000
 ARG user_gid=1000
-ENV A4C_PORT 8089
+ENV A4C_PORT 8088
+ENV A4C_DEBUG_PORT 5005
 ENV A4C_VER 2.0.0-SNAPSHOT
 ENV A4C_INSTALL_PATH /opt
 ENV A4C_INSTALL_DIR a4c
@@ -31,16 +32,16 @@ ENV USER a4c
 
 RUN addgroup --gid ${user_gid} ${USER} \
   && adduser --disabled-password --gecos "" --uid ${user_uid} --gid ${user_gid} ${USER}
-RUN mkdir -p "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}"
+#RUN mkdir -p "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}"
 #RUN mkdir -p "/home/${USER}"
-ADD alien4cloud.sh "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}"
-RUN chmod +x "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud.sh"
+#ADD alien4cloud.sh "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}"
+#RUN chmod +x "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud.sh"
 
-ADD config "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config"
-ADD init "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init"
+#ADD config "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config"
+#ADD init "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init"
 
 # DEBUG - copy repos to avoid costly downloads
-ADD a4c-tmp "/home/${USER}"
+#ADD a4c-tmp "/home/${USER}"
 
 # Change perms from root to restricted user
 RUN chown -R ${USER}:${USER} "${A4C_INSTALL_PATH}"
@@ -51,16 +52,23 @@ USER ${USER}
 # Allow bower to be executed as root
 #RUN echo '{ "allow_root": true }' > /root/.bowerrc
 
-RUN git clone https://github.com/alien4cloud/alien4cloud "${A4C_INSTALL_PATH}/${A4C_SRC_DIR}"
+#RUN git clone https://github.com/alien4cloud/alien4cloud "${A4C_INSTALL_PATH}/${A4C_SRC_DIR}"
 RUN git clone -b a4c https://github.com/indigo-dc/tosca-types "${A4C_INSTALL_PATH}/indigo-dc-tosca-types"
+
+#WORKDIR "${A4C_INSTALL_PATH}/${A4C_SRC_DIR}"
+
+#RUN mvn clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+#RUN cp "${A4C_INSTALL_PATH}/${A4C_SRC_DIR}/alien4cloud-ui/target/alien4cloud-ui-${A4C_VER}-standalone.war" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud-ui-standalone.war"
+
+WORKDIR "${A4C_INSTALL_PATH}"
+RUN curl -O https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/1.4.3.2/alien4cloud-dist-1.4.3.2-dist.tar.gz
+RUN tar xvf alien4cloud-dist-1.4.3.2-dist.tar.gz
+
+RUN mv alien4cloud "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}"
+RUN ls -al
 RUN zip -j "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/archives/indigo-dc-tosca-types.zip" "${A4C_INSTALL_PATH}/indigo-dc-tosca-types/custom_types.yaml"
 
-WORKDIR "${A4C_INSTALL_PATH}/${A4C_SRC_DIR}"
-
-RUN mvn clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
-
-RUN cp "${A4C_INSTALL_PATH}/${A4C_SRC_DIR}/alien4cloud-ui/target/alien4cloud-ui-${A4C_VER}-standalone.war" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud-ui-standalone.war"
-
 EXPOSE ${A4C_PORT}
+EXPOSE ${A4C_DEBUG_PORT}
 
 ENTRYPOINT cd ${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR} && ./alien4cloud.sh

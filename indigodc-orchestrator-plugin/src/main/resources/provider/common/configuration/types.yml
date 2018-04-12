@@ -1,0 +1,18 @@
+tosca_definitions_version: alien_dsl_1_4_0
+
+metadata:
+  template_name: indigodc-plugin
+  template_author: Alien 4 Cloud
+  template_version: 1.0.0
+
+description: "Defines resources for IndigoDC Orchestrator plugin"
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN14
+  - indigo-types:1.0.0
+
+node_types:
+  tosca.nodes.indigodc-plugin.MyCompute:
+    derived_from: tosca.nodes.Compute
+  tosca.nodes.indigodc-plugin.MyIndigoDCCompute:
+    derived_from: tosca.nodes.indigo.Compute
