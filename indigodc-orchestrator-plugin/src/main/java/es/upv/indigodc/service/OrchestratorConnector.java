@@ -115,7 +115,7 @@ public class OrchestratorConnector {
     sbuf.append("client_secret=").append(cloudConfiguration.getClientSecret()).append("&");
     sbuf.append("username=").append(cloudConfiguration.getUser()).append("&");
     sbuf.append("password=").append(cloudConfiguration.getPassword()).append("&");
-    sbuf.append("scope=").append(cloudConfiguration.getClientScopes());
+    sbuf.append("scope=").append(cloudConfiguration.getClientScopes().replaceAll(" ", "%20"));
     URL requestURL = new URL(cloudConfiguration.getTokenEndpoint());
     
     AccessToken at = null;

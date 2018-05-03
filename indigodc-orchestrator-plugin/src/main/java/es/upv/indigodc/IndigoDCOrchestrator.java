@@ -161,7 +161,6 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
   @Override
   public void getInstancesInformation(PaaSTopologyDeploymentContext deploymentContext,
       IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback) {
-    // TODO Auto-generated method stub
 	  log.info("call getInstancesInformation");
 //      final Map<String, Map<String, InstanceInformation>> topologyInfo = newHashMap();
 //      final String groupID = deploymentContext.getDeploymentPaaSId();
