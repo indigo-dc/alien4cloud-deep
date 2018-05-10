@@ -1,7 +1,6 @@
 package es.upv.indigodc.service;
 
 import java.io.BufferedReader;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,21 +16,17 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
-import javax.annotation.Resource;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.upv.indigodc.IndigoDCOrchestrator;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import lombok.Data;
@@ -65,6 +60,8 @@ public class OrchestratorConnector {
   public static final int DELETE_CALL = 3;
   public static final int PUT_CALL = 4;
   
+  public static final String WS_PATH_DEPLOYMENTS = "/deployments";
+  
   //public static final String STATUS_UNKNOWN = "UNKNOWN";
   public static final int STATUS_UNKNOWN = 1;
   
@@ -72,39 +69,7 @@ public class OrchestratorConnector {
   //private SslContextBuilder sslContextBuilder;
   //private SSLContext sslContext;
  
-  public OrchestratorConnector() {
-    
-    //sslContextBuilder = new SslContextBuilder();
-    //sslContextBuilder.addCertificate(
-//    sslContextBuilder.addCertificate("MIIFOTCCBCGgAwIBAgIQDihOdHgl4y/X+WgnoPumYjANBgkqhkiG9w0BAQsFADBk" + 
-//        "MQswCQYDVQQGEwJOTDEWMBQGA1UECBMNTm9vcmQtSG9sbGFuZDESMBAGA1UEBxMJ" + 
-//        "QW1zdGVyZGFtMQ8wDQYDVQQKEwZURVJFTkExGDAWBgNVBAMTD1RFUkVOQSBTU0wg" + 
-//        "Q0EgMzAeFw0xNzEyMTMwMDAwMDBaFw0yMDEyMTcxMjAwMDBaMHwxCzAJBgNVBAYT" + 
-//        "AklUMREwDwYDVQQHEwhGcmFzY2F0aTEuMCwGA1UEChMlSXN0aXR1dG8gTmF6aW9u" + 
-//        "YWxlIGRpIEZpc2ljYSBOdWNsZWFyZTELMAkGA1UECxMCQkExHTAbBgNVBAMTFGlh" + 
-//        "bS5yZWNhcy5iYS5pbmZuLml0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC" + 
-//        "AQEAs6nUoL9jy29dkKM3v4SLiY7dtC3S5ZkHIP+6fbCz284bxzv7DxM7gme47MuX" + 
-//        "rrl9tG8RGH5WnK/ST0tj5+KP/CaC5Nf36j1c/e8SlZuOiTsSqmZYXmkDZtGRmzWI" + 
-//        "cPcOFNVNduHAPd9scpgQkP/+McLi2xV7xKRPlZRpq3ezg7kwWQ12SIjl/W5GgVEf" + 
-//        "s+qgqX3mqVFC9erBYlUVsdIE2O4T7IdbVGVEOk/Q/RgY3PUGia7GNiRliD5POecF" + 
-//        "ynTmFCCjlGtlVM4YooPgaAUHELQcmc0c+eTyOoaBtb2644vUAUJK3vIK3tnjy6VL" + 
-//        "rClDDHt4Un408x+dwEeX7jf2gQIDAQABo4IBzTCCAckwHwYDVR0jBBgwFoAUZ/2I" + 
-//        "IBQnmMcJ0iUZu+lREWN1UGIwHQYDVR0OBBYEFG8UOkbHg9VHfgPdQ0TcHaokU0H4" + 
-//        "MB8GA1UdEQQYMBaCFGlhbS5yZWNhcy5iYS5pbmZuLml0MA4GA1UdDwEB/wQEAwIF" + 
-//        "oDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwawYDVR0fBGQwYjAvoC2g" + 
-//        "K4YpaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL1RFUkVOQVNTTENBMy5jcmwwL6At" + 
-//        "oCuGKWh0dHA6Ly9jcmw0LmRpZ2ljZXJ0LmNvbS9URVJFTkFTU0xDQTMuY3JsMEwG" + 
-//        "A1UdIARFMEMwNwYJYIZIAYb9bAEBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3" + 
-//        "LmRpZ2ljZXJ0LmNvbS9DUFMwCAYGZ4EMAQICMG4GCCsGAQUFBwEBBGIwYDAkBggr" + 
-//        "BgEFBQcwAYYYaHR0cDovL29jc3AuZGlnaWNlcnQuY29tMDgGCCsGAQUFBzAChixo" + 
-//        "dHRwOi8vY2FjZXJ0cy5kaWdpY2VydC5jb20vVEVSRU5BU1NMQ0EzLmNydDAMBgNV" + 
-//        "HRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCCyBPHs2L3/LTrBxFx38cDb2RX" + 
-//        "UvNrLD3b6MH8wXtdT29mlCJLlPTHP/ZLwB0NI4i+ojR4m1AfGUQx164y66crkdZV" + 
-//        "PijVgWtyH5PSa1+jf1d3mD+eEyfKLX7htyw1CUx1ubGWT1Hgeq0Ltuej8TxQu42R" + 
-//        "lofP8t5BChrCHFfkDZm9OqLqXxT2joIAkL3+xmrc1+ghUTU6OWKxOBm6fM7ybhjO" + 
-//        "0Lfk2K3RRvdNTFtMR6Eaaohtx1wmYEXNjBVSAuMvvjpt/F74gMixiOhPwUJ388hu" + 
-//        "18FUuwOXw1vALUbHxL91rhBKRfqL8322KWmqdo8goXJeRYT6gcmQlvBmpDtD");
-    
+  public OrchestratorConnector() {    
   }
 
   public AccessToken obtainAuthTokens(CloudConfiguration cloudConfiguration) throws IOException, NoSuchFieldException  {
@@ -135,7 +100,7 @@ public class OrchestratorConnector {
     System.out.println(accessToken);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
-    sbuf.append("/deployments").append("?");
+    sbuf.append(WS_PATH_DEPLOYMENTS).append("?");
     sbuf.append("createdBy=").append(URLEncoder.encode(cloudConfiguration.getClientId(), "UTF-8")).
       append(URLEncoder.encode("@", "UTF-8")).
       append(URLEncoder.encode(cloudConfiguration.getIamHost(), "UTF-8"));
@@ -156,7 +121,7 @@ public class OrchestratorConnector {
     AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
-    sbuf.append("/deployments");
+    sbuf.append(WS_PATH_DEPLOYMENTS);
     
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
@@ -176,7 +141,7 @@ public class OrchestratorConnector {
 	    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
 
 	    StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
-	    sbuf.append("/deployments").append("/").append(deploymentId);
+	    sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
 	    
 	    Map<String, String> headers = new HashMap<>();
 	    headers.put("Accept", "application/json");
@@ -197,7 +162,7 @@ public class OrchestratorConnector {
     AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
-    sbuf.append("/deployments").append("/").append(deploymentId);
+    sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
     
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");

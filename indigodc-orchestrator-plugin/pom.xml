@@ -4,7 +4,7 @@
 
   <groupId>es.upv</groupId>
   <artifactId>alien4cloud-indigodc-provider</artifactId>
-  <version>0.0.3-SNAPSHOT</version>
+  <version>0.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>alien4cloud-indigodc-provider</name>
@@ -16,6 +16,11 @@
       <name>your custom repo</name>
       <url>https://fastconnect.org/maven/content/repositories/opensource/</url>
     </repository>
+    <!-- repository>
+        <id>project.local</id>
+        <name>project</name>
+        <url>file:${project.basedir}/repo</url>
+    </repository-->
 </repositories>
 
   <properties>
@@ -29,9 +34,25 @@
     <provider.common.clientSecret>none</provider.common.clientSecret>
     <provider.common.user>none</provider.common.user>
     <provider.common.password>none</provider.common.password>
+    <dep.ver.jetty>9.4.9.v20180320</dep.ver.jetty>
+    <dep.ver.jetty.servlet>9.4.9.v20180320</dep.ver.jetty.servlet>
+    
   </properties>
 
   <dependencies>
+  <dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-servlet</artifactId>
+    <version>9.4.3.v20170317</version>
+</dependency>
+  
+  <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
+<dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-server</artifactId>
+    <version>${dep.ver.jetty}</version>
+</dependency>
+  
 <!-- https://mvnrepository.com/artifact/alien4cloud/alien4cloud-core -->
 <dependency>
     <groupId>alien4cloud</groupId>
@@ -55,6 +76,7 @@
     <artifactId>commons-cli</artifactId>
     <version>1.4</version>
 </dependency>
+
 <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 <dependency>
     <groupId>org.projectlombok</groupId>
@@ -62,6 +84,7 @@
     <version>1.16.20</version>
     <scope>provided</scope>
 </dependency>
+
 <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 <dependency>
     <groupId>org.apache.httpcomponents</groupId>

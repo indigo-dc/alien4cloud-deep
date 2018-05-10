@@ -26,7 +26,7 @@ public class MappingService {
 
   /**
    * Register a running deployment into the MappingService.
-   * @param marathonDeploymentId the id of the deployment in Marathon
+   * @param indigoDCDeploymentId the id of the deployment in the Indigo DC orchestrator
    * @param alienDeploymentId the id of the deployment in Alien
    * @param status The running status of the deployment, Deploying or Undeploying.
    */

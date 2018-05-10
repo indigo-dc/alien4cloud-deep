@@ -1,27 +1,21 @@
 package es.upv.indigodc;
 
-import static com.google.common.collect.Maps.newHashMap;
-
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Functions;
-import com.google.common.collect.Collections2;
 
 import alien4cloud.exception.NotFoundException;
 import alien4cloud.orchestrators.plugin.ILocationConfiguratorPlugin;
@@ -30,16 +24,13 @@ import alien4cloud.orchestrators.plugin.model.PluginArchive;
 import alien4cloud.paas.IPaaSCallback;
 import alien4cloud.paas.exception.MaintenanceModeException;
 import alien4cloud.paas.exception.OperationExecutionException;
-import alien4cloud.paas.exception.PaaSAlreadyDeployedException;
 import alien4cloud.paas.exception.PluginConfigurationException;
 import alien4cloud.paas.model.AbstractMonitorEvent;
 import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.InstanceInformation;
-import alien4cloud.paas.model.InstanceStatus;
 import alien4cloud.paas.model.NodeOperationExecRequest;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
-import es.upv.indigodc.Util;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import es.upv.indigodc.location.LocationConfiguratorFactory;
@@ -47,9 +38,7 @@ import es.upv.indigodc.service.BuilderService;
 import es.upv.indigodc.service.EventService;
 import es.upv.indigodc.service.MappingService;
 import es.upv.indigodc.service.OrchestratorConnector;
-import es.upv.indigodc.service.SslContextBuilder;
 import es.upv.indigodc.service.model.OrchestratorResponse;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -67,16 +56,16 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
       "}";
   
   
-  @Resource(name = "cloud-configuration-manager")
+  @Autowired @Qualifier("cloud-configuration-manager")
   private CloudConfigurationManager cloudConfigurationHolder;
   
-  @Resource(name = "orchestrator-connector")
+  @Autowired @Qualifier("orchestrator-connector")
   private OrchestratorConnector orchestratorConnector;
   
-  @Resource(name = "builder-service")
+  @Autowired @Qualifier("builder-service")
   private BuilderService builderService;
   
-  @Resource(name = "mapping-service")
+  @Autowired @Qualifier("mapping-service")
   private MappingService mappingService;
   
   @Inject
@@ -109,7 +98,7 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
       OrchestratorResponse response = orchestratorConnector.callDeploy(configuration, yamlPaasTopology);
       String uuid = OrchestratorConnector.getUUIDTopologyDeployment(response);
       log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
-      log.info("uuid: " + uuid);
+      log.info("uuid mine: " + uuid);
       mappingService.registerDeploymentInfo(uuid, 
     		  deploymentContext.getDeploymentPaaSId(), DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
     } catch (NoSuchFieldException | 
@@ -135,11 +124,11 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
 
       OrchestratorResponse result;
       try {
-    	String UUIDTopologyDeployment = mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()).getIndigoDCDeploymentId();
+    	String uuid = mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()).getIndigoDCDeploymentId();
     	log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
-        log.info("uuid: " + UUIDTopologyDeployment);
-    	result = orchestratorConnector.callUndeploy(configuration, UUIDTopologyDeployment);        
-        mappingService.registerDeploymentInfo(UUIDTopologyDeployment, deploymentContext.getDeploymentPaaSId(), 
+        log.info("uuid: " + uuid);
+    	result = orchestratorConnector.callUndeploy(configuration, uuid);        
+        mappingService.registerDeploymentInfo(uuid, deploymentContext.getDeploymentPaaSId(), 
             DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
       } catch (Exception e) {
   		log.error(Util.throwableToString(e));
@@ -162,31 +151,31 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
   public void getInstancesInformation(PaaSTopologyDeploymentContext deploymentContext,
       IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback) {
 	  log.info("call getInstancesInformation");
-//      final Map<String, Map<String, InstanceInformation>> topologyInfo = newHashMap();
-//      final String groupID = deploymentContext.getDeploymentPaaSId();
+      final Map<String, Map<String, InstanceInformation>> topologyInfo = new HashMap<>();
+      final String groupID = deploymentContext.getDeploymentId();//.getDeploymentPaaSId();
 //      deploymentContext.getPaaSTopology().getNonNatives().forEach(paaSNodeTemplate -> {
-//          Map<String, InstanceInformation> instancesInfo = newHashMap();
+//          Map<String, InstanceInformation> instancesInfo = new HashMap<>();
 //          final String appID = groupID + "/" + paaSNodeTemplate.getId().toLowerCase();
 //
-//          try {
-//              // Marathon tasks are alien instances
-//              final Collection<Task> tasks = marathonClient.getAppTasks(appID).getTasks();
-//              tasks.forEach(task -> {
-//                  final InstanceInformation instanceInformation = this.getInstanceInformation(task);
-//                  instancesInfo.put(task.getId(), instanceInformation);
-//              });
-//
-//              topologyInfo.put(paaSNodeTemplate.getId(), instancesInfo);
-//          } catch (Exception e) {
-//              switch (e.getStatus()) {
-//              case 404: // The app cannot be found in marathon - we display no information
-//                  break;
-//              default:
-//            	  callback.onFailure(e);
-//              }
-//          }
+////          try {
+////              // Marathon tasks are alien instances
+////              final Collection<Task> tasks = marathonClient.getAppTasks(appID).getTasks();
+////              tasks.forEach(task -> {
+////                  final InstanceInformation instanceInformation = this.getInstanceInformation(task);
+////                  instancesInfo.put(task.getId(), instanceInformation);
+////              });
+////
+////              topologyInfo.put(paaSNodeTemplate.getId(), instancesInfo);
+////          } catch (Exception e) {
+////              switch (e.getStatus()) {
+////              case 404: // The app cannot be found in marathon - we display no information
+////                  break;
+////              default:
+////            	  callback.onFailure(e);
+////              }
+////          }
 //      });
-//      callback.onSuccess(topologyInfo);
+      callback.onSuccess(topologyInfo);
   }
 //  
 //  protected InstanceInformation getInstanceInformation(Task task) {

@@ -160,7 +160,7 @@ public class BuilderService {
     Deployment d = new Deployment();
     d.setParameters(new Deployment.Parameters(numCPUs));
     d.setCallback("http://localhost:8080/callback");
-    String yamlIndigoDC = TEST_YAML_JUPYTER;//buildTemplate(deploymentContext);
+    String yamlIndigoDC = buildTemplate(deploymentContext);
     d.setTemplate(yamlIndigoDC);
     
     String yamlApp = mapper.writeValueAsString(d);//.replace("\\\\n", "\\n")
