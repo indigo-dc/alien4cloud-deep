@@ -1,9 +1,6 @@
 FROM alpine:3.7
 
-RUN apk update && apk add zip curl openjdk8 git maven openssl bash
-
-# These are development only libs, speeds up testing
-#RUN apt-get -y install build-essential vim htop python3 sudo bash
+RUN apk add --no-cache openjdk8-jre-base bash
 
 ARG user_uid=1000
 ARG user_gid=1000
@@ -25,7 +22,10 @@ ARG KEYSTOREPASS=changeit
 # ENV JAVA_HOME "/usr/lib/jvm/java-8-openjdk-amd64"
 
 # get the SSL certificate
-RUN openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERT_FILE}
+RUN apk add --no-cache openssl \
+  && openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERT_FILE} \
+  && apk del openssl \
+  && rm -rf /var/cache/apk/*
 
 # create a keystore and import certificate
 RUN keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${CERT_FILE} -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS}
@@ -38,29 +38,39 @@ RUN addgroup -g ${user_gid} -S ${USER} \
 
 ADD indigodc-orchestrator-plugin "${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin"
 
+WORKDIR "${A4C_INSTALL_PATH}"
+RUN apk add --no-cache curl \
+  && curl -k -O https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz \
+  && tar xvf alien4cloud-dist-${a4c_ver}-dist.tar.gz \
+  && mv alien4cloud "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
+  && rm alien4cloud-dist-${a4c_ver}-dist.tar.gz \
+  && apk del curl \
+  && rm -rf /var/cache/apk/*
+  
+RUN apk add --no-cache git zip \
+  && git clone -b indigo2 https://github.com/grycap/tosca "${A4C_INSTALL_PATH}/indigo-dc-tosca-types" \
+  && cd "${A4C_INSTALL_PATH}/indigo-dc-tosca-types" \
+  && zip -r "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/archives/indigo-dc-tosca-types.zip" custom_types.yml images/ \
+  && rm -R "${A4C_INSTALL_PATH}/indigo-dc-tosca-types" \
+  && apk del git zip \
+  && rm -rf /var/cache/apk/*
+
+WORKDIR "${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin"
+RUN  apk add --no-cache openjdk8 maven \
+  && mvn -e clean package \
+  && cp ${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider-*.zip "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/plugins/" \
+  && rm -R $HOME/.m2 \
+  && rm -R ${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin \
+  && apk del openjdk8 maven \
+  && rm -rf /var/cache/apk/*
+
+EXPOSE ${A4C_PORT}
+EXPOSE ${A4C_DEBUG_PORT}
+
 # Change perms from root to restricted user
 RUN chown -R ${USER}:${USER} "${A4C_INSTALL_PATH}"
 RUN chown -R ${USER}:${USER} "/home/${USER}"
 
 USER ${USER}
-
-RUN git clone -b indigo2 https://github.com/grycap/tosca "${A4C_INSTALL_PATH}/indigo-dc-tosca-types"
-
-WORKDIR "${A4C_INSTALL_PATH}"
-RUN curl -k -O https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
-RUN tar xvf alien4cloud-dist-${a4c_ver}-dist.tar.gz
-RUN mv alien4cloud "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}"
-
-WORKDIR "${A4C_INSTALL_PATH}/indigo-dc-tosca-types"
-RUN zip -r "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/archives/indigo-dc-tosca-types.zip" custom_types.yml images/
-
-WORKDIR "${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin"
-RUN mvn -e clean package
-RUN cp ${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider-*.zip "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/plugins/"
-# Java 10 rm'ed args
-#RUN sed -i -e 's/-XX:+UseParNewGC//g' "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud.sh"
-
-EXPOSE ${A4C_PORT}
-EXPOSE ${A4C_DEBUG_PORT}
 
 ENTRYPOINT cd ${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR} && ./alien4cloud.sh
