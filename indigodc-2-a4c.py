@@ -14,7 +14,6 @@ yaml.add_representer(collections.OrderedDict, dict_representer)
 yaml.add_constructor(_mapping_tag, dict_constructor)
 
 tosca = yaml.load(sys.stdin)
-print(yaml.dump(tosca, default_flow_style=False))
 tosca["tosca_definitions_version"] = "alien_dsl_2_0_0"
 tosca["metadata"] = {"template_name": "indigo-types",
 	"template_version": "1.0.0",
