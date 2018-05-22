@@ -11,9 +11,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AlienDeploymentMapping {
 
-    public static final AlienDeploymentMapping EMPTY = new AlienDeploymentMapping("unknown_deployment_id", DeploymentStatus.UNKNOWN);
+    public static final AlienDeploymentMapping EMPTY = 
+        new AlienDeploymentMapping("unknown_deployment_id", "unknown_orchestrator_id", DeploymentStatus.UNKNOWN);
 
-    private String alienDeploymentId;
+    private String deploymentId;
+    private String orchetratorId;
     private DeploymentStatus status;
 
 }

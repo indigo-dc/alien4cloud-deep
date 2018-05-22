@@ -1,6 +1,7 @@
 package es.upv.indigodc;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -94,13 +95,14 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
     CloudConfiguration configuration = cloudConfigurationHolder.getCloudConfiguration();//deploymentContext.getDeployment().getOrchestratorId();
     String yamlPaasTopology;
     try {
-      yamlPaasTopology = TMP_ORCHETRATOR_DEMO;//builderService.buildApp(deploymentContext, 1);
+      yamlPaasTopology = builderService.buildApp(deploymentContext, 1);
       OrchestratorResponse response = orchestratorConnector.callDeploy(configuration, yamlPaasTopology);
       String uuid = OrchestratorConnector.getUUIDTopologyDeployment(response);
       log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
       log.info("uuid mine: " + uuid);
       mappingService.registerDeploymentInfo(uuid, 
-    		  deploymentContext.getDeploymentPaaSId(), DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
+    		  deploymentContext.getDeploymentPaaSId(), deploymentContext.getDeployment().getOrchestratorId(), 
+    		  DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
     } catch (NoSuchFieldException | 
         IOException e) {
       e.printStackTrace();
@@ -124,12 +126,12 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
 
       OrchestratorResponse result;
       try {
-    	String uuid = mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()).getIndigoDCDeploymentId();
-    	log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
-        log.info("uuid: " + uuid);
-    	result = orchestratorConnector.callUndeploy(configuration, uuid);        
-        mappingService.registerDeploymentInfo(uuid, deploymentContext.getDeploymentPaaSId(), 
-            DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
+      	String uuid = mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()).getIndigoDCDeploymentId();
+      	log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
+          log.info("uuid: " + uuid);
+      	result = orchestratorConnector.callUndeploy(configuration, uuid);        
+          mappingService.registerDeploymentInfo(uuid, deploymentContext.getDeploymentPaaSId(), 
+              deploymentContext.getDeployment().getOrchestratorId(), DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
       } catch (Exception e) {
   		log.error(Util.throwableToString(e));
         callback.onFailure(e);
@@ -141,8 +143,7 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
 
   @Override
   public void getEventsSince(Date date, int maxEvents, IPaaSCallback<AbstractMonitorEvent[]> eventCallback) {
-	// TODO: implement an event listener for the orchestrator
-    eventCallback.onSuccess(eventService.flushEvents());
+    eventCallback.onSuccess(eventService.flushEvents(date, maxEvents));
     //log.info("call getEventsSince");
     
   }
@@ -152,29 +153,25 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
       IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback) {
 	  log.info("call getInstancesInformation");
       final Map<String, Map<String, InstanceInformation>> topologyInfo = new HashMap<>();
-      final String groupID = deploymentContext.getDeploymentId();//.getDeploymentPaaSId();
-//      deploymentContext.getPaaSTopology().getNonNatives().forEach(paaSNodeTemplate -> {
-//          Map<String, InstanceInformation> instancesInfo = new HashMap<>();
-//          final String appID = groupID + "/" + paaSNodeTemplate.getId().toLowerCase();
+      final String uuid = deploymentContext.getDeployment().getId();//.getDeploymentId();//.getDeploymentPaaSId();
+      final String groupID = deploymentContext.getDeploymentPaaSId();
+      deploymentContext.getPaaSTopology().getNonNatives().forEach(paaSNodeTemplate -> {
+          Map<String, InstanceInformation> instancesInfo = new HashMap<>();
+          final String appID = groupID + "/" + paaSNodeTemplate.getId().toLowerCase();
+
+//          try {
+//              // Marathon tasks are alien instances
+//              final Collection<Task> tasks = marathonClient.getAppTasks(appID).getTasks();
+//              tasks.forEach(task -> {
+//                  final InstanceInformation instanceInformation = this.getInstanceInformation(task);
+//                  instancesInfo.put(task.getId(), instanceInformation);
+//              });
 //
-////          try {
-////              // Marathon tasks are alien instances
-////              final Collection<Task> tasks = marathonClient.getAppTasks(appID).getTasks();
-////              tasks.forEach(task -> {
-////                  final InstanceInformation instanceInformation = this.getInstanceInformation(task);
-////                  instancesInfo.put(task.getId(), instanceInformation);
-////              });
-////
-////              topologyInfo.put(paaSNodeTemplate.getId(), instancesInfo);
-////          } catch (Exception e) {
-////              switch (e.getStatus()) {
-////              case 404: // The app cannot be found in marathon - we display no information
-////                  break;
-////              default:
-////            	  callback.onFailure(e);
-////              }
-////          }
-//      });
+//              topologyInfo.put(paaSNodeTemplate.getId(), instancesInfo);
+//          } catch (Exception e) {
+//            	  callback.onFailure(e);
+//          }
+      });
       callback.onSuccess(topologyInfo);
   }
 //  
@@ -226,7 +223,8 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
     try {
     	OrchestratorResponse response = orchestratorConnector.callDeploymentStatus(configuration, UUIDTopologyDeployment);
 
-        callback.onSuccess(getIndigoDCDeploymentStatus(response));
+        callback.onSuccess(Util.indigoDCStatusToDeploymentStatus(
+            OrchestratorConnector.getStatusTopologyDeployment(response).toUpperCase()));
     } catch (RuntimeException e) {
 		log.error(Util.throwableToString(e));
     	callback.onFailure(e.getCause());
@@ -239,30 +237,11 @@ public class IndigoDCOrchestrator  implements IOrchestratorPlugin<CloudConfigura
 	}
     
   }
-  
-  protected DeploymentStatus getIndigoDCDeploymentStatus(OrchestratorResponse orchestratorResponse) throws JsonProcessingException, IOException {
-	  String status = OrchestratorConnector.getStatusTopologyDeployment(orchestratorResponse).toUpperCase();
-	  switch (status) {
-	  case "UNKNOWN": return DeploymentStatus.UNKNOWN;
-	  case "CREATE_COMPLETE": return DeploymentStatus.DEPLOYED;
-	  case "CREATE_FAILED": return DeploymentStatus.FAILURE;
-	  case "CREATE_IN_PROGRESS": return DeploymentStatus.DEPLOYMENT_IN_PROGRESS;
-	  case "DELETE_COMPLETE": return DeploymentStatus.UNDEPLOYED;
-	  case "DELETE_FAILED": return DeploymentStatus.FAILURE;
-	  case "DELETE_IN_PROGRESS": return DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS;
-	  case "UPDATE_COMPLETE": return DeploymentStatus.UPDATED;
-	  case "UPDATE_FAILED": return DeploymentStatus.UPDATE_FAILURE;
-	  case "UPDATE_IN_PROGRESS": return DeploymentStatus.UPDATE_IN_PROGRESS;
-	  default: throw new NotFoundException("Status \"" + status + "\" not supported yet");
-	  }
-  }
-
 
 
   @Override
   public void update(PaaSTopologyDeploymentContext deploymentContext, IPaaSCallback<?> callback) {
-    // TODO Auto-generated method stub
-    
+    return;    
   }
 
   @Override

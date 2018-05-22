@@ -30,13 +30,17 @@ public class MappingService {
    * @param alienDeploymentId the id of the deployment in Alien
    * @param status The running status of the deployment, Deploying or Undeploying.
    */
-  public void registerDeploymentInfo(String indigoDCDeploymentId, String alienDeploymentId, DeploymentStatus status) {
-	  indigoDCToAlienDeploymentMap.put(indigoDCDeploymentId, new AlienDeploymentMapping(alienDeploymentId, status));
+  public void registerDeploymentInfo(String indigoDCDeploymentId, String alienDeploymentId, String orchestratorId, DeploymentStatus status) {
+	  indigoDCToAlienDeploymentMap.put(indigoDCDeploymentId, new AlienDeploymentMapping(alienDeploymentId, orchestratorId, status));
 	  alienToIndigoDCDeploymentMap.put(alienDeploymentId, new IndigoDCDeploymentMapping(indigoDCDeploymentId, status));
   }
   
   public IndigoDCDeploymentMapping getByAlienDeploymentId(String alienDeploymentId) {
 	  return alienToIndigoDCDeploymentMap.get(alienDeploymentId);
+  }
+  
+  public AlienDeploymentMapping getByIndigoDCDeploymentId(String indigoDCDeploymentId) {
+    return indigoDCToAlienDeploymentMap.get(indigoDCDeploymentId);
   }
 
   public void init(Collection<PaaSTopologyDeploymentContext> activeDeployments) {

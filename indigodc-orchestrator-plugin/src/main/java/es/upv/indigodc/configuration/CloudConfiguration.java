@@ -16,7 +16,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @FormProperties({ "clientId", "clientSecret", "tokenEndpoint", "clientScopes", "orchestratorEndpoint", 
-  "iamHost", "user", "password"})
+  "iamHost", "user", "password", "orchestratorPollInterval"})
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,6 +44,7 @@ public class CloudConfiguration {
   private String user;  
   @NotNull
   private String password;
+  private int orchestratorPollInterval;
   
 //  @JsonIgnore
 //  private SSLContext sslContext;

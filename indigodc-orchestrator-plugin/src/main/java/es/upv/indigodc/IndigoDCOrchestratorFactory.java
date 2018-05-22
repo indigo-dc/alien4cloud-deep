@@ -58,7 +58,8 @@ public class IndigoDCOrchestratorFactory  implements IOrchestratorPluginFactory<
     } catch (IOException e) {
       e.printStackTrace();
       log.error(e.toString());  
-      c = new CloudConfiguration("clientId", "csecret", "tendpoint", "tendpointcert", "cscopes", "oendpoint", "oendpointCert", "iamhost", "iamhostCert", "u", "p");
+      c = new CloudConfiguration("clientId", "csecret", "tendpoint", "tendpointcert", "cscopes", "oendpoint", 
+          "oendpointCert", "iamhost", "iamhostCert", "u", "p", 5);
     }
     return c;
   }
