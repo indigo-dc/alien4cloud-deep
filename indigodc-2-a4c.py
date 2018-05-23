@@ -22,25 +22,24 @@ REPO_GRYCAP = "GitHub-GRyCAP"
 tosca = yaml.load(sys.stdin)
 tosca["tosca_definitions_version"] = "alien_dsl_2_0_0"
 tosca["repositories"] = \
-  {REPO_INDIGODC: {"url": "https://github.com/indigo-dc/",
-                       "type": "http"},
-   REPO_GRYCAP: {"url": "https://github.com/grycap/",
-                     "type": "http"} 
-  }
+ {REPO_INDIGODC: {"url": "", #"https://github.com/indigo-dc/",
+                      "type": "a4c_ignore"},
+  REPO_GRYCAP: {"url": "", # "https://github.com/grycap/",
+                    "type": "a4c_ignore"}
+ }
 
-nodeTypes = collections.OrderedDict()
 for i, (key, value) in enumerate(tosca["node_types"].items()):
-  if "artifacts" in value:
-    for artifact in value["artifacts"]:
-      artifactVal = next(iter(artifact.values()))
-      if "indigo-dc" in artifactVal["file"]:
-        artifactVal["file"] = get_artifact_name(artifactVal["file"])
-        artifactVal["repository"] = REPO_INDIGODC
-      elif "grycap" in artifactVal["file"]:
-        artifactVal["file"] = get_artifact_name(artifactVal["file"])
-        artifactVal["repository"] = REPO_GRYCAP
-      else:
-        raise ValueError("Repository containing roles " + artifactVal["file"] + " not handled")
+ if "artifacts" in value:
+   for artifact in value["artifacts"]:
+     artifactVal = next(iter(artifact.values()))
+     if "indigo-dc" in artifactVal["file"]:
+       #artifactVal["file"] = get_artifact_name(artifactVal["file"])
+       artifactVal["repository"] = REPO_INDIGODC
+     elif "grycap" in artifactVal["file"]:
+       #artifactVal["file"] = get_artifact_name(artifactVal["file"])
+       artifactVal["repository"] = REPO_GRYCAP
+     else:
+       raise ValueError("Repository containing roles " + artifactVal["file"] + " not handled")
 
 tosca["metadata"] = {"template_name": "indigo-types",
 	"template_version": "1.0.0",
