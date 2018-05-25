@@ -25,7 +25,7 @@ RUN apk add --no-cache openjdk8-jre-base bash \
   && git clone -b devel_deep https://github.com/indigo-dc/tosca-types indigo-dc-tosca-types \
   && python3 indigodc-2-a4c.py < ${A4C_INSTALL_PATH}/indigo-dc-tosca-types/custom_types.yaml > ${A4C_INSTALL_PATH}/indigo-dc-tosca-types/custom_types_alien.yaml \
   && cd "${A4C_INSTALL_PATH}/indigo-dc-tosca-types" \
-  && zip -r "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/archives/indigo-dc-tosca-types.zip" custom_types_alien.yaml artifacts/ images/ \
+  && zip -9 -r "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/init/archives/indigo-dc-tosca-types.zip" custom_types_alien.yaml artifacts/ images/ \
   && rm -R "${A4C_INSTALL_PATH}/indigo-dc-tosca-types" \
   # Compile and install the plugin
   && cd "${A4C_INSTALL_PATH}/indigodc-orchestrator-plugin" \
