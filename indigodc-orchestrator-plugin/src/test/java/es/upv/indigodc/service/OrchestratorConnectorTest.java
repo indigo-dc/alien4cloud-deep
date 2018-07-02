@@ -32,6 +32,7 @@ import es.upv.indigodc.TestServer;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.BuilderService.Deployment;
 import es.upv.indigodc.service.OrchestratorConnector.AccessToken;
+import es.upv.indigodc.service.model.OrchestratorIAMException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,7 +65,7 @@ public class OrchestratorConnectorTest {
   
   @Ignore("Test is ignored because it overstretches the orchestrator")
   @Test
-  public void testLoginWithProductionInfo() throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException {
+  public void testLoginWithProductionInfo() throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException, OrchestratorIAMException {
     OrchestratorConnector oc = new OrchestratorConnector();
     CloudConfiguration cc = getRealConfiguration();
     AccessToken at = oc.obtainAuthTokens(cc);
@@ -73,7 +74,7 @@ public class OrchestratorConnectorTest {
   
   @Ignore("Test is ignored because it overstretches the orchestrator")
   @Test
-  public void deployUndeployProductionAuthSingleToscaCompute() throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException {
+  public void deployUndeployProductionAuthSingleToscaCompute() throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException, OrchestratorIAMException {
     OrchestratorConnector oc = new OrchestratorConnector();
     
 
@@ -81,14 +82,14 @@ public class OrchestratorConnectorTest {
 	String yamlIndigoDC = new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     ObjectMapper mapper = new ObjectMapper();
     Deployment d = new Deployment();
-    d.setParameters(new Deployment.Parameters(1));
+    d.setParameters(new HashMap<String, Object>());
     d.setCallback("http://localhost:8080/callback");
     d.setTemplate(yamlIndigoDC);
     String callJson = mapper.writeValueAsString(d).replaceAll("\\\\n", "\\n")
     		.replace("\\\\\\", "\\");
     
     //String callJson = String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
-    log.info("call to be sent to the orchestrator: \n" + callJson);
+    //log.info("call to be sent to the orchestrator: \n" + callJson);
     CloudConfiguration cc = getRealConfiguration();
     OrchestratorResponse or = oc.callDeploy(cc, callJson);
     ObjectMapper objectMapper = new ObjectMapper();
@@ -97,7 +98,7 @@ public class OrchestratorConnectorTest {
     List<JsonNode> vals = root.findValues("uuid");
     assertEquals(true, vals.size() >= 1);
     String uuid = vals.get(0).asText();
-    log.info("UUID of the app: " + uuid);
+    //log.info("UUID of the app: " + uuid);
     vals = root.findValues("status");
     assertEquals(true, vals.size() >= 1);
     vals = root.findValues("callback");
@@ -110,6 +111,10 @@ public class OrchestratorConnectorTest {
     // now let us undeploy
     or = oc.callUndeploy(cc, uuid);
     assertEquals(204, or.getCode());
+    
+ // now let us see the status
+    or = oc.callDeploymentStatus(cc, uuid);
+    log.info("Deployment status is: " + or.getResponse().toString());
   }
   
   @Test

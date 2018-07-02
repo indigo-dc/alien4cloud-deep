@@ -10,12 +10,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -24,6 +27,7 @@ import org.alien4cloud.tosca.exporter.ArchiveExportService;
 import org.alien4cloud.tosca.model.Csar;
 import org.alien4cloud.tosca.model.definitions.AbstractPropertyValue;
 import org.alien4cloud.tosca.model.definitions.PropertyDefinition;
+import org.alien4cloud.tosca.model.definitions.PropertyValue;
 import org.alien4cloud.tosca.model.definitions.ScalarPropertyValue;
 import org.alien4cloud.tosca.model.templates.Capability;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
@@ -40,12 +44,16 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 
 import alien4cloud.paas.model.PaaSNodeTemplate;
 import alien4cloud.paas.model.PaaSTopology;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
-import es.upv.indigodc.service.model.ToscaYamlIndigoDC;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -53,6 +61,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Service("builder-service")
@@ -94,13 +103,8 @@ public class BuilderService {
   @NoArgsConstructor
   public static class Deployment {
     
-    @Data @AllArgsConstructor
-    public static class Parameters {
-      private int cpus;
-    }
-    
     private String template;
-    private Parameters parameters;
+    private Map<String, Object> parameters;
     private String callback;
     
   }
@@ -154,89 +158,98 @@ public class BuilderService {
     }
     
   }
+  
+  public static String getIndigoDCTopologyYaml(String a4cTopologyYaml) throws JsonProcessingException, IOException {
+    ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
 
-  public String buildApp(PaaSTopologyDeploymentContext deploymentContext, int numCPUs) throws JsonProcessingException {
+    ObjectNode root = (ObjectNode) mapper.readTree(a4cTopologyYaml);
+    root.remove("tosca_definitions_version");
+    root.put("tosca_definitions_version", "tosca_simple_yaml_1_0");
+    ((ObjectNode)root.get("topology_template")).remove("workflows");
+    root.remove("metadata");
+    root.remove("imports");
+    ObjectNode imports = mapper.createObjectNode();
+    imports.put("indigo_custom_types", "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
+    root.putArray("imports").add(imports);
+    ObjectNode tmp = (ObjectNode) root.get("topology_template").get("node_templates");
+    Iterator<JsonNode> it = tmp.elements();
+    while (it.hasNext()) {
+      ObjectNode nodeTemplate = (ObjectNode) it.next();      
+      // Eliminate metadata info
+      nodeTemplate.remove("metadata");      
+      // Change requirements (no type and the name of the requirement is the type)
+      ArrayNode requirements = ((ArrayNode)nodeTemplate.get("requirements"));
+      if (requirements != null) {
+        Iterator<JsonNode> itRequirements = requirements.elements();
+        while (itRequirements.hasNext()) {
+          ObjectNode requirement = (ObjectNode) itRequirements.next();
+          Entry<String, JsonNode> firstField = requirement.fields().next();
+          if (firstField.getValue().has("type_requirement")) {
+            requirement.remove(firstField.getKey());
+            requirement.set(firstField.getValue().get("type_requirement").asText(), firstField.getValue());
+            ((ObjectNode)firstField.getValue()).remove("type_requirement");
+          }
+        }
+      }
+    }
+    return toscaMethodsStrToMethod(mapper.writer().writeValueAsString(root))
+        //.replaceAll("(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*(\\[){1}(.?)+(\\]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}",           
+        //.replaceAll("(\\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*([){1}(.?)+(]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}", 
+            //"this")
+            .replaceAll("\n", "\\\\n");    
+  }
+  
+  public static String toscaMethodsStrToMethod(String a4cTopologyYaml) {
+    StringBuffer newa4cTopologyYaml = new StringBuffer();
+
+    Pattern p = Pattern.compile("(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*(\\[){1}(.?)+(\\]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}");
+
+    Matcher m = p.matcher(a4cTopologyYaml);
+    while (m.find()) {
+      m.appendReplacement(newa4cTopologyYaml, m.group().replaceAll("(\\\"){1}|(\\n){0,1}(\\\\s)*(-){0,1}", ""));
+    }
+    m.appendTail(newa4cTopologyYaml);
+    
+    return newa4cTopologyYaml.toString();
+  }
+
+  public String buildApp(PaaSTopologyDeploymentContext deploymentContext, int numCPUs) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     Deployment d = new Deployment();
-    d.setParameters(new Deployment.Parameters(numCPUs));
+    d.setParameters(getParameters(deploymentContext));
     d.setCallback("http://localhost:8080/callback");
     String yamlIndigoDC = buildTemplate(deploymentContext);
     d.setTemplate(yamlIndigoDC);
     
-    String yamlApp = mapper.writeValueAsString(d);//.replace("\\\\n", "\\n")
+    String yamlApp = mapper.writeValueAsString(d).replace("\\\\n", "\\n");
     		//.replace("\\\\\\", "\\");//.replaceAll("\"", "\\\"");
     		//String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
-    log.info("Yaml to be sent to the orchestrator: \n" + yamlApp);
+    //log.info("Yaml to be sent to the orchestrator: \n" + yamlApp);
     return yamlApp;
   }
   
-  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext) {
-//    Template t = new Template();
-//    t.setDescription("A4C won't allow saving a description from the UI");
-//    t.setMetadata(new Template.Metadata(deploymentContext.getDeployment().getSourceId(), 
-//        deploymentContext.getDeployment().getVersionId(), "admin"));
-//    //t.setTopology_template(new Template.TopologyTemplate(deploymentContext.getPaaSTopology().getAllNodes()));
-//    //deploymentContext.getPaaSTopology().get
-//    //Representer r = new Representer();
-//    //r.setPropertyUtils(new MyPropertyUtils());
-//    Yaml yaml = new Yaml(new MyRepresenter(), dumperOptions);
-//    
-//    //log.info("Deployment is: \n" + yaml.dumpAs(deploymentContext.getDeploymentTopology(), Tag.MAP, DumperOptions.FlowStyle.BLOCK));
-//    
-//    
-//    
-//    //deploymentContext.getPaaSTopology().getAllNodes();
-//    //PaaSTopology paaSTopology = this.clonePaaSTopology(deploymentContext.getPaaSTopology());
-//    Map<String, PaaSNodeTemplate> an = deploymentContext.getPaaSTopology().getAllNodes();
-//    //log.info("Num nodes topo: " + an.size());
-//    
-//
-//   // log.info("Full dump topo: " + yaml.dump(deploymentContext.getPaaSTopology()));
-//    //log.info("Full dump deployment: " + yaml.dump(deploymentContext.getDeployment()));
-//    
-//    //Map<String, Template.TopologyTemplate.NodeTemplateDef> nodes = new HashMap<>();
-//    Map<String, NodeTemplate> nodes = new HashMap<>();
+  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext) throws JsonProcessingException, IOException {
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml = exportService.getYaml(EditionContextManager.getCsar(), EditionContextManager.getTopology());
+        //
+        
     
-    ToscaYamlIndigoDC toscaYamlIndigoDC = new ToscaYamlIndigoDC(a4cTopologyYaml);
+    log.info("+++++++++++++" + a4cTopologyYaml);
+
+    return getIndigoDCTopologyYaml(a4cTopologyYaml);//yaml.dump(t);
+  }
+  
+  public Map<String, Object> getParameters(PaaSTopologyDeploymentContext deploymentContext) {
+    final Map<String, Object> params = new HashMap<>();
+    Map<String, AbstractPropertyValue> vals = deploymentContext.getDeploymentTopology().getAllInputProperties();
+    for (Map.Entry<String, AbstractPropertyValue> v: vals.entrySet()) {
+      if (v.getValue() instanceof PropertyValue)
+        params.put(v.getKey(), ((PropertyValue<?>)v.getValue()).getValue());
+      else
+        log.warn(String.format("Can't add property %s", v.getKey()));
+    }
     
-    //log.info("Editor yaml: " + a4cTopologyYaml);
-    
-    
-//    for (Map.Entry<String, PaaSNodeTemplate> e: an.entrySet()) {
-//      //log.info(e.getKey() + " - " + e.getValue().getId() + " - " + e.toString());
-//      //log.info("Template: " + yaml.dump(e.getValue().getTemplate()));
-//      //log.info("Full dump: " + yaml.dump(e.getValue()));
-//      Map<String, Capability> capabilities = e.getValue().getTemplate().getCapabilities();
-////      for (Map.Entry<String, Capability> capability: capabilities.entrySet()) {
-////        Map<String, AbstractPropertyValue> props = capability.getValue().getProperties();
-////        for (Map.Entry<String, AbstractPropertyValue> prop: props.entrySet()) {
-////          prop.getValue().
-////        }
-////      }
-//      //nodes.put(e.getKey(), new Template.TopologyTemplate.NodeTemplateDef(e.getValue().getTemplate().getType(), capabilities));
-//      nodes.put(e.getKey(), e.getValue().getTemplate());
-//    }
-//    deploymentContext.getDeploymentTopology().getOutputAttributes();
-//    
-//    
-//    Map<String, Template.OutputDef> outputs = new HashMap<>();
-//    
-//    for (Entry<String, Set<String>> e: deploymentContext.getDeploymentTopology().getOutputAttributes().entrySet()) {
-//      for (String pn: e.getValue()) {
-//        //log.info(buildOutputValue(e.getKey(), pn));
-//        outputs.put(buildOutputKey(e.getKey(), pn), new Template.OutputDef(buildOutputValue(e.getKey(), pn)));
-//      }
-//    }
-//
-//    t.setTopology_template(new Template.TopologyTemplate(deploymentContext.getDeploymentTopology().getInputs(), nodes, outputs));
-//    
-////    log.info(deploymentContext.getPaaSTopology().toString());
-//    String yamlRepresentation = yaml.dumpAs(t, Tag.MAP, 
-//        DumperOptions.FlowStyle.BLOCK);
-    //log.info("Tosca Template to be sent: " + yamlRepresentation);
-    return toscaYamlIndigoDC.getIndigoDCTopologyYaml();//yaml.dump(t);
+    return params;
   }
   
   protected String buildOutputValue(String nodeName, String propertyName) {

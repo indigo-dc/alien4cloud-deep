@@ -10,7 +10,7 @@ import com.google.common.collect.Maps;
 import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
 import es.upv.indigodc.service.model.AlienDeploymentMapping;
-import es.upv.indigodc.service.model.IndigoDCDeploymentMapping;
+import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
 import lombok.extern.slf4j.Slf4j;
 
 @Service("mapping-service")
@@ -22,7 +22,7 @@ public class MappingService {
    */
   private final Map<String, AlienDeploymentMapping> indigoDCToAlienDeploymentMap = Maps.newConcurrentMap();
   
-  private final Map<String, IndigoDCDeploymentMapping> alienToIndigoDCDeploymentMap = Maps.newConcurrentMap();
+  private final Map<String, OrchestratorDeploymentMapping> alienToIndigoDCDeploymentMap = Maps.newConcurrentMap();
 
   /**
    * Register a running deployment into the MappingService.
@@ -30,17 +30,21 @@ public class MappingService {
    * @param alienDeploymentId the id of the deployment in Alien
    * @param status The running status of the deployment, Deploying or Undeploying.
    */
-  public void registerDeploymentInfo(String indigoDCDeploymentId, String alienDeploymentId, String orchestratorId, DeploymentStatus status) {
-	  indigoDCToAlienDeploymentMap.put(indigoDCDeploymentId, new AlienDeploymentMapping(alienDeploymentId, orchestratorId, status));
-	  alienToIndigoDCDeploymentMap.put(alienDeploymentId, new IndigoDCDeploymentMapping(indigoDCDeploymentId, status));
+  public void registerDeploymentInfo(String orchestratorUUIDDeployment, String alienDeploymentId, String orchestratorID, DeploymentStatus status) {
+	  indigoDCToAlienDeploymentMap.put(orchestratorUUIDDeployment, new AlienDeploymentMapping(alienDeploymentId, orchestratorID, status));
+	  alienToIndigoDCDeploymentMap.put(alienDeploymentId, new OrchestratorDeploymentMapping(orchestratorUUIDDeployment, status));
   }
   
-  public IndigoDCDeploymentMapping getByAlienDeploymentId(String alienDeploymentId) {
+  public void registerDeploymentInfoAlienToIndigoDC(String alienDeploymentId, DeploymentStatus status) {
+    alienToIndigoDCDeploymentMap.put(alienDeploymentId, new OrchestratorDeploymentMapping(null, status));
+  }
+  
+  public OrchestratorDeploymentMapping getByAlienDeploymentId(String alienDeploymentId) {
 	  return alienToIndigoDCDeploymentMap.get(alienDeploymentId);
   }
   
-  public AlienDeploymentMapping getByIndigoDCDeploymentId(String indigoDCDeploymentId) {
-    return indigoDCToAlienDeploymentMap.get(indigoDCDeploymentId);
+  public AlienDeploymentMapping getByOrchestratorUUIDDeployment(String orchestratorUUIDDeployment) {
+    return indigoDCToAlienDeploymentMap.get(orchestratorUUIDDeployment);
   }
 
   public void init(Collection<PaaSTopologyDeploymentContext> activeDeployments) {

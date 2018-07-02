@@ -27,6 +27,7 @@ import alien4cloud.paas.model.AbstractMonitorEvent;
 import alien4cloud.paas.model.PaaSDeploymentStatusMonitorEvent;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.model.AlienDeploymentMapping;
+import es.upv.indigodc.service.model.OrchestratorIAMException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import es.upv.indigodc.Util;
 import lombok.RequiredArgsConstructor;
@@ -100,7 +101,7 @@ public class EventService {
         for (JsonNode jsonNode : deployments) {
           PaaSDeploymentStatusMonitorEvent statusEv = new PaaSDeploymentStatusMonitorEvent();
           statusEv.setDeploymentStatus(Util.indigoDCStatusToDeploymentStatus(jsonNode.findValue("status").get(0).asText()));
-          AlienDeploymentMapping alienDeploymentMapping = mappingService.getByIndigoDCDeploymentId(jsonNode.findValue("uuid").get(0).asText());
+          AlienDeploymentMapping alienDeploymentMapping = mappingService.getByOrchestratorUUIDDeployment(jsonNode.findValue("uuid").get(0).asText());
           statusEv.setDeploymentId(alienDeploymentMapping.getDeploymentId());
           statusEv.setOrchestratorId(alienDeploymentMapping.getOrchetratorId());
           // Get date/time from ISO to long since 1.1.1970
@@ -117,6 +118,9 @@ public class EventService {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (OrchestratorIAMException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
