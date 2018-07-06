@@ -32,8 +32,8 @@ public final class SslContextBuilder {
   public SSLContext build() {
     try {
       CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-          TrustManagerFactory.getDefaultAlgorithm());
+      TrustManagerFactory trustManagerFactory =
+          TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
       KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
       keyStore.load(null, null); // Use a null input stream + password to create an empty key store.
 
@@ -41,8 +41,9 @@ public final class SslContextBuilder {
       int nextName = 1;
       for (String certificateBase64 : certificateBase64s) {
         Buffer certificateBuffer = new Buffer().write(ByteString.decodeBase64(certificateBase64));
-        X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(
-            certificateBuffer.inputStream());
+        X509Certificate certificate =
+            (X509Certificate)
+                certificateFactory.generateCertificate(certificateBuffer.inputStream());
         keyStore.setCertificateEntry(Integer.toString(nextName++), certificate);
       }
 

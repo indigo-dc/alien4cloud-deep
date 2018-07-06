@@ -22,40 +22,35 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Scope("prototype")
 public class LocationConfiguratorFactory {
-  
 
-  @Inject
-  private ApplicationContext applicationContext;
+  @Inject private ApplicationContext applicationContext;
 
   public ILocationConfiguratorPlugin newInstance(String locationType) {
 
-      if (LocationConfigurator.LOCATION_TYPE.equals(locationType)) {
-          LocationConfigurator configurator = applicationContext.getBean(LocationConfigurator.class);
-          return configurator;
+    if (LocationConfigurator.LOCATION_TYPE.equals(locationType)) {
+      LocationConfigurator configurator = applicationContext.getBean(LocationConfigurator.class);
+      return configurator;
+    }
+    return new ILocationConfiguratorPlugin() {
+      @Override
+      public List<PluginArchive> pluginArchives() {
+        return new ArrayList<>();
       }
-      return new ILocationConfiguratorPlugin() {
-          @Override
-          public List<PluginArchive> pluginArchives() {
-              return new ArrayList<>();
-          }
 
-          @Override
-          public List<String> getResourcesTypes() {
-              return new ArrayList<>();
-          }
+      @Override
+      public List<String> getResourcesTypes() {
+        return new ArrayList<>();
+      }
 
-          @Override
-          public Map<String, MatchingConfiguration> getMatchingConfigurations() {
-              return new HashMap<>();
-          }
+      @Override
+      public Map<String, MatchingConfiguration> getMatchingConfigurations() {
+        return new HashMap<>();
+      }
 
-          @Override
-          public List<LocationResourceTemplate> instances(ILocationResourceAccessor resourceAccessor) {
-              return null;
-          }
-
-
-      };
+      @Override
+      public List<LocationResourceTemplate> instances(ILocationResourceAccessor resourceAccessor) {
+        return null;
+      }
+    };
   }
-
 }

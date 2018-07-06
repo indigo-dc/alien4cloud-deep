@@ -26,83 +26,101 @@ import alien4cloud.tosca.parser.ParsingResult;
 import alien4cloud.utils.AlienConstants;
 import lombok.extern.slf4j.Slf4j;
 
-
+/**
+ * This class contains the configuration setup for a plugin location.
+ * We support only one location.
+ * @author asalic
+ *
+ */
 @Slf4j
 @Component
 @Scope("prototype")
 public class LocationConfigurator implements ILocationConfiguratorPlugin {
-  
-  public static final String LOCATION_TYPE = "indigodc";
-  
-  @Inject
-  private ManagedPlugin selfContext;
 
-  @Inject
-  private ArchiveParser archiveParser;
-  
-  @Inject
-  private MatchingConfigurationsParser matchingConfigurationsParser;
-  
+  /**
+   * The name of the location
+   */
+  public static final String LOCATION_TYPE = "Deep Orchestrator Location";
+
+  @Inject private ManagedPlugin selfContext;
+
+  //@Inject private ArchiveParser archiveParser;
+
+  @Inject private MatchingConfigurationsParser matchingConfigurationsParser;
+
   protected List<PluginArchive> archives;
   protected Map<String, MatchingConfiguration> matchingConfigurations;
-  
+
   @Override
   public List<PluginArchive> pluginArchives() {
-      if (archives == null) {
-          archives = Lists.newArrayList();
-//          try {
-//              addToArchive(archives, "provider/common/configuration");
-//          } catch (ParsingException e) {
-//              log.error(e.getMessage());
-//              throw new PluginParseException(e.getMessage());
-//          }
-      }
-      return archives;
+    if (archives == null) {
+      archives = Lists.newArrayList();
+      //          try {
+      //              addToArchive(archives, "provider/common/configuration");
+      //          } catch (ParsingException e) {
+      //              log.error(e.getMessage());
+      //              throw new PluginParseException(e.getMessage());
+      //          }
+    }
+    return archives;
   }
 
   @Override
   public List<String> getResourcesTypes() {
-      return getAllResourcesTypes();
+    return getAllResourcesTypes();
   }
 
   @Override
   public Map<String, MatchingConfiguration> getMatchingConfigurations() {
-      return Maps.newHashMap();//getMatchingConfigurations("provider/common/matching/config.yml");
+    //return  getMatchingConfigurations("provider/common/matching/config.yml");
+    // Match all nodes defined in the Alien4Cloud list of components
+    return Maps.newHashMap();
   }
 
   @Override
-  public List<LocationResourceTemplate> instances(ILocationResourceAccessor iLocationResourceAccessor) {
-      return Lists.newArrayList();
+  public List<LocationResourceTemplate> instances(
+      ILocationResourceAccessor iLocationResourceAccessor) {
+    return Lists.newArrayList();
   }
-  
-  public Map<String, MatchingConfiguration> getMatchingConfigurations(String matchingConfigRelativePath) {
+
+  /**
+   * Returns the matching nodes provided by a location
+   * @param matchingConfigRelativePath file containing the the rules used to match the nodes of the location
+   * @return A list of locations resources templates that users can define or null if the plugin doesn't support auto-configuration of resources..
+   */
+  public Map<String, MatchingConfiguration> getMatchingConfigurations(
+      String matchingConfigRelativePath) {
     if (matchingConfigurations == null) {
-        Path matchingConfigPath = selfContext.getPluginPath().resolve(matchingConfigRelativePath);
-        try {
-            this.matchingConfigurations = matchingConfigurationsParser.parseFile(matchingConfigPath).getResult().getMatchingConfigurations();
-        } catch (ParsingException e) {
-            return Maps.newHashMap();
-        }
+      Path matchingConfigPath = selfContext.getPluginPath().resolve(matchingConfigRelativePath);
+      try {
+        this.matchingConfigurations =
+            matchingConfigurationsParser
+                .parseFile(matchingConfigPath)
+                .getResult()
+                .getMatchingConfigurations();
+      } catch (ParsingException e) {
+        return Maps.newHashMap();
+      }
     }
-    return Maps.newHashMap();//matchingConfigurations;
+    return matchingConfigurations;
   }
-  
-  public List<String> getAllResourcesTypes() {
+
+  private List<String> getAllResourcesTypes() {
     List<String> resourcesTypes = Lists.newArrayList();
     for (PluginArchive pluginArchive : this.pluginArchives()) {
-        for (String nodeType : pluginArchive.getArchive().getNodeTypes().keySet()) {
-            resourcesTypes.add(nodeType);
-        }
+      for (String nodeType : pluginArchive.getArchive().getNodeTypes().keySet()) {
+        resourcesTypes.add(nodeType);
+      }
     }
     return resourcesTypes;
-}
-  
-  private void addToArchive(List<PluginArchive> archives, String path) throws ParsingException {
-    Path archivePath = selfContext.getPluginPath().resolve(path);
-    // Parse the archives
-    ParsingResult<ArchiveRoot> result = archiveParser.parseDir(archivePath, AlienConstants.GLOBAL_WORKSPACE_ID);
-    PluginArchive pluginArchive = new PluginArchive(result.getResult(), archivePath);
-    archives.add(pluginArchive);
-}
-
+  }
+//
+//  private void addToArchive(List<PluginArchive> archives, String path) throws ParsingException {
+//    Path archivePath = selfContext.getPluginPath().resolve(path);
+//    // Parse the archives
+//    ParsingResult<ArchiveRoot> result =
+//        archiveParser.parseDir(archivePath, AlienConstants.GLOBAL_WORKSPACE_ID);
+//    PluginArchive pluginArchive = new PluginArchive(result.getResult(), archivePath);
+//    archives.add(pluginArchive);
+//  }
 }

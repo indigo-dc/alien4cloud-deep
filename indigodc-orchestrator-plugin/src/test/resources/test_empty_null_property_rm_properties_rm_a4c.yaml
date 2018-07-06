@@ -1,0 +1,9 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+topology_template:
+  node_templates:
+    mesos_master:
+      type: tosca.nodes.indigo.MesosMaster
+      properties:
+        marathon_username: 
+        wn_ips: 

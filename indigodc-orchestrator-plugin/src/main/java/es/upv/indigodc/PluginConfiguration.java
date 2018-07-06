@@ -10,13 +10,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
-
-/**
- * Plugin spring context configuration.
- */
-
+/** Plugin spring context configuration. */
 @Configuration
 @ComponentScan("es.upv.indigodc")
-public class PluginConfiguration {
-  
-}
+public class PluginConfiguration {}

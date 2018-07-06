@@ -9,5 +9,4 @@ public class OrchestratorResponse {
 
   private int code;
   private StringBuilder response;
-  
 }

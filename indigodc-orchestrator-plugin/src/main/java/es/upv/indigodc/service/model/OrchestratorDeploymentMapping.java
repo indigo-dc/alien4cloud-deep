@@ -5,11 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-
-@Getter @AllArgsConstructor
+@Getter
+@AllArgsConstructor
 public class OrchestratorDeploymentMapping {
-    public static final OrchestratorDeploymentMapping EMPTY = new OrchestratorDeploymentMapping("unknown_deployment_id", DeploymentStatus.UNKNOWN);
+  public static final OrchestratorDeploymentMapping EMPTY =
+      new OrchestratorDeploymentMapping("unknown_deployment_id", DeploymentStatus.UNKNOWN);
 
-    private String orchestratorUUIDDeployment;
-    private DeploymentStatus status;
+  private String orchestratorUUIDDeployment;
+  private DeploymentStatus status;
 }

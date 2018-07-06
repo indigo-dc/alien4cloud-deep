@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -67,118 +68,120 @@ import lombok.extern.slf4j.Slf4j;
 @Service("builder-service")
 @Slf4j
 public class BuilderService {
-  
 
-  @Inject
-  private ArchiveExportService exportService;
+  @Inject private ArchiveExportService exportService;
 
-  @Inject
-  private EditionContextManager editionContextManager;
-  
+  @Inject private EditionContextManager editionContextManager;
+
   public static final String TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_0";
-  
+
   private static final DumperOptions dumperOptions;
-  
-  private static final String TEST_YAML = 
-      "\ntosca_definitions_version: tosca_simple_yaml_1_0\n\nimports:\n  - indigo_custom_types: https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml\n\ndescription: Example\n\ntopology_template:\n  node_templates:\n    Compute:\n      type: tosca.nodes.Compute\n      capabilities:\n        scalable:\n          properties:\n            min_instances: 1\n            max_instances: 1\n            default_instances: 1\n          endpoint:\n            properties:\n              secure: true\n              protocol: tcp\n              network_name: PRIVATE\n              initiator: source\n";
-  
-  private static final String TEST_YAML_JUPYTER =
-      "tosca_definitions_version: tosca_simple_yaml_1_0\n\nimports:\n  - indigo_custom_types: https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml\n\ndescription: >\n  TOSCA test for launching a Kubernetes Virtual Cluster.\ntopology_template:\n  inputs:\n    wn_num:\n      type: integer\n      description: Number of WNs in the cluster\n      default: 1\n      required: yes\n    fe_cpus:\n      type: integer\n      description: Numer of CPUs for the front-end node\n      default: 2\n      required: yes\n    fe_mem:\n      type: scalar-unit.size\n      description: Amount of Memory for the front-end node\n      default: 2 GB\n      required: yes\n    wn_cpus:\n      type: integer\n      description: Numer of CPUs for the WNs\n      default: 1\n      required: yes\n    wn_mem:\n      type: scalar-unit.size\n      description: Amount of Memory for the WNs\n      default: 2 GB\n      required: yes\n\n    admin_username:\n      type: string\n      description: Username of the admin user\n      default: kubeuser\n    admin_token:\n      type: string\n      description: Access Token for the admin user\n      default: not_very_secret_token\n\n  node_templates:\n\n    jupyterhub:\n      type: tosca.nodes.indigo.JupyterHub\n      properties:\n        spawner: kubernetes\n      requirements:\n        - host: lrms_server\n        - dependency: lrms_front_end\n\n    lrms_front_end:\n      type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes\n      properties:\n        admin_username:  { get_input: admin_username }\n        admin_token: { get_input: admin_token }\n      requirements:\n        - host: lrms_server\n\n    lrms_server:\n      type: tosca.nodes.indigo.Compute\n      capabilities:\n        endpoint:\n          properties:\n            dns_name: kubeserver\n            network_name: PUBLIC\n            ports:\n              https_port:\n                protocol: tcp\n                source: 6443\n        host:\n          properties:\n            num_cpus: { get_input: fe_cpus }\n            mem_size: { get_input: fe_mem }\n        os:\n          properties:\n            image: linux-ubuntu-16.04-vmi\n            #type: linux\n            #distribution: ubuntu\n            #version: 16.04\n\n    wn_node:\n      type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes\n      properties:\n        front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }\n      requirements:\n        - host: lrms_wn\n\n    lrms_wn:\n      type: tosca.nodes.indigo.Compute\n      capabilities:\n        scalable:\n          properties:\n            count: { get_input: wn_num }\n        host:\n          properties:\n            num_cpus: { get_input: wn_cpus }\n            mem_size: { get_input: wn_mem }\n        os:\n          properties:\n            image: linux-ubuntu-16.04-vmi\n            #type: linux\n            #distribution: ubuntu\n            #version: 16.04\n\n  outputs:\n    jupyterhub_url:\n      value: { concat: [ 'http://', get_attribute: [ lrms_server, public_address, 0 ], ':8000' ] }\n    cluster_ip:\n      value: { get_attribute: [ lrms_server, public_address, 0 ] }\n    cluster_creds:\n      value: { get_attribute: [ lrms_server, endpoint, credential, 0 ] }";
-  
+
   static {
     dumperOptions = new DumperOptions();
     dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
     dumperOptions.setIndent(4);
     dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-    //dumperOptions.setLineBreak(DumperOptions.LineBreak.valueOf("\\n"));
+    // dumperOptions.setLineBreak(DumperOptions.LineBreak.valueOf("\\n"));
     dumperOptions.setLineBreak(DumperOptions.LineBreak.UNIX);
     dumperOptions.setPrettyFlow(true);
     dumperOptions.setCanonical(false);
   }
-  
- 
-  
+
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Deployment {
-    
+
     private String template;
     private Map<String, Object> parameters;
     private String callback;
-    
   }
-  
+
   @Data
   public static class Template {
-    
-    @Data @AllArgsConstructor @NoArgsConstructor
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Metadata {
       protected String template_name;
       protected String template_version;
       protected String template_author;
     }
-    
-    @Data @AllArgsConstructor @NoArgsConstructor
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class TopologyTemplate {
-      
-      @Data @AllArgsConstructor
+
+      @Data
+      @AllArgsConstructor
       public static class NodeTemplateDef {
-        
+
         protected String type;
         protected Map<String, Capability> capabilities;
-        
       }
-      
+
       protected Map<String, PropertyDefinition> inputs;
       protected Map<String, NodeTemplate> node_templates;
       protected Map<String, OutputDef> outputs;
-      
     }
-    
-    @Data @AllArgsConstructor
+
+    @Data
+    @AllArgsConstructor
     public static class OutputDef {
-      
+
       protected String value;
-      
     }
-    
+
     protected String tosca_definitions_version;
     protected Metadata metadata;
     protected String description;
     protected List<Map<String, String>> imports;
     protected TopologyTemplate topology_template;
-    
+
     public Template() {
       tosca_definitions_version = TOSCA_DEFINITIONS_VERSION;
-      imports = new ArrayList<>();//new HashMap<>();
+      imports = new ArrayList<>(); // new HashMap<>();
       Map<String, String> imp = new HashMap<>();
-      imp.put("indigo_custom_types", "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
+      imp.put(
+          "indigo_custom_types",
+          "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
       imports.add(imp);
     }
-    
   }
-  
-  public static String getIndigoDCTopologyYaml(String a4cTopologyYaml) throws JsonProcessingException, IOException {
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
+
+  public static String getIndigoDCTopologyYaml(String a4cTopologyYaml)
+      throws JsonProcessingException, IOException {
+    ObjectMapper mapper =
+        new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
 
     ObjectNode root = (ObjectNode) mapper.readTree(a4cTopologyYaml);
     root.remove("tosca_definitions_version");
     root.put("tosca_definitions_version", "tosca_simple_yaml_1_0");
-    ((ObjectNode)root.get("topology_template")).remove("workflows");
+    ((ObjectNode) root.get("topology_template")).remove("workflows");
     root.remove("metadata");
     root.remove("imports");
     ObjectNode imports = mapper.createObjectNode();
-    imports.put("indigo_custom_types", "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
+    imports.put(
+        "indigo_custom_types",
+        "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
     root.putArray("imports").add(imports);
     ObjectNode tmp = (ObjectNode) root.get("topology_template").get("node_templates");
     Iterator<JsonNode> it = tmp.elements();
     while (it.hasNext()) {
-      ObjectNode nodeTemplate = (ObjectNode) it.next();      
+      ObjectNode nodeTemplate = (ObjectNode) it.next();
       // Eliminate metadata info
-      nodeTemplate.remove("metadata");      
+      nodeTemplate.remove("metadata");
+
+      //
+      ObjectNode properties = rmNullProps((ObjectNode) nodeTemplate.get("properties"));
+      if (properties == null)
+        nodeTemplate.remove("properties");
+
       // Change requirements (no type and the name of the requirement is the type)
-      ArrayNode requirements = ((ArrayNode)nodeTemplate.get("requirements"));
+      ArrayNode requirements = ((ArrayNode) nodeTemplate.get("requirements"));
       if (requirements != null) {
         Iterator<JsonNode> itRequirements = requirements.elements();
         while (itRequirements.hasNext()) {
@@ -186,120 +189,147 @@ public class BuilderService {
           Entry<String, JsonNode> firstField = requirement.fields().next();
           if (firstField.getValue().has("type_requirement")) {
             requirement.remove(firstField.getKey());
-            requirement.set(firstField.getValue().get("type_requirement").asText(), firstField.getValue());
-            ((ObjectNode)firstField.getValue()).remove("type_requirement");
+            requirement.set(
+                firstField.getValue().get("type_requirement").asText(), firstField.getValue());
+            ((ObjectNode) firstField.getValue()).remove("type_requirement");
           }
         }
       }
     }
     return toscaMethodsStrToMethod(mapper.writer().writeValueAsString(root))
-        //.replaceAll("(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*(\\[){1}(.?)+(\\]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}",           
-        //.replaceAll("(\\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*([){1}(.?)+(]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}", 
-            //"this")
-            .replaceAll("\n", "\\\\n");    
+        // .replaceAll("(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*(\\[){1}(.?)+(\\]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}",
+        // .replaceAll("(\\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*([){1}(.?)+(]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}",
+        // "this")
+        .replaceAll("\n", "\\\\n");
   }
-  
+
+  /**
+   * Cleanse the properties of a node_template by removing those nodes with null value. This method
+   * modifies the properties that it receives.
+   *
+   * @param properties The array of properties of a node_template (can include inherited ones). Can
+   *     be null, in which case nothing is done, null is returned
+   * @return The input parameter after modification, null if input is null
+   */
+  public static ObjectNode rmNullProps(ObjectNode properties) {
+    if (properties != null) {
+      Iterator<Map.Entry<String,JsonNode>> itProperties = properties.fields();
+      while (itProperties.hasNext()) {
+        Map.Entry<String,JsonNode> property = itProperties.next();
+        if (property.getValue().isNull()) itProperties.remove();
+      }
+      return properties.size() > 0 ? properties : null;
+    } else
+      return null;
+  }
+
   public static String toscaMethodsStrToMethod(String a4cTopologyYaml) {
     StringBuffer newa4cTopologyYaml = new StringBuffer();
 
-    Pattern p = Pattern.compile("(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*(\\[){1}(.?)+(\\]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}");
+    Pattern p =
+        Pattern.compile(
+            "(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*(get_attribute:){1}(\\s)*(\\[){1}(.?)+(\\]){1}(\\s)*(\\}){1}(\\s)*(\\\"){1}");
 
     Matcher m = p.matcher(a4cTopologyYaml);
     while (m.find()) {
-      m.appendReplacement(newa4cTopologyYaml, m.group().replaceAll("(\\\"){1}|(\\n){0,1}(\\\\s)*(-){0,1}", ""));
+      m.appendReplacement(
+          newa4cTopologyYaml, m.group().replaceAll("(\\\"){1}|(\\n){0,1}(\\\\s)*(-){0,1}", ""));
     }
     m.appendTail(newa4cTopologyYaml);
-    
+
     return newa4cTopologyYaml.toString();
   }
 
-  public String buildApp(PaaSTopologyDeploymentContext deploymentContext, int numCPUs) throws IOException {
+  public String buildApp(PaaSTopologyDeploymentContext deploymentContext, int numCPUs)
+      throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     Deployment d = new Deployment();
     d.setParameters(getParameters(deploymentContext));
     d.setCallback("http://localhost:8080/callback");
     String yamlIndigoDC = buildTemplate(deploymentContext);
     d.setTemplate(yamlIndigoDC);
-    
+
     String yamlApp = mapper.writeValueAsString(d).replace("\\\\n", "\\n");
-    		//.replace("\\\\\\", "\\");//.replaceAll("\"", "\\\"");
-    		//String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
-    //log.info("Yaml to be sent to the orchestrator: \n" + yamlApp);
+    // .replace("\\\\\\", "\\");//.replaceAll("\"", "\\\"");
+    // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
+    // log.info("Yaml to be sent to the orchestrator: \n" + yamlApp);
     return yamlApp;
   }
-  
-  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext) throws JsonProcessingException, IOException {
+
+  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext)
+      throws JsonProcessingException, IOException {
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
-    String a4cTopologyYaml = exportService.getYaml(EditionContextManager.getCsar(), EditionContextManager.getTopology());
-        //
-        
-    
+    String a4cTopologyYaml =
+        exportService.getYaml(EditionContextManager.getCsar(), EditionContextManager.getTopology());
+    //
+
     log.info("+++++++++++++" + a4cTopologyYaml);
 
-    return getIndigoDCTopologyYaml(a4cTopologyYaml);//yaml.dump(t);
+    return getIndigoDCTopologyYaml(a4cTopologyYaml); // yaml.dump(t);
   }
-  
+
   public Map<String, Object> getParameters(PaaSTopologyDeploymentContext deploymentContext) {
     final Map<String, Object> params = new HashMap<>();
-    Map<String, AbstractPropertyValue> vals = deploymentContext.getDeploymentTopology().getAllInputProperties();
-    for (Map.Entry<String, AbstractPropertyValue> v: vals.entrySet()) {
+    Map<String, AbstractPropertyValue> vals =
+        deploymentContext.getDeploymentTopology().getAllInputProperties();
+    for (Map.Entry<String, AbstractPropertyValue> v : vals.entrySet()) {
       if (v.getValue() instanceof PropertyValue)
-        params.put(v.getKey(), ((PropertyValue<?>)v.getValue()).getValue());
-      else
-        log.warn(String.format("Can't add property %s", v.getKey()));
+        params.put(v.getKey(), ((PropertyValue<?>) v.getValue()).getValue());
+      else log.warn(String.format("Can't add property %s", v.getKey()));
     }
-    
+
     return params;
   }
-  
+
   protected String buildOutputValue(String nodeName, String propertyName) {
     return String.format("{ get_attribute: [ %s, %s ] }", nodeName, propertyName);
   }
-  
+
   protected String buildOutputKey(String nodeName, String propertyName) {
     String nodeName2 = nodeName.replaceAll(" ", "_");
     String propertyName2 = propertyName.replaceAll(" ", "_");
     return nodeName2 + "_" + propertyName2;
   }
-  
+
   private static class MyRepresenter extends Representer {
-//    @Override
-//    protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
-//        Set<Property> set = super.getProperties(type);
-//        Set<Property> filtered = new LinkedHashSet<Property>();
-//        if (type.equals(ScalarPropertyValue.class)) {
-//            // filter properties
-//            for (Property prop : set) {
-//                String name = prop.getName();
-//                if (!name.equals("value")) {
-//                    filtered.add(prop);
-//                } else {
-//                  prop.set(, value);
-//                }
-//            }
-//        } else {
-//          for (Property prop : set) {
-//            String name = prop.getName();
-//                filtered.add(prop);
-//          }
-//        }
-//        return filtered;
-//    }
-}
-//  
-//  private static class MyPropertyUtils extends PropertyUtils {
-//    @Override
-//    protected Set<Property> createPropertySet(Class<? extends Object> type, BeanAccess bAccess)
-//        throws IntrospectionException {
-//    Set<Property> properties = new LinkedHashSet<Property>();
-//    Collection<Property> props = getPropertiesMap(type, bAccess).values();
-//    for (Property property : props) {
-//        if (property.isReadable() && property.isWritable()) {
-//            properties.add(property);
-//        }
-//    }
-//    return properties;
-//}
-//  }
+    //    @Override
+    //    protected Set<Property> getProperties(Class<? extends Object> type) throws
+    // IntrospectionException {
+    //        Set<Property> set = super.getProperties(type);
+    //        Set<Property> filtered = new LinkedHashSet<Property>();
+    //        if (type.equals(ScalarPropertyValue.class)) {
+    //            // filter properties
+    //            for (Property prop : set) {
+    //                String name = prop.getName();
+    //                if (!name.equals("value")) {
+    //                    filtered.add(prop);
+    //                } else {
+    //                  prop.set(, value);
+    //                }
+    //            }
+    //        } else {
+    //          for (Property prop : set) {
+    //            String name = prop.getName();
+    //                filtered.add(prop);
+    //          }
+    //        }
+    //        return filtered;
+    //    }
+  }
+  //
+  //  private static class MyPropertyUtils extends PropertyUtils {
+  //    @Override
+  //    protected Set<Property> createPropertySet(Class<? extends Object> type, BeanAccess bAccess)
+  //        throws IntrospectionException {
+  //    Set<Property> properties = new LinkedHashSet<Property>();
+  //    Collection<Property> props = getPropertiesMap(type, bAccess).values();
+  //    for (Property property : props) {
+  //        if (property.isReadable() && property.isWritable()) {
+  //            properties.add(property);
+  //        }
+  //    }
+  //    return properties;
+  // }
+  //  }
 
 }
