@@ -11,5 +11,5 @@
   "user": "${provider.common.user}",
   "password": "${provider.common.password}",
   "orchestratorPollInterval": 10,
-  "importIndigoCustomTypes": "https://raw.githubusercontent.com/indigo-dc/tosca-types/devel-deep/custom_types.yaml"
+  "importIndigoCustomTypes": "https://raw.githubusercontent.com/indigo-dc/tosca-types/devel_deep/custom_types.yaml"
 }
