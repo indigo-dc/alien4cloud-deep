@@ -31,7 +31,8 @@ import lombok.ToString;
   "iamHost",
   "user",
   "password",
-  "orchestratorPollInterval"
+  "orchestratorPollInterval",
+  "importIndigoCustomTypes"
 })
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -50,5 +51,6 @@ public class CloudConfiguration {
   @NotNull private String user;
   @NotNull private String password;
   private int orchestratorPollInterval;
+  @NotNull private String importIndigoCustomTypes;
 
 }

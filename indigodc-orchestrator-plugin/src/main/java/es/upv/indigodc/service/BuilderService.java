@@ -34,6 +34,7 @@ import org.alien4cloud.tosca.model.templates.Capability;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
 import org.alien4cloud.tosca.model.templates.Topology;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
@@ -55,6 +56,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import alien4cloud.paas.model.PaaSNodeTemplate;
 import alien4cloud.paas.model.PaaSTopology;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
+import es.upv.indigodc.configuration.CloudConfigurationManager;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -72,6 +74,10 @@ public class BuilderService {
   @Inject private ArchiveExportService exportService;
 
   @Inject private EditionContextManager editionContextManager;
+  
+  @Autowired
+  @Qualifier("cloud-configuration-manager")
+  private CloudConfigurationManager cloudConfigurationHolder;
 
   public static final String TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_0";
 
@@ -98,75 +104,19 @@ public class BuilderService {
     private String callback;
   }
 
-  @Data
-  public static class Template {
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Metadata {
-      protected String template_name;
-      protected String template_version;
-      protected String template_author;
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class TopologyTemplate {
-
-      @Data
-      @AllArgsConstructor
-      public static class NodeTemplateDef {
-
-        protected String type;
-        protected Map<String, Capability> capabilities;
-      }
-
-      protected Map<String, PropertyDefinition> inputs;
-      protected Map<String, NodeTemplate> node_templates;
-      protected Map<String, OutputDef> outputs;
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class OutputDef {
-
-      protected String value;
-    }
-
-    protected String tosca_definitions_version;
-    protected Metadata metadata;
-    protected String description;
-    protected List<Map<String, String>> imports;
-    protected TopologyTemplate topology_template;
-
-    public Template() {
-      tosca_definitions_version = TOSCA_DEFINITIONS_VERSION;
-      imports = new ArrayList<>(); // new HashMap<>();
-      Map<String, String> imp = new HashMap<>();
-      imp.put(
-          "indigo_custom_types",
-          "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
-      imports.add(imp);
-    }
-  }
-
-  public static String getIndigoDCTopologyYaml(String a4cTopologyYaml)
+  public static String getIndigoDCTopologyYaml(String a4cTopologyYaml, String importIndigoCustomTypes)
       throws JsonProcessingException, IOException {
     ObjectMapper mapper =
         new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
 
     ObjectNode root = (ObjectNode) mapper.readTree(a4cTopologyYaml);
     root.remove("tosca_definitions_version");
-    root.put("tosca_definitions_version", "tosca_simple_yaml_1_0");
+    root.put("tosca_definitions_version", TOSCA_DEFINITIONS_VERSION);
     ((ObjectNode) root.get("topology_template")).remove("workflows");
     root.remove("metadata");
     root.remove("imports");
     ObjectNode imports = mapper.createObjectNode();
-    imports.put(
-        "indigo_custom_types",
-        "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml");
+    imports.put("indigo_custom_types", importIndigoCustomTypes);
     root.putArray("imports").add(imports);
     ObjectNode tmp = (ObjectNode) root.get("topology_template").get("node_templates");
     Iterator<JsonNode> it = tmp.elements();
@@ -175,7 +125,6 @@ public class BuilderService {
       // Eliminate metadata info
       nodeTemplate.remove("metadata");
 
-      //
       ObjectNode properties = rmNullProps((ObjectNode) nodeTemplate.get("properties"));
       if (properties == null)
         nodeTemplate.remove("properties");
@@ -240,13 +189,13 @@ public class BuilderService {
     return newa4cTopologyYaml.toString();
   }
 
-  public String buildApp(PaaSTopologyDeploymentContext deploymentContext, int numCPUs)
+  public String buildApp(PaaSTopologyDeploymentContext deploymentContext, String importIndigoCustomTypes)
       throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     Deployment d = new Deployment();
     d.setParameters(getParameters(deploymentContext));
     d.setCallback("http://localhost:8080/callback");
-    String yamlIndigoDC = buildTemplate(deploymentContext);
+    String yamlIndigoDC = buildTemplate(deploymentContext, importIndigoCustomTypes);
     d.setTemplate(yamlIndigoDC);
 
     String yamlApp = mapper.writeValueAsString(d).replace("\\\\n", "\\n");
@@ -256,7 +205,7 @@ public class BuilderService {
     return yamlApp;
   }
 
-  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext)
+  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext, String importIndigoCustomTypes)
       throws JsonProcessingException, IOException {
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
@@ -265,7 +214,7 @@ public class BuilderService {
 
     log.info("+++++++++++++" + a4cTopologyYaml);
 
-    return getIndigoDCTopologyYaml(a4cTopologyYaml); // yaml.dump(t);
+    return getIndigoDCTopologyYaml(a4cTopologyYaml, importIndigoCustomTypes); // yaml.dump(t);
   }
 
   public Map<String, Object> getParameters(PaaSTopologyDeploymentContext deploymentContext) {

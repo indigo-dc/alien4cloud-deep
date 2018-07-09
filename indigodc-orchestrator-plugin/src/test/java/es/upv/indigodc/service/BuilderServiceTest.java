@@ -16,6 +16,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import es.upv.indigodc.IndigoDCOrchestrator;
+import es.upv.indigodc.TestUtil;
+import es.upv.indigodc.configuration.CloudConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,7 +37,9 @@ public class BuilderServiceTest {
             .getResource("test_jupyter_kube_cluster_indigodc.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c));
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
+        cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -47,7 +51,9 @@ public class BuilderServiceTest {
     url = BuilderServiceTest.class.getClassLoader().getResource("test_compute_indigodc.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c));
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
+        cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -60,7 +66,9 @@ public class BuilderServiceTest {
         BuilderServiceTest.class.getClassLoader().getResource("test_compute_kepler_indigodc.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c));
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
+        cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -71,7 +79,9 @@ public class BuilderServiceTest {
     url = BuilderServiceTest.class.getClassLoader().getResource("test_get_attribute_indigodc.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c));
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
+        cc.getImportIndigoCustomTypes()));
   }
   
   @Test
@@ -82,7 +92,9 @@ public class BuilderServiceTest {
     url = BuilderServiceTest.class.getClassLoader().getResource("test_empty_null_property_rm_orchestrator.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c));
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
+        cc.getImportIndigoCustomTypes()));
   }
   
   @Test
@@ -93,7 +105,9 @@ public class BuilderServiceTest {
     url = BuilderServiceTest.class.getClassLoader().getResource("test_empty_null_property_rm_properties_rm_orchestrator.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c));
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
+        cc.getImportIndigoCustomTypes()));
   }
   
 }

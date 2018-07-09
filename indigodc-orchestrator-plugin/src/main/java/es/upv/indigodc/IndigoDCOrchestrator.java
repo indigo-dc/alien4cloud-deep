@@ -98,7 +98,8 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             .getConfiguration(); // deploymentContext.getDeployment().getOrchestratorId();
 
     try {
-      final String yamlPaasTopology = builderService.buildApp(deploymentContext, 1);
+      final String yamlPaasTopology = builderService.buildApp(deploymentContext, 
+          cloudConfigurationHolder.getConfiguration().getImportIndigoCustomTypes());
       log.info("Topology: " + yamlPaasTopology);
       OrchestratorResponse response =
           orchestratorConnector.callDeploy(configuration, yamlPaasTopology);

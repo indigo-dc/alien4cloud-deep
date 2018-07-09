@@ -71,7 +71,8 @@ public class IndigoDCOrchestratorFactory
               "iamhostCert",
               "u",
               "p",
-              5);
+              5,
+              "https://raw.githubusercontent.com/indigo-dc/tosca-types/devel-deep/custom_types.yaml");
     }
     return c;
   }

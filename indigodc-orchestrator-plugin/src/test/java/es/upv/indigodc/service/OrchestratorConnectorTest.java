@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.upv.indigodc.IndigoDCOrchestratorFactory;
 import es.upv.indigodc.TestBlockingServlet;
 import es.upv.indigodc.TestServer;
+import es.upv.indigodc.TestUtil;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.BuilderService.Deployment;
 import es.upv.indigodc.service.OrchestratorConnector.AccessToken;
@@ -72,7 +73,7 @@ public class OrchestratorConnectorTest {
       throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
           OrchestratorIAMException {
     OrchestratorConnector oc = new OrchestratorConnector();
-    CloudConfiguration cc = getRealConfiguration();
+    CloudConfiguration cc = TestUtil.getRealConfiguration(null);
     AccessToken at = oc.obtainAuthTokens(cc);
     assertEquals(true, at.getAccessToken() != null);
   }
@@ -99,7 +100,7 @@ public class OrchestratorConnectorTest {
     // String callJson =
     // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
     // log.info("call to be sent to the orchestrator: \n" + callJson);
-    CloudConfiguration cc = getRealConfiguration();
+    CloudConfiguration cc = TestUtil.getRealConfiguration(null);
     OrchestratorResponse or = oc.callDeploy(cc, callJson);
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
@@ -140,43 +141,10 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(new OrchestratorResponse(1, new StringBuilder("none")))));
     testServer.start(servlets);
-    CloudConfiguration cc = getTestConfiguration();
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     log.info(cc.getTokenEndpoint());
     OrchestratorConnector oc = new OrchestratorConnector();
     OrchestratorResponse or = oc.callDeploy(cc, "{\"response\": 1}");
     testServer.stop();
-  }
-
-  @Ignore("Not testing method")
-  protected CloudConfiguration getRealConfiguration()
-      throws JsonParseException, JsonMappingException, IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    InputStream is =
-        IndigoDCOrchestratorFactory.class.getResourceAsStream(
-            IndigoDCOrchestratorFactory.CLOUD_CONFIGURATION_DEFAULTS_FILE);
-    return mapper.readValue(is, CloudConfiguration.class);
-  }
-
-  @Ignore("Not testing method")
-  protected CloudConfiguration getTestConfiguration()
-      throws JsonParseException, JsonMappingException, IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    // Be sure that the configuration contains the right certificate stored in the keystore, since
-    // it is for localhost and unsigned
-    // Export from keystore with:openssl pkcs12 -in keystore -out foo.pem
-    URL url = OrchestratorConnectorTest.class.getClassLoader().getResource("cloud_conf_test.json");
-    InputStream is = new FileInputStream(url.getPath());
-    CloudConfiguration cf = mapper.readValue(is, CloudConfiguration.class);
-    // Add port
-    //    String v = cf.getTokenEndpoint();
-    //    cf.setTokenEndpoint(v.replaceAll("(http|https)(://)(.+?)(/)*",
-    // String.format("%s://%s:%d/", "https", "localhost", testServer.getSecurePort())));
-    //    v = cf.getIamHost();
-    //    cf.setIamHost(v.replaceAll("(http|https)(://)(.)+(/)*", String.format("%s://%s:%d/",
-    // "https", "localhost", testServer.getSecurePort())));
-    //    v = cf.getOrchestratorEndpoint();
-    //    cf.setOrchestratorEndpoint(v.replaceAll("(http|https)(://)(.)+(/)*",
-    // String.format("%s://%s:%d/", "https", "localhost", testServer.getSecurePort())));
-    return cf;
   }
 }
