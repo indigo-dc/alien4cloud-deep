@@ -1,1 +1,12 @@
-topology_template:\n  node_templates:\n    mesos_master:\n      type: "tosca.nodes.indigo.MesosMaster"\n      properties:\n        marathon_username: "admin"\n        marathon_password:\n          get_input: "marathon_password"\n        chronos_enable_ssl: true\n        hybrid: false\ntosca_definitions_version: "tosca_simple_yaml_1_0"\nimports:\n- indigo_custom_types: "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml"\n
+topology_template:
+  node_templates:
+    mesos_master:
+      type: "tosca.nodes.indigo.MesosMaster"
+      properties:
+        marathon_username: "admin"
+        marathon_password: { get_input: marathon_password }
+        chronos_enable_ssl: true
+        hybrid: false
+tosca_definitions_version: "tosca_simple_yaml_1_0"
+imports:
+- indigo_custom_types: "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml"

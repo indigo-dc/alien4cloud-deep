@@ -1,0 +1,14 @@
+tosca_definitions_version: alien_dsl_2_0_0
+description: ""
+topology_template:
+  node_templates:
+    Compute:
+      type: tosca.nodes.indigo.Compute
+      properties:
+        p0: { get_input: marathon_password }
+        p1: { get_input : marathon_password }
+        p2: { get_attribute : [ mesos_master_server, public_address ] }
+        p3: { concat: [ "a", "b" ] }
+        p4:   {   concat : [ 'http://', get_attribute : [ lrms_server, public_address, 0 ], ':8000' ] }  
+        p5:  " { get_attribute : [ mesos_master_server, public_address ] } "  
+        

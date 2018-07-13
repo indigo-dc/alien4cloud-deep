@@ -110,4 +110,15 @@ public class BuilderServiceTest {
         cc.getImportIndigoCustomTypes()));
   }
   
+  @Test
+  public void quoteAllToscaMethods() throws URISyntaxException, IOException {
+    URL url = BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_in.yaml");
+    String yamlA4c =
+        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+    url = BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_out.yaml");
+    String yamlIndigoDC =
+        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+    assertEquals(yamlIndigoDC, BuilderService.encodeTOSCAMethods(yamlA4c));
+  }
+  
 }
