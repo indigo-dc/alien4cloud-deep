@@ -1,0 +1,26 @@
+<div>
+  <div class="row">
+    <div class="col-md-2" ng-if="isArchitect">
+      <button class="btn btn-success" ng-click="openNewTopologyTemplate()" id="btn-add-template">
+        <i class="fa fa-plus-circle"></i> {{ 'TEMPLATE.NEW' | translate}}
+      </button>
+    </div>
+
+    <!-- Upload box -->
+    <div id="upload-csar-topology" class="col-md-10" ng-if="isArchitect">
+      <upload-directive
+        target-url="'rest/latest/csars'"
+        drag-and-drop-message="'COMPONENTS.DRAG_DROP_UPLOAD'"
+        button-message="'COMPONENTS.UPLOAD'"
+        upload-success-callback="searchConfig.service.search()">
+      </upload-directive>
+    </div>
+  </div>
+
+  <topology-template-search
+    on-select="onSelect(topology)"
+    on-select-for-clone="openNewTopologyTemplate(topology)"
+    on-search-config="onSearchConfigChanged(searchConfig)"
+    archive-link="true">
+  </topology-template-search>
+</div>

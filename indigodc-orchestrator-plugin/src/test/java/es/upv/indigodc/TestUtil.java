@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import alien4cloud.security.model.User;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.OrchestratorConnectorTest;
 
@@ -25,6 +26,15 @@ public class TestUtil {
     InputStream is =
         IndigoDCOrchestratorFactory.class.getResourceAsStream(fileNameResource);
     return mapper.readValue(is, CloudConfiguration.class);
+  }
+  
+  @Ignore("Not testing method")
+  public static User getTestUser()
+      throws JsonParseException, JsonMappingException, IOException {
+    User u = new User();
+    u.setUsername("testuser");
+    u.setPassword("password");
+    return u;
   }
 
   @Ignore("Not testing method")

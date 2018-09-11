@@ -1,0 +1,37 @@
+<div class="row">
+  <div class="col-md-6">
+    <form ng-submit="addVariable(formVar)" style="margin-top: 15px">
+      <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-filter"></i></span>
+        <input type="text" class="form-control input-sm" id="var-name" name="varName" ng-model="formVar.name"
+          placeholder="{{'APPLICATIONS.VARIABLES.TYPE_TO_ADD' | translate}}" required/>
+        <span class="input-group-btn">
+          <button ng-disabled="formAddVar.varName.$invalid" type="submit" class="btn btn-primary btn-sm" id="btn-add-var">
+            <i class="fa fa-plus-circle"></i>
+          </button>
+        </span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<empty-place-holder data="variables"></empty-place-holder>
+<table class="table table-hover grp-margin" ng-if="_.isNotEmpty(variables)">
+  <tbody>
+    <tr ng-repeat="variable in _.keys(variables) | filter:formVar.name">
+      <td style="width: 20%"><a ng-click="openVarModal(variable)">{{variable}}</a></td>
+      <td>
+        <button
+          ng-disabled = "!variables[variable].environment && !variables[variable].environmentType"
+          class="btn btn-default btn-sm"
+          uib-tooltip="{{ 'APPLICATIONS.VARIABLES.DELETE_FROM_ENVS' | translate}}"
+          tooltip-append-to-body="true"
+          ng-click="deleteFromEnvScopes(variable)"><i class="fa fa-eraser"></i> {{'APPLICATIONS.INPUTS.CLEAR' | translate}}</button>
+
+          <i style="margin-left: 10px" class="fa fa-desktop" ng-if = "variables[variable].application"
+          uib-tooltip="{{ 'APPLICATIONS.VARIABLES.APP_VAR' | translate}}"
+          tooltip-append-to-body="true"></i>
+      </td>
+    </tr>
+  </tbody>
+</table>

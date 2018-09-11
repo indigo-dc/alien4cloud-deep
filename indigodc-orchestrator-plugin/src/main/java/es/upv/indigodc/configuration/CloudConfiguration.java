@@ -29,8 +29,6 @@ import lombok.ToString;
   "clientScopes",
   "orchestratorEndpoint",
   "iamHost",
-  "user",
-  "password",
   "orchestratorPollInterval",
   "importIndigoCustomTypes"
 })
@@ -48,8 +46,8 @@ public class CloudConfiguration {
   @NotNull private String orchestratorEndpointCert;
   @NotNull private String iamHost;
   @NotNull private String iamHostCert;
-  @NotNull private String user;
-  @NotNull private String password;
+  //@NotNull private String user;
+  //@NotNull private String password;
   private int orchestratorPollInterval;
   @NotNull private String importIndigoCustomTypes;
 

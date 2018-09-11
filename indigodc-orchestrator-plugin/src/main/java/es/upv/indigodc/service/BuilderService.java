@@ -13,25 +13,12 @@ import javax.inject.Inject;
 
 import org.alien4cloud.tosca.editor.EditionContextManager;
 import org.alien4cloud.tosca.exporter.ArchiveExportService;
-import org.alien4cloud.tosca.model.Csar;
 import org.alien4cloud.tosca.model.definitions.AbstractPropertyValue;
-import org.alien4cloud.tosca.model.definitions.PropertyDefinition;
 import org.alien4cloud.tosca.model.definitions.PropertyValue;
-import org.alien4cloud.tosca.model.definitions.ScalarPropertyValue;
-import org.alien4cloud.tosca.model.templates.Capability;
-import org.alien4cloud.tosca.model.templates.NodeTemplate;
-import org.alien4cloud.tosca.model.templates.Topology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.BeanAccess;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.introspector.PropertyUtils;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,35 +28,44 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 
-import alien4cloud.paas.model.PaaSNodeTemplate;
-import alien4cloud.paas.model.PaaSTopology;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Manages the creation of the generation of the tosca topology in a format that is accepted by the Orchestrator.
+ * It uses the TOSCA document as found in the TOSCA topology text editor.
+ * @author asalic
+ *
+ */
 @Service("builder-service")
 @Slf4j
 public class BuilderService {
 
+  /**
+   * Gets the TOSCA topology in text format from the A4C topology editor
+   */
   @Inject private ArchiveExportService exportService;
-
+  /**
+   * Initializes the the manager of the TOSCA editor for a certain deployment
+   */
   @Inject private EditionContextManager editionContextManager;
-  
-  @Autowired
-  @Qualifier("cloud-configuration-manager")
+  /**
+   * Retrieves the configuration for the plugin
+   */
+  @Autowired @Qualifier("cloud-configuration-manager")
   private CloudConfigurationManager cloudConfigurationHolder;
-
+  /**
+   * The Orchestrator's accepted TOSCA YAML definition declaration
+   */
   public static final String TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_0";
-  public static final String TOSCA_METHODS[] = {"get_input", "concat"};
-
+  /**
+   * The options used by the TOSCA YAML writer to generate the text representation
+   * of the topology that is sent to the Orchestrator
+   */
   private static final DumperOptions dumperOptions;
 
   static {
@@ -83,22 +79,46 @@ public class BuilderService {
     dumperOptions.setCanonical(false);
   }
 
-  @Data
-  @AllArgsConstructor
-  @NoArgsConstructor
+  /**
+   * Describes the payload sent to the Orchestrator containing the TOSCA topology
+   * @author asalic
+   *
+   */
+  @Data @AllArgsConstructor @NoArgsConstructor
   public static class Deployment {
 
+    /**
+     * The textual representation of the TOSCA topology that will be sent to the Orchestrator
+     */
     private String template;
+    /**
+     * The inputs from the TOSCA topology
+     */
     private Map<String, Object> parameters;
+    /**
+     * The callback function used by the Orchestrator
+     */
     private String callback;
+    
+    /**
+     * Generates the text representation of the deployment of a topology as requested by the Orchestrator
+     * @return The payload that will be sent to the Orchestrator
+     * @throws JsonProcessingException
+     */
+    public String toOrchestratorString() throws JsonProcessingException {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.writeValueAsString(this).replace("\n", "\\n");
+    }
   }
   
+  /**
+   * Takes the A4C textual representation of the TOSCA topology and encodes (comments) the TOSCA methods as strings
+   * in order to be processed by YAML parser (which doesn't discern between a TOSCA method and a 
+   * a value)
+   * @param a4cTopologyYaml The A4C topology that can be seen in the A4C text TOSCA editor
+   * @return The A4C topology with the TOSCA methods commented
+   */
   public static String encodeTOSCAMethods(String a4cTopologyYaml) {
-    StringBuffer patternsMethods = new StringBuffer();
-    for (int idx=0; idx<TOSCA_METHODS.length; ++idx)
-      patternsMethods.append(TOSCA_METHODS[idx]).append("|");
-    patternsMethods.deleteCharAt(patternsMethods.length() - 1);
-
     StringBuffer newa4cTopologyYaml = new StringBuffer();
       Pattern p =
           Pattern.compile(
@@ -120,6 +140,15 @@ public class BuilderService {
     return newa4cTopologyYaml.toString();
   }
 
+  /**
+   * Converts the A4C topology to a modified version that the Orchestrator understands
+   * @param a4cTopologyYaml The A4C topology that can be seen in the A4C text TOSCA editor 
+   * @param importIndigoCustomTypes The path to the repository (file) containing the TOSCA
+   * types used by the Orchestrator
+   * @return The textual representation of the topology that will be sent to the Orchestrator
+   * @throws JsonProcessingException
+   * @throws IOException
+   */
   public static String getIndigoDCTopologyYaml(String a4cTopologyYaml, String importIndigoCustomTypes)
       throws JsonProcessingException, IOException {
     ObjectMapper mapper =
@@ -192,14 +221,19 @@ public class BuilderService {
       return null;
   }
 
-  public static String toscaMethodsStrToMethod(String a4cTopologyYaml) {
-    StringBuffer newa4cTopologyYaml = new StringBuffer();
+  /**
+   * Executes the uncomment of the TOSCA methods that where commented using {@link #encodeTOSCAMethods}
+   * @param topologyYaml The modified TOSCA topology that is accepted by the Orchestrator
+   * @return The textual representation of the TOSCA topology with uncommented TOSCA methods
+   */
+  public static String toscaMethodsStrToMethod(String topologyYaml) {
+    StringBuffer newTopologyYaml = new StringBuffer();
 
     Pattern p =
         Pattern.compile(
             "(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*[a-zA-Z_\\-0-9]+(\\s)*(:){1}(\\s)*(.?)+(\\s)*(\\}){1}(\\s)*(\\\"){1}");
 
-    Matcher m = p.matcher(a4cTopologyYaml);
+    Matcher m = p.matcher(topologyYaml);
     while (m.find()) {
       StringBuilder group = new StringBuilder(m.group());
       int pos = group.lastIndexOf("\"");
@@ -209,44 +243,42 @@ public class BuilderService {
       if (pos >= 0)
         group.replace(pos, pos + 1, "");
       m.appendReplacement(
-          newa4cTopologyYaml, group.toString().replaceAll("(\\n){0,1}(\\s)*(-){1}", ""));
+          newTopologyYaml, group.toString().replaceAll("(\\n){0,1}(\\s)*(-){1}", ""));
     }
-    m.appendTail(newa4cTopologyYaml);
+    m.appendTail(newTopologyYaml);
 
-    return newa4cTopologyYaml.toString();
-  }
-  
-  public static String deploymentToStr(Deployment d) throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    return mapper.writeValueAsString(d).replace("\n", "\\n");
+    return newTopologyYaml.toString();
   }
 
+  /**
+   * Creates the payload that will be sent to the Orchestrator
+   * @param deploymentContext The deployment object that represents the whole deployment process, including the TOSCA 
+   * topology represented as A4C Java classes 
+   * @param importIndigoCustomTypes The path to the repository (file) containing the TOSCA
+   * types used by the Orchestrator
+   * @return The textual representation of the topology that will be sent to the Orchestrator
+   * @throws IOException
+   */
   public String buildApp(PaaSTopologyDeploymentContext deploymentContext, String importIndigoCustomTypes)
       throws IOException {
     Deployment d = new Deployment();
     d.setParameters(getParameters(deploymentContext));
     d.setCallback("http://localhost:8080/callback");
-    String yamlIndigoDC = buildTemplate(deploymentContext, importIndigoCustomTypes);
-    d.setTemplate(yamlIndigoDC);
-
-    // .replace("\\\\\\", "\\");//.replaceAll("\"", "\\\"");
-    // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
-    // log.info("Yaml to be sent to the orchestrator: \n" + yamlApp);
-    return deploymentToStr(d);
-  }
-
-  public String buildTemplate(PaaSTopologyDeploymentContext deploymentContext, String importIndigoCustomTypes)
-      throws JsonProcessingException, IOException {
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
         exportService.getYaml(EditionContextManager.getCsar(), EditionContextManager.getTopology());
-    //
-
-    //log.info("+++++++++++++" + a4cTopologyYaml);
-
-    return getIndigoDCTopologyYaml(a4cTopologyYaml, importIndigoCustomTypes); // yaml.dump(t);
+    String yamlIndigoDC = getIndigoDCTopologyYaml(a4cTopologyYaml, importIndigoCustomTypes);
+    d.setTemplate(yamlIndigoDC);
+    return d.toOrchestratorString();
   }
 
+  /**
+   * Generates the parameters needed by the Orchestrator from the inputs found in the TOSCA topology generated by A4C
+   * @param deploymentContext The deployment object that represents the whole deployment process, including the TOSCA 
+   * topology represented as A4C Java classes 
+   * @return A map having the keys as the input name and the values as the corresponding A4C objects describing the
+   * TOSCA inputs
+   */
   public Map<String, Object> getParameters(PaaSTopologyDeploymentContext deploymentContext) {
     final Map<String, Object> params = new HashMap<>();
     Map<String, AbstractPropertyValue> vals =
@@ -259,56 +291,4 @@ public class BuilderService {
 
     return params;
   }
-
-  protected String buildOutputValue(String nodeName, String propertyName) {
-    return String.format("{ get_attribute: [ %s, %s ] }", nodeName, propertyName);
-  }
-
-  protected String buildOutputKey(String nodeName, String propertyName) {
-    String nodeName2 = nodeName.replaceAll(" ", "_");
-    String propertyName2 = propertyName.replaceAll(" ", "_");
-    return nodeName2 + "_" + propertyName2;
-  }
-
-  private static class MyRepresenter extends Representer {
-    //    @Override
-    //    protected Set<Property> getProperties(Class<? extends Object> type) throws
-    // IntrospectionException {
-    //        Set<Property> set = super.getProperties(type);
-    //        Set<Property> filtered = new LinkedHashSet<Property>();
-    //        if (type.equals(ScalarPropertyValue.class)) {
-    //            // filter properties
-    //            for (Property prop : set) {
-    //                String name = prop.getName();
-    //                if (!name.equals("value")) {
-    //                    filtered.add(prop);
-    //                } else {
-    //                  prop.set(, value);
-    //                }
-    //            }
-    //        } else {
-    //          for (Property prop : set) {
-    //            String name = prop.getName();
-    //                filtered.add(prop);
-    //          }
-    //        }
-    //        return filtered;
-    //    }
-  }
-  //
-  //  private static class MyPropertyUtils extends PropertyUtils {
-  //    @Override
-  //    protected Set<Property> createPropertySet(Class<? extends Object> type, BeanAccess bAccess)
-  //        throws IntrospectionException {
-  //    Set<Property> properties = new LinkedHashSet<Property>();
-  //    Collection<Property> props = getPropertiesMap(type, bAccess).values();
-  //    for (Property property : props) {
-  //        if (property.isReadable() && property.isWritable()) {
-  //            properties.add(property);
-  //        }
-  //    }
-  //    return properties;
-  // }
-  //  }
-
 }

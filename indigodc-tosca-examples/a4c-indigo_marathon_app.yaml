@@ -1,0 +1,53 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+metadata:
+  template_name: IndigoMarathonApp
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN20
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    num_cpus:
+      type: float
+      required: false
+      constraints:
+        - greater_or_equal: 0.0
+    mem_size:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+  node_templates:
+    docker_runtime:
+      metadata:
+        a4c_edit_x: 0
+        a4c_edit_y: "-14"
+      type: tosca.nodes.indigo.Container.Runtime.Docker
+      capabilities:
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus }
+            publish_all: false
+            volumes: 
+              - "{ concat: [ 'marathon:', get_input: data_path, ':rw:dvdi:rexray'] }"
+            mem_size: { get_input: mem_size }
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+    marathon_app:
+      type: tosca.nodes.indigo.Container.Application.Docker.Marathon
+      properties:
+        force_pull_image: true
+        labels: 
+          HAPROXY_GROUP: external
+        priviliged: false
+

@@ -20,15 +20,33 @@ import org.springframework.stereotype.Service;
 import okio.Buffer;
 import okio.ByteString;
 
+/**
+ * Creates the context needed to communicate with different servers over HTTPS using custom certificates.
+ * Some certificates may not be validaded automatically by the system, therefore we have to add them to
+ * the database manually. 
+ * We can also control what certificates are issued for a certain server 
+ * These are stored  in a {@link es.upv.indigodc.configuration.CloudConfiguration} instance.
+ * @author asalic
+ *
+ */
 @Service("ssl-context-builder")
 public final class SslContextBuilder {
   private final List<String> certificateBase64s = new ArrayList<String>();
 
+  /**
+   * Add a certificate to the current context
+   * @param certificateBase64 The certificate encoded in BASE64
+   * @return the instance of the builder that aggregated this certificate
+   */
   public SslContextBuilder addCertificate(String certificateBase64) {
     certificateBase64s.add(certificateBase64);
     return this;
   }
 
+  /**
+   * Create the context for the certificates added with {@link #addCertificate}
+   * @return the generated context with the custom certificates included
+   */
   public SSLContext build() {
     try {
       CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");

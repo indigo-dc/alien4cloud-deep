@@ -36,11 +36,17 @@ import es.upv.indigodc.service.BuilderService;
 import es.upv.indigodc.service.EventService;
 import es.upv.indigodc.service.MappingService;
 import es.upv.indigodc.service.OrchestratorConnector;
+import es.upv.indigodc.service.UserService;
 import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
 import es.upv.indigodc.service.model.OrchestratorIAMException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Exposes the methods that allow the operations with the Orchestrator
+ * @author asalic
+ *
+ */
 @Slf4j
 @Component("indigodc-orchestrator")
 @Scope("prototype")
@@ -48,26 +54,52 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
   public static String TYPE = "IndigoDC";
 
-
+  /**
+   * The configuration manager used to obtain the {@link es.upv.indigodc.configuration.CloudConfiguration}
+   * instance that holds the parameters of the plugin
+   */
   @Autowired
   @Qualifier("cloud-configuration-manager")
   private CloudConfigurationManager cloudConfigurationHolder;
 
+  /**
+   * The service that executes the HTTP(S) calls to the Orchestrator
+   */
   @Autowired
   @Qualifier("orchestrator-connector")
   private OrchestratorConnector orchestratorConnector;
 
+  /**
+   * The service that creates the payload (which includes the TOSCA topologies)
+   * that is sent to the Orchestrator using {@link #orchestratorConnector}
+   */
   @Autowired
   @Qualifier("builder-service")
   private BuilderService builderService;
 
+  /**
+   * Maintain the IDs of the launched topologies
+   */
   @Autowired
   @Qualifier("mapping-service")
   private MappingService mappingService;
 
+  /**
+   * Manages the instantiation of a new location configurator using a location type
+   */
   @Inject private LocationConfiguratorFactory locationConfiguratorFactory;
 
+  /**
+   * Manages the events produced by the Orchestrator
+   */
   @Inject private EventService eventService;
+
+  /**
+   * Manages the logged in user that executes this instance of service
+   */
+  @Autowired
+  private UserService userService;
+
 
   @Override
   public void init(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
@@ -91,11 +123,14 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             .getConfiguration(); // deploymentContext.getDeployment().getOrchestratorId();
 
     try {
-      final String yamlPaasTopology = builderService.buildApp(deploymentContext, 
+      final String yamlPaasTopology = builderService.buildApp(deploymentContext,
           cloudConfigurationHolder.getConfiguration().getImportIndigoCustomTypes());
       log.info("Topology: " + yamlPaasTopology);
       OrchestratorResponse response =
-          orchestratorConnector.callDeploy(configuration, yamlPaasTopology);
+          orchestratorConnector.callDeploy(configuration,
+              userService.getCurrentUser().getUsername(),
+              userService.getCurrentUser().getPlainPassword(),
+              yamlPaasTopology);
       final String orchestratorUUIDDeployment =
           OrchestratorConnector.getOrchestratorUUIDDeployment(response);
       log.info("uuid a4c: " + deploymentContext.getDeploymentPaaSId());
@@ -144,7 +179,9 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
         log.info("uuid: " + orchestratorUUIDDeployment);
         final OrchestratorResponse result =
-            orchestratorConnector.callUndeploy(configuration, orchestratorUUIDDeployment);
+            orchestratorConnector.callUndeploy(configuration,
+                userService.getCurrentUser().getUsername(),
+                userService.getCurrentUser().getPlainPassword(), orchestratorUUIDDeployment);
         mappingService.registerDeploymentInfo(
             orchestratorUUIDDeployment,
             deploymentContext.getDeploymentPaaSId(),
@@ -199,7 +236,9 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       final CloudConfiguration configuration = cloudConfigurationHolder.getConfiguration();
       try {
         OrchestratorResponse response =
-            orchestratorConnector.callDeploymentStatus(configuration, orchestratorUUIDDeployment);
+            orchestratorConnector.callDeploymentStatus(configuration,
+                userService.getCurrentUser().getUsername(),
+                userService.getCurrentUser().getPlainPassword(), orchestratorUUIDDeployment);
         Util.InstanceStatusInfo instanceStatusInfo =
             Util.indigoDCStatusToInstanceStatus(
                 OrchestratorConnector.getStatusTopologyDeployment(response).toUpperCase());
@@ -264,7 +303,9 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         final CloudConfiguration configuration = cloudConfigurationHolder.getConfiguration();
         try {
           OrchestratorResponse response =
-              orchestratorConnector.callDeploymentStatus(configuration, orchestratorUUIDDeployment);
+              orchestratorConnector.callDeploymentStatus(configuration,
+                  userService.getCurrentUser().getUsername(),
+                  userService.getCurrentUser().getPlainPassword(), orchestratorUUIDDeployment);
 
           callback.onSuccess(
               Util.indigoDCStatusToDeploymentStatus(

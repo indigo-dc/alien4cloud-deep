@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -68,18 +69,6 @@ public class OrchestratorConnector {
     }
   }
 
-  /** POST call to the DEEP infrastructure unique ID */
-  public static final int POST_CALL = 1;
-
-  /** GET call to the DEEP infrastructure unique ID */
-  public static final int GET_CALL = 2;
-
-  /** DELETE call to the DEEP infrastructure unique ID */
-  public static final int DELETE_CALL = 3;
-
-  /** PUT call to the DEEP infrastructure unique ID */
-  public static final int PUT_CALL = 4;
-
   /** Web service path for deployments operations; It is appended to the orchestrator endpoint */
   public static final String WS_PATH_DEPLOYMENTS = "/deployments";
 
@@ -96,22 +85,22 @@ public class OrchestratorConnector {
    * @throws NoSuchFieldException
    * @throws OrchestratorIAMException
    */
-  public AccessToken obtainAuthTokens(CloudConfiguration cloudConfiguration)
+  public AccessToken obtainAuthTokens(CloudConfiguration cloudConfiguration, String userName, String userPassword)
       throws IOException, NoSuchFieldException, OrchestratorIAMException {
 
     StringBuilder sbuf = new StringBuilder();
     sbuf.append("grant_type=password&");
     sbuf.append("client_id=").append(cloudConfiguration.getClientId()).append("&");
     sbuf.append("client_secret=").append(cloudConfiguration.getClientSecret()).append("&");
-    sbuf.append("username=").append(cloudConfiguration.getUser()).append("&");
-    sbuf.append("password=").append(cloudConfiguration.getPassword()).append("&");
+    sbuf.append("username=").append(userName).append("&");
+    sbuf.append("password=").append(userPassword).append("&");
     sbuf.append("scope=").append(cloudConfiguration.getClientScopes().replaceAll(" ", "%20"));
     URL requestURL = new URL(cloudConfiguration.getTokenEndpoint());
 
     AccessToken at = null;
     SSLContext sslContext = getSSLContext(cloudConfiguration);
     OrchestratorResponse r =
-        restCall(requestURL, sbuf.toString(), null, true, sslContext, GET_CALL);
+        restCall(requestURL, sbuf.toString(), null, true, sslContext, HttpMethod.GET);
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> map =
         mapper.readValue(r.getResponse().toString(), new TypeReference<Map<String, String>>() {});
@@ -132,10 +121,9 @@ public class OrchestratorConnector {
    * @throws NoSuchFieldException
    * @throws OrchestratorIAMException
    */
-  public OrchestratorResponse callGetDeployments(CloudConfiguration cloudConfiguration)
+  public OrchestratorResponse callGetDeployments(CloudConfiguration cloudConfiguration, String userName, String userPassword)
       throws IOException, NoSuchFieldException, OrchestratorIAMException {
-
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
+    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
     sbuf.append(WS_PATH_DEPLOYMENTS).append("?");
@@ -157,7 +145,7 @@ public class OrchestratorConnector {
         headers,
         isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
         sslContext,
-        GET_CALL);
+        HttpMethod.GET);
   }
 
   /**
@@ -173,10 +161,10 @@ public class OrchestratorConnector {
    * @throws NoSuchFieldException
    * @throws OrchestratorIAMException
    */
-  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, String yamlTopology)
+  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, String userName, String userPassword, String yamlTopology)
       throws IOException, NoSuchFieldException, OrchestratorIAMException {
     log.info("call Deploy");
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
+    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
     sbuf.append(WS_PATH_DEPLOYMENTS);
@@ -195,7 +183,7 @@ public class OrchestratorConnector {
         headers,
         isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
         sslContext,
-        POST_CALL);
+        HttpMethod.POST);
   }
 
   /**
@@ -209,10 +197,10 @@ public class OrchestratorConnector {
    * @throws OrchestratorIAMException
    */
   public OrchestratorResponse callDeploymentStatus(
-      CloudConfiguration cloudConfiguration, String deploymentId)
+      CloudConfiguration cloudConfiguration, String userName, String userPassword, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIAMException {
     log.info("call deployment status for UUID " + deploymentId);
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
+    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
     sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
@@ -231,7 +219,7 @@ public class OrchestratorConnector {
         headers,
         isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
         sslContext,
-        GET_CALL);
+        HttpMethod.GET);
   }
 
   /**
@@ -245,11 +233,11 @@ public class OrchestratorConnector {
    * @throws OrchestratorIAMException
    */
   public OrchestratorResponse callUndeploy(
-      CloudConfiguration cloudConfiguration, String deploymentId)
+      CloudConfiguration cloudConfiguration, String userName, String userPassword, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIAMException {
 
     log.info("call undeploy");
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration);
+    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
     sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
@@ -268,7 +256,7 @@ public class OrchestratorConnector {
         headers,
         isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
         sslContext,
-        DELETE_CALL);
+        HttpMethod.DELETE);
   }
 
   /**
@@ -292,7 +280,7 @@ public class OrchestratorConnector {
       Map<String, String> headers,
       boolean isSecured,
       SSLContext sslContext,
-      int requestType)
+      HttpMethod requestType)
       throws IOException, NoSuchFieldException, OrchestratorIAMException {
 
     URLConnection connection = null;
@@ -307,8 +295,8 @@ public class OrchestratorConnector {
 
     if (postData != null) {
 
-      if (isSecured) ((HttpsURLConnection) connection).setRequestMethod(getRequest(requestType));
-      else ((HttpURLConnection) connection).setRequestMethod(getRequest(requestType));
+      if (isSecured) ((HttpsURLConnection) connection).setRequestMethod(requestType.name());
+      else ((HttpURLConnection) connection).setRequestMethod(requestType.name());
       connection.setDoOutput(true);
       byte[] pd = postData.getBytes(StandardCharsets.UTF_8);
       int postDataLength = pd.length;
@@ -320,8 +308,8 @@ public class OrchestratorConnector {
       wr.write(pd);
       wr.close();
     } else {
-      if (isSecured) ((HttpsURLConnection) connection).setRequestMethod(getRequest(requestType));
-      else ((HttpURLConnection) connection).setRequestMethod(getRequest(requestType));
+      if (isSecured) ((HttpsURLConnection) connection).setRequestMethod(requestType.name());
+      else ((HttpURLConnection) connection).setRequestMethod(requestType.name());
     }
 
     int responseCode;
@@ -342,7 +330,7 @@ public class OrchestratorConnector {
       is = connection.getInputStream();
       StringBuilder response = getResponse(is);
       LOGGER.info("Response content: " + response);
-      return new OrchestratorResponse(responseCode, response);
+      return new OrchestratorResponse(responseCode, requestType, response);
     } else {
       if (isSecured) is = ((HttpsURLConnection) connection).getErrorStream();
       else is = ((HttpURLConnection) connection).getErrorStream();
@@ -402,23 +390,7 @@ public class OrchestratorConnector {
     sslContextBuilder.addCertificate(cloudConfiguration.getTokenEndpointCert());
     return sslContextBuilder.build();
   }
-
-  private String getRequest(int request) throws NoSuchFieldException {
-    switch (request) {
-      case POST_CALL:
-        return "POST";
-      case GET_CALL:
-        return "GET";
-      case PUT_CALL:
-        return "PUT";
-      case DELETE_CALL:
-        return "DELETE";
-      default:
-        throw new NoSuchFieldException(
-            "Unable to map to a JAVA request the request with type " + request);
-    }
-  }
-
+  
   /**
    * Check if the URL is secured
    *

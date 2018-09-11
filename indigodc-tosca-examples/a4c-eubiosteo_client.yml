@@ -1,0 +1,116 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+metadata:
+  template_name: EubiosteoClient
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN20
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    number_cpus:
+      type: integer
+      required: true
+      default: 1
+      description: "number of cpus required for the instance"
+    memory_size:
+      type: string
+      required: true
+      default: "1 GB"
+      description: "ram memory required for the instance"
+    location:
+      type: string
+      required: true
+      default: "/mnt/"
+      description: "mounting point for the container"
+    oneprovider_host:
+      type: string
+      required: true
+      default: "oprov01.ncg.ingrid.pt"
+      description: "IP of the oneprovider"
+    token:
+      type: string
+      required: true
+      default: MDAxNWxvY2F00aW9uIG9uZXpvbmUKMDAzYmlkZW500aWZpZXIgbTNXMHY4Wm5kejkyZWUyXzloYm1MOEtZbjJCSG1rTHBSYzAzUDA1dWZoWQowMDFhY2lkIHRpbWUgPCAxNTA3OTA2MjIzCjAwMmZzaWduYXR1cmUgi6Fk00k8Ga7QVxRxHO5j501XqBPFx02v011pKQE9ngO02IswK
+      description: "access token"
+  node_templates:
+    onedata_client_node:
+      metadata:
+        a4c_edit_x: "-5"
+        a4c_edit_y: "-22"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            image: "indigodatacloudapps/eubiosteo"
+            type: linux
+            distribution: ubuntu
+            version: 14.04
+        endpoint:
+          properties:
+            private_ip: true
+            ports: 
+              ssh_port: 
+                protocol: tcp
+                source: 22
+              oneclient_5555: 
+                protocol: tcp
+                source: 5555
+              oneclient_443: 
+                protocol: tcp
+                source: 443
+            protocol: tcp
+            secure: false
+            network_name: PUBLIC
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: number_cpus }
+            mem_size: { get_input: memory_size }
+    my_onedata_storage:
+      metadata:
+        a4c_edit_x: 233
+        a4c_edit_y: "-12"
+      type: tosca.nodes.indigo.OneDataStorage
+      properties:
+        oneprovider_host: 
+          - "\"oprov01.ncg.ingrid.pt\""
+        onezone_endpoint: "https://ozone01.ncg.ingrid.pt"
+        dataspace: 
+          - "\"EUBIOSTEO\""
+        credential: 
+          token_type: token
+          token: "{ get_input: token }"
+      requirements:
+        - attachToOnedataClientNodeAttach:
+            type_requirement: attachment
+            node: onedata_client_node
+            capability: tosca.capabilities.Attachment
+            relationship: tosca.relationships.AttachTo
+    Eubiosteo:
+      type: tosca.nodes.indigo.Eubiosteo
+      requirements:
+        - hostedOnOnedataClientNodeHost:
+            type_requirement: host
+            node: onedata_client_node
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+  outputs:
+    onedata_client_node_public_address:
+      value: { get_attribute: [ onedata_client_node, public_address ] }
+

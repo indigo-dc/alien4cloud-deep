@@ -1,0 +1,30 @@
+<div id="topology_validation" class="topology-editor topology-column-padding">
+  <div class="topology-row" style="padding-top: 20px;">
+    <div class="col-md-12">
+      <uib-tabset>
+        <uib-tab id="current-topology-tab">
+          <uib-tab-heading>
+            <i class="fa" ng-class="{'fa-check': editedTopologyValidationDTO.valid, 'fa-exclamation-triangle text-danger': !editedTopologyValidationDTO.valid}"></i>
+            <span> {{'EDITOR.VALIDATION.CURRENT_TOPOLOGY' | translate}}</span>
+          </uib-tab-heading>
+
+          <topology-validation-display
+            validation-dto="editedTopologyValidationDTO"
+            valid-message="APPLICATIONS.TOPOLOGY.TASK.VALIDATION_SUCCESS_CURRENT_TOPOLOGY"></topology-validation-display>
+        </uib-tab>
+
+        <uib-tab id="last-topology-tab">
+          <uib-tab-heading>
+            <i class="fa" ng-class= "{'fa-exclamation-triangle text-danger': !lastSavedTopologyValidationDto.valid , 'fa fa-check': lastSavedTopologyValidationDto.valid}"></i>
+            <span> {{'EDITOR.VALIDATION.LAST_SAVED_TOPOLOGY' | translate}}</span>
+          </uib-tab-heading>
+
+          <topology-validation-display
+            validation-dto="lastSavedTopologyValidationDto"
+            valid-message="APPLICATIONS.TOPOLOGY.TASK.VALIDATION_SUCCESS"></topology-validation-display>
+        </uib-tab>
+      </uib-tabset>
+    </div>
+
+  </div>
+</div>

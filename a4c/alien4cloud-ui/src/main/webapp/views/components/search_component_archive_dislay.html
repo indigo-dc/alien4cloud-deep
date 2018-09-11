@@ -1,0 +1,17 @@
+<div class="catalog-archive-info">
+  <div class="btn-group-vertical btn-group-xs btn-block">
+    <span class="btn btn-default btn-square disabled" uib-tooltip="{{component.archiveName}}" tooltip-placement="top" tooltip-append-to-body="true">
+      <i class="fa fa-archive"></i> {{component.archiveName | limitTo: 31 : -31 }}
+    </span>
+    <div class="btn-group btn-group-xs" uib-dropdown>
+      <button type="button" class="btn btn-default btn-square" uib-dropdown-toggle id="{{component.id}}_vfetch"
+        ng-click="fetchElementVersion(component, $event)">
+        {{component.selectedVersion}} <i class="fa fa-caret-down"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" ng-init="itemIdex = $index">
+        <li ng-if="!component.olderVersions" class="option-selected"><i class="fa fa-spin fa-spinner"></i> Loading...</li>
+        <li ng-repeat="olderVersion in component.olderVersions" class="option-selected"><a id="{{component.id}}_version_{{olderVersion}}" ng-click="selectVersion(component, olderVersion, itemIdex, $event)">{{olderVersion.version}}</a></li>
+      </ul>
+    </div>
+  </div>
+</div>

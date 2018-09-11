@@ -18,13 +18,28 @@ import alien4cloud.orchestrators.plugin.ILocationResourceAccessor;
 import alien4cloud.orchestrators.plugin.model.PluginArchive;
 import lombok.extern.slf4j.Slf4j;
 
+
+/**
+ * Factory used to create a location configurator for the plugin.
+ * Using this approach we can create multiple location by creating a configurator for each.
+ * @author asalic
+ *
+ */
 @Slf4j
 @Component
 @Scope("prototype")
 public class LocationConfiguratorFactory {
 
+  /**
+   * The context of the whole application
+   */
   @Inject private ApplicationContext applicationContext;
 
+  /**
+   * Generates a new instance for a location
+   * @param locationType RThe type of location to be generated
+   * @return The instance of the location
+   */
   public ILocationConfiguratorPlugin newInstance(String locationType) {
 
     if (LocationConfigurator.LOCATION_TYPE.equals(locationType)) {

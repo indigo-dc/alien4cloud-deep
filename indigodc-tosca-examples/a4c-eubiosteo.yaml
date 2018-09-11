@@ -1,0 +1,79 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+metadata:
+  template_name: Eubiosteo
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN20
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    number_cpus:
+      type: integer
+      required: false
+      default: 1
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    memory_size:
+      type: scalar-unit.size
+      required: false
+      default: "1 GB"
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+  node_templates:
+    eubiosteo_server:
+      metadata:
+        a4c_edit_x: "-15"
+        a4c_edit_y: "-28"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            image: "indigodatacloudapps/eubiosteo"
+            type: linux
+            distribution: ubuntu
+            version: 14.04
+        endpoint:
+          properties:
+            private_ip: true
+            ports: 
+              ssh_port: 
+                protocol: tcp
+                source: 22
+            protocol: tcp
+            secure: false
+            network_name: PUBLIC
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: number_cpus }
+            mem_size: { get_input: memory_size }
+    Eubiosteo:
+      type: tosca.nodes.indigo.Eubiosteo
+      requirements:
+        - hostedOnEubiosteoServerHost:
+            type_requirement: host
+            node: eubiosteo_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+  outputs:
+    eubiosteo_server_public_address:
+      value: { get_attribute: [ eubiosteo_server, public_address ] }
+

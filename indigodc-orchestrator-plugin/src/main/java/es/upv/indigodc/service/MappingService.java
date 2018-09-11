@@ -13,11 +13,18 @@ import es.upv.indigodc.service.model.AlienDeploymentMapping;
 import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Holds the relationships between different IDs of what was deployed
+ * @author asalic
+ *
+ */
 @Service("mapping-service")
 @Slf4j
 public class MappingService {
 
-  /** Map marathon deployment ids, which are ephemeral, to alien deployment ids */
+  /** 
+   * Map marathon deployment ids, which are ephemeral, to alien deployment ids 
+   * */
   private final Map<String, AlienDeploymentMapping> indigoDCToAlienDeploymentMap =
       Maps.newConcurrentMap();
 

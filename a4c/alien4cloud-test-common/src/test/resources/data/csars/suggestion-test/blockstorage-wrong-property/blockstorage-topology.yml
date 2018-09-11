@@ -1,0 +1,18 @@
+tosca_definitions_version: alien_dsl_1_3_0
+
+metadata:
+  template_name: BlockStorage
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: Alien4Cloud generated service template
+
+imports:
+  - tosca-normative-types:1.0.0-SNAPSHOT
+
+topology_template:
+  node_templates:
+    BlockStorage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        device: /DEV/VDB

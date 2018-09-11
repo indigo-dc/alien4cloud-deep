@@ -1,0 +1,225 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+metadata:
+  template_name: EubiosteoServer
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN20
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    fe_cpus:
+      type: integer
+      required: false
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    fe_mem:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+    wn_cpus:
+      type: integer
+      required: false
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    wn_mem:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+    wn_num:
+      type: integer
+      required: true
+      default: 1
+      description: "This property is used to indicate the maximum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator."
+  node_templates:
+    slurm_server:
+      metadata:
+        a4c_edit_x: 247
+        a4c_edit_y: "-10"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            image: "onecloud-linux-ubuntu-16.04.vmi"
+        endpoint:
+          properties:
+            dns_name: slurmserver
+            private_ip: true
+            ports: 
+              apiRest: 
+                protocol: tcp
+                source: 8080
+              oneclient_5555: 
+                protocol: tcp
+                source: 5555
+              oneclient_443: 
+                protocol: tcp
+                source: 443
+            protocol: tcp
+            secure: false
+            network_name: PUBLIC
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+    slurm_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.Slurm
+      properties:
+        wn_ips: 
+        hybrid: false
+      requirements:
+        - hostedOnSlurmServerHost:
+            type_requirement: host
+            node: slurm_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        lrms:
+          properties:
+            type: slurm
+    elastic_cluster_front_end:
+      metadata:
+        a4c_edit_x: 14
+        a4c_edit_y: "-5"
+      type: tosca.nodes.indigo.ElasticCluster
+      properties:
+        secret_token: "not_very_secret_token"
+        deployment_id: "orchestrator_deployment_id"
+        orchestrator_url: "http://orchestrator01-indigo.cloud.ba.infn.it:8080/orchestrator"
+        iam_access_token: "iam_access_token"
+        iam_clues_client_id: "iam_clues_client_id"
+        iam_clues_client_secret: "iam_clues_client_secret"
+        marathon_credentials: 
+          protocol: http
+          token_type: password
+          user: admin
+          token: password
+        chronos_credentials: 
+          protocol: http
+          token_type: password
+          user: admin
+          token: password
+        mesos_credentials: 
+          protocol: http
+          token_type: password
+          user: admin
+          token: password
+        hybrid: false
+      requirements:
+        - hostedOnSlurmFrontEndLrms:
+            type_requirement: lrms
+            node: slurm_front_end
+            capability: tosca.capabilities.indigo.LRMS.Slurm
+            relationship: tosca.relationships.HostedOn
+        - hostedOnSlurmServerHost:
+            type_requirement: host
+            node: slurm_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+        - managesSlurmWnScalable:
+            type_requirement: wn
+            node: slurm_wn
+            capability: tosca.capabilities.indigo.Scalable
+            relationship: tosca.relationships.indigo.Manages
+    slurm_wn:
+      metadata:
+        a4c_edit_x: "-21"
+        a4c_edit_y: "-10"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 2
+            default_instances: 1
+        os:
+          properties:
+            image: "onecloud-linux-ubuntu-16.04.vmi"
+        endpoint:
+          properties:
+            private_ip: true
+            ports: 
+              ssh_port: 
+                protocol: tcp
+                source: 22
+              oneclient_5555: 
+                protocol: tcp
+                source: 5555
+              oneclient_443: 
+                protocol: tcp
+                source: 443
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: wn_cpus }
+            mem_size: { get_input: wn_mem }
+    my_onedata_storage:
+      metadata:
+        a4c_edit_x: "-14"
+        a4c_edit_y: 139
+      type: tosca.nodes.indigo.OneDataStorage
+      properties:
+        oneprovider_host: 
+          - "\"oneprovider.cloud.cnaf.infn.it\""
+        onezone_endpoint: "https://onezone.cloud.cnaf.infn.it"
+        dataspace: 
+          - "\"galeno\""
+        credential: 
+          token_type: token
+          token: "{ get_input: token }"
+      requirements:
+        - attachToSlurmWnAttach:
+            type_requirement: attachment
+            node: slurm_wn
+            capability: tosca.capabilities.Attachment
+            relationship: tosca.relationships.AttachTo
+    wn_node:
+      type: tosca.nodes.indigo.LRMS.WorkerNode.Slurm
+      properties:
+        hybrid: false
+      requirements:
+        - hostedOnSlurmWnHost:
+            type_requirement: host
+            node: slurm_wn
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        wn:
+          properties:
+            min_instances: 1
+            max_instances: { get_input: wn_num }
+            default_instances: 1
+  outputs:
+    slurm_server_public_address:
+      value: { get_attribute: [ slurm_server, public_address ] }
+

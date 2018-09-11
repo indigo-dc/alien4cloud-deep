@@ -1,0 +1,22 @@
+tosca_definitions_version: alien_dsl_1_3_0
+
+metadata:
+  template_name: java-type
+  template_version: 2.0.0-SNAPSHOT
+  template_author: Test
+
+description: Test on artifact, the artifact type not exist
+
+imports:
+  - tosca-base-types:1.0
+
+node_types:
+  fastconnect.nodes.Java:
+    abstract: true
+    derived_from: tosca.nodes.SoftwareComponent
+    description: >
+      A Java Virtual Machine Software Component.
+    artifacts:
+      - config:
+          file: ./config/example.sh
+          type: tosca.artifacts.Failled

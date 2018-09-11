@@ -1,0 +1,162 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+metadata:
+  template_name: WebMysqlTosca
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN20
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    db_name:
+      type: string
+      required: true
+      description: "the logical name of the database"
+    mysql_root_password:
+      type: string
+      required: true
+    db_user:
+      type: string
+      required: false
+      description: "the optional user account name for DB administration"
+    db_password:
+      type: string
+      required: false
+      description: "the optional password for the DB user account"
+  node_templates:
+    db_server:
+      metadata:
+        a4c_edit_x: 21
+        a4c_edit_y: "-18"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            architecture: "x86_64"
+            type: linux
+            distribution: ubuntu
+        endpoint:
+          properties:
+            private_ip: true
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+        host:
+          properties:
+            num_cpus: 1
+            disk_size: "10 GB"
+            mem_size: "4 GB"
+    my_block_storage:
+      metadata:
+        a4c_edit_x: 443
+        a4c_edit_y: "-3"
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: "1 GB"
+    mysql:
+      type: tosca.nodes.DBMS.MySQL
+      properties:
+        port: 3306
+      requirements:
+        - hostedOnDbServerHost:
+            type_requirement: host
+            node: db_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+    test_db:
+      type: tosca.nodes.indigo.Database.MySQL
+      properties:
+        access_host: "%"
+        root_password: { get_input: mysql_root_password }
+        name: { get_input: db_name }
+        user: { get_input: db_user }
+        password: { get_input: db_password }
+      requirements:
+        - hostedOnMysqlHost:
+            type_requirement: host
+            node: mysql
+            capability: tosca.capabilities.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        database_endpoint:
+          properties:
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+    web_server:
+      metadata:
+        a4c_edit_x: 461
+        a4c_edit_y: 143
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            type: linux
+            distribution: ubuntu
+        endpoint:
+          properties:
+            private_ip: true
+            ports: 
+              https_port: 
+                protocol: tcp
+                source: 443
+              http_port: 
+                protocol: tcp
+                source: 80
+            protocol: tcp
+            secure: false
+            network_name: PUBLIC
+            initiator: source
+        host:
+          properties:
+            num_cpus: 1
+            mem_size: "1 GB"
+    apache:
+      type: tosca.nodes.WebServer.Apache
+      requirements:
+        - hostedOnWebServerHost:
+            type_requirement: host
+            node: web_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        data_endpoint:
+          properties:
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+        admin_endpoint:
+          properties:
+            secure: true
+            protocol: tcp
+            network_name: PRIVATE
+            initiator: source
+

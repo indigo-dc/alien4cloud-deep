@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mockito="http://www.mockito.org/spring/mockito"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+           http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="
+		alien4cloud.*,
+		org.alien4cloud.alm.*,
+		org.alien4cloud.tosca.*,
+		org.alien4cloud.secret.*,
+		org.alien4cloud.git,
+		org.alien4cloud.git.*,
+		org.elasticsearch.mapping">
+        <!-- alien4cloud.security.* to exclude ldap package is not working in component-scan -->
+        <context:exclude-filter type="regex" expression="alien4cloud\.ldap.*|alien4cloud\.initialization.*|alien4cloud\.webconfiguration.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.security.spring.SecurityConfiguration"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.plugin.PluginRestMapper"/>
+        <context:exclude-filter type="regex" expression="org.alien4cloud.tosca.editor.EditorStaticResourcesConfigurer"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.application.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.deployment.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.websocket.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.form.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.form.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.rest.internal.AlienMaintenanceController.*"/>
+        <context:exclude-filter type="regex" expression="org.alien4cloud.alm.deployment.*"/>
+        <context:exclude-filter type="regex" expression="alien4cloud.deployment.DeploymentTopologyDTOBuilder"/>
+    </context:component-scan>
+
+    <bean id="alienconfigFactory" class="alien4cloud.utils.AlienConfigFactory"/>
+    <bean id="alienconfig" factory-bean="alienconfigFactory" factory-method="get"/>
+    <alias name="alienconfig" alias="elasticsearchConfig"/>
+    <context:property-placeholder properties-ref="alienconfig"/>
+
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
+
+    <mockito:mock id="wstemplate" class="org.springframework.messaging.simp.SimpMessagingTemplate"/>
+
+    <mockito:mock id="requestMappingHandlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
+    <mockito:mock id="pluginmodifierregistry" class="org.alien4cloud.alm.deployment.configuration.flow.modifiers.PluginModifierRegistry"/>
+</beans>

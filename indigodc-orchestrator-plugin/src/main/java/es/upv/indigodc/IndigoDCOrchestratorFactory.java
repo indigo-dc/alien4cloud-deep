@@ -7,6 +7,7 @@ import java.util.Map;
 import org.alien4cloud.tosca.model.definitions.PropertyDefinition;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,8 +70,6 @@ public class IndigoDCOrchestratorFactory
               "oendpointCert",
               "iamhost",
               "iamhostCert",
-              "u",
-              "p",
               5,
               "https://raw.githubusercontent.com/indigo-dc/tosca-types/devel-deep/custom_types.yaml");
     }

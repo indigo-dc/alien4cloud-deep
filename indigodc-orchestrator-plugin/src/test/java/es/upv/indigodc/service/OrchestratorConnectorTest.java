@@ -19,6 +19,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import alien4cloud.security.model.User;
 import es.upv.indigodc.IndigoDCOrchestratorFactory;
 import es.upv.indigodc.TestBlockingServlet;
 import es.upv.indigodc.TestServer;
@@ -74,7 +76,9 @@ public class OrchestratorConnectorTest {
           OrchestratorIAMException {
     OrchestratorConnector oc = new OrchestratorConnector();
     CloudConfiguration cc = TestUtil.getRealConfiguration(null);
-    AccessToken at = oc.obtainAuthTokens(cc);
+
+    User user = TestUtil.getTestUser();
+    AccessToken at = oc.obtainAuthTokens(cc, user.getUsername(), user.getPassword());
     assertEquals(true, at.getAccessToken() != null);
   }
 
@@ -101,7 +105,8 @@ public class OrchestratorConnectorTest {
     // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
     // log.info("call to be sent to the orchestrator: \n" + callJson);
     CloudConfiguration cc = TestUtil.getRealConfiguration(null);
-    OrchestratorResponse or = oc.callDeploy(cc, callJson);
+    User user = TestUtil.getTestUser();
+    OrchestratorResponse or = oc.callDeploy(cc, user.getUsername(), user.getPassword(), callJson);
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
     JsonNode root = objectMapper.readTree(or.getResponse().toString());
@@ -115,15 +120,15 @@ public class OrchestratorConnectorTest {
     assertEquals(true, vals.size() >= 1);
 
     // now let us see the status
-    or = oc.callDeploymentStatus(cc, uuid);
+    or = oc.callDeploymentStatus(cc, user.getUsername(), user.getPassword(), uuid);
     log.info("Deployment status is: " + or.getResponse().toString());
 
     // now let us undeploy
-    or = oc.callUndeploy(cc, uuid);
+    or = oc.callUndeploy(cc, user.getUsername(), user.getPassword(), uuid);
     assertEquals(204, or.getCode());
 
     // now let us see the status
-    or = oc.callDeploymentStatus(cc, uuid);
+    or = oc.callDeploymentStatus(cc, user.getUsername(), user.getPassword(), uuid);
     log.info("Deployment status is: " + or.getResponse().toString());
   }
 
@@ -139,12 +144,13 @@ public class OrchestratorConnectorTest {
         new TestBlockingServlet(
             TestBlockingServlet.CONTENT_TYPE_JSON,
             200,
-            om.writeValueAsString(new OrchestratorResponse(1, new StringBuilder("none")))));
+            om.writeValueAsString(new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("none")))));
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     log.info(cc.getTokenEndpoint());
     OrchestratorConnector oc = new OrchestratorConnector();
-    OrchestratorResponse or = oc.callDeploy(cc, "{\"response\": 1}");
+    User user = TestUtil.getTestUser();
+    OrchestratorResponse or = oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
     testServer.stop();
   }
 }

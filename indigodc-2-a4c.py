@@ -55,5 +55,6 @@ for i, (key, value) in enumerate(tosca["node_types"].items()):
 tosca["metadata"] = {"template_name": "indigo-types",
 	"template_version": "1.0.0",
 	"template_author": "indigo"}
+tosca["description"] = "Contains the types definition as currently supported by the IndigoDC Orchestrator"
 tosca["imports"] = ["tosca-normative-types:1.0.0-ALIEN20"]
 print(yaml.dump(tosca, default_flow_style=False))

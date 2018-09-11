@@ -1,0 +1,30 @@
+tosca_definitions_version: alien_dsl_1_3_0
+
+metadata:
+  template_name: topology-capacility-prop
+  template_version: 1.1.0-SNAPSHOT
+  template_author: FastConnect
+
+description: TOSCA simple profile with Apache.
+
+imports:
+  - "tosca-base-types:1.0"
+
+topology_template:
+  description: A simple topology template created directly from a CSAR archive
+  inputs:
+    an_input:
+      type: string
+  node_templates:
+    compute1:
+      type: tosca.nodes.Compute
+      capabilities:
+        compute:
+          properties:
+            containee_types: something
+    compute2:
+      type: tosca.nodes.Compute
+      capabilities:
+        compute:
+          properties:
+            containee_types: { get_input: an_input }

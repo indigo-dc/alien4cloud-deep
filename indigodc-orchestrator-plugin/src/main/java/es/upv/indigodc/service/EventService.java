@@ -36,6 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class EventService {
+  
+
+  @Autowired
+  private UserService userService;
 
   @Autowired
   @Qualifier("orchestrator-connector")
@@ -51,7 +55,7 @@ public class EventService {
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     executor.scheduleWithFixedDelay(
-        new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue),
+        new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue, userService),
         0,
         cc.getOrchestratorPollInterval(),
         TimeUnit.SECONDS);
@@ -86,20 +90,26 @@ public class EventService {
     private Queue<AbstractMonitorEvent> eventQueue;
 
     private MappingService mappingService;
+    
+    private UserService userService;
 
     public OrchestratorPollRunnable(
         OrchestratorConnector orchestratorConnector,
         final CloudConfiguration cc,
-        Queue<AbstractMonitorEvent> eventQueue) {
+        Queue<AbstractMonitorEvent> eventQueue, 
+        UserService userService) {
       this.orchestratorConnector = orchestratorConnector;
       this.cc = cc;
       this.eventQueue = eventQueue;
+      this.userService = userService;
     }
 
     @Override
     public void run() {
       try {
-        OrchestratorResponse response = orchestratorConnector.callGetDeployments(cc);
+        OrchestratorResponse response = orchestratorConnector.callGetDeployments(cc, 
+            userService.getCurrentUser().getUsername(),
+            userService.getCurrentUser().getPassword());
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         JsonNode root = objectMapper.readTree(response.getResponse().toString());

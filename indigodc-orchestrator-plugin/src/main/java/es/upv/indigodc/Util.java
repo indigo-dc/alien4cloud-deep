@@ -22,11 +22,22 @@ import lombok.Setter;
  */
 public class Util {
 
+  /**
+   * Store A4C status {@link alien4cloud.paas.model.InstanceStatus} and the Orchestrator state of the instance
+   * @author asalic
+   *
+   */
   @Getter
   @Setter
   @AllArgsConstructor
   public static class InstanceStatusInfo {
+    /**
+     * The A4C instance status
+     */
     protected InstanceStatus instanceStatus;
+    /**
+     * The Orchestrator instance state
+     */
     protected String state;
   }
 
@@ -49,7 +60,7 @@ public class Util {
    * @throws IOException
    */
   public static DeploymentStatus indigoDCStatusToDeploymentStatus(final String status)
-      throws JsonProcessingException, IOException {
+      throws NotFoundException {
     switch (status) {
       case "UNKNOWN":
         return DeploymentStatus.UNKNOWN;

@@ -1,0 +1,23 @@
+tosca_definitions_version: alien_dsl_1_3_0
+
+metadata:
+  template_name: topology-groups-unknown-policy
+  template_version: 1.0.0-SNAPSHOT
+  template_author: FastConnect
+
+description: define groups with ha policies
+
+imports:
+  - "tosca-base-types:1.0"
+
+topology_template:
+  node_templates:
+    compute1:
+      type: tosca.nodes.Compute
+  groups:
+    compute_scaling_group:
+      members: [ compute1 ]
+      policies:
+        - name: my_scaling_ha_policy
+          # tosca.policy.unknown doesn't exist
+          type: tosca.policy.unknown

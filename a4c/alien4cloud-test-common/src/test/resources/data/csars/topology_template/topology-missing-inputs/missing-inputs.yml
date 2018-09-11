@@ -1,0 +1,30 @@
+tosca_definitions_version: alien_dsl_1_3_0
+
+metadata:
+  template_name: apache-type
+  template_version: 1.1.0-SNAPSHOT
+  template_author: FastConnect
+
+description: TOSCA simple profile with on a topology.
+
+imports:
+  - "tosca-base-types:1.0"
+
+topology_template:
+  inputs:
+    linux_type:
+      type: string
+      default: linux
+    size:
+      type: scalar-unit.size
+      required: true
+      default: 30 GiB
+  node_templates:
+    compute:
+      type: tosca.nodes.Compute
+      properties:
+        # incorrect get_input for os_type and os_arch
+        os_type: { get_input: linux_type }
+        os_distribution: { get_input: toto }
+        os_version: 14.10
+        os_arch: { get_input: greatsize }

@@ -1,0 +1,74 @@
+<div class="{{classes}}" ng-class="{'col-md-12': !classes}">
+  <div class="content-head" ng-class="{'clickable': collapsable}" ng-click=" collapsable && (isoutputsCollapsed = !isoutputsCollapsed)">
+    <span>
+      <i class="fa fa-sign-out"> </i> {{'APPLICATIONS.TOPOLOGY.PROPERTIES_OUTPUTS' | translate}}
+    </span>
+    <!-- <span style="margin-left: 2em">
+      {{ 'APPLICATIONS.DEPLOYMENT.VERSION' | translate }}:
+      <i class="text-primary">{{(environment.deployedVersion | idToVersion) || 'N/A'}}</i>
+    </span> -->
+    <i ng-if="collapsable" class="fa" ng-class="{'fa-caret-down' : !isoutputsCollapsed, 'fa-caret-right': isoutputsCollapsed}"></i>
+  </div>
+  <div uib-collapse="isoutputsCollapsed" class="content-body">
+    <span ng-if="isEmptyOutpts()" class="empty-place-holder" style="padding: 0px">{{'APPLICATIONS.TOPOLOGY.NO_OUTPUTS' | translate}}</span>
+    <table ng-if="!isEmptyOutpts()" class="table table-condensed" id="outputPropertiesTable">
+      <tr ng-repeat="nodeId in outputNodes" ng-if="somethingToDisplay(nodeId)">
+        <td>
+          <span>{{nodeId}}</span>
+        </td>
+        <td>
+          <ul>
+            <!--Nodes Output properties list -->
+            <li ng-if="outputPropertiesSize > 0 && outputPropertiesValue[nodeId]">
+              <strong>{{ 'COMMON.PROPERTIES' | translate }}</strong>
+              <ul>
+                <li ng-repeat="(outputPropertyKey, outputPropertyValue) in outputPropertiesValue[nodeId]">
+                  {{outputPropertyKey}} :
+                  <span ng-if="outputPropertyValue.value" class="text-primary" id="property-{{nodeId}}-{{outputPropertyKey}}" ng-bind-html="outputPropertyValue.value | linky:'_blank'"></span>
+                  <em class="text-primary" ng-if="!outputPropertyValue.value">N/A</em>
+                </li>
+              </ul>
+            </li>
+
+            <!-- capabilities output properties list -->
+            <li ng-repeat="(capabilityId, outputCapabilityPropertyValue) in outputCapabilityPropertiesValue[nodeId]">
+              <strong>{{ 'COMMON.CAPABILITIES' | translate }} :</strong>
+              <ul>
+                <li><strong>{{capabilityId}} :</strong>
+                  <ul>
+                    <li><strong>{{ 'COMMON.PROPERTIES' | translate }} :</strong>
+                      <ul>
+                        <li ng-repeat="(propertyId, propertyValue) in outputCapabilityPropertiesValue[nodeId][capabilityId]">
+                          {{propertyId}} :
+                          <span ng-if="propertyValue.value" class="text-primary" id="property-{{nodeId}}-{{outputPropertyKey}}" ng-bind-html="propertyValue.value | linky:'_blank'"></span>
+                          <em class="text-primary" ng-if="!propertyValue.value">N/A</em>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+
+            <!-- Output attributes list -->
+            <li ng-if="outputAttributesSize > 0 && outputAttributesValue[nodeId]">
+              <strong>{{ 'COMMON.ATTRIBUTES' | translate }}</strong>
+              <ul>
+                <li ng-repeat="(instanceId, instanceAttributes) in outputAttributesValue[nodeId]">
+                  {{'INSTANCE' | translate}} {{instanceId}}
+                  <ul>
+                    <li ng-repeat="(outputAttributeKey, outputAttributeValue) in instanceAttributes">
+                      {{outputAttributeKey}} :
+                      <span ng-if="outputAttributeValue" class="text-primary" id="attribute-{{nodeId}}-{{instanceId}}-{{outputAttributeKey}}" ng-bind-html="outputAttributeValue | linky:'_blank'"></span>
+                      <em class="text-primary" ng-if="!outputAttributeValue">N/A</em>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+tosca_definitions_version: alien_dsl_1_3_0
+
+metadata:
+  template_name: Relationship
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: Alien4Cloud generated service template
+
+imports:
+  - tosca-normative-types:1.0.0-SNAPSHOT
+  - Relationship-type:0.1.0-SNAPSHOT
+
+node_types:
+
+  alien.test.Software:
+    derived_from: tosca.nodes.SoftwareComponent
+    requirements:
+      - host:
+          capability: tosca.capabilities.Container
+          relationship: alien.test.SoftwareHostedOnCompute
+          occurrences: [1,1]
+
+topology_template:
+
+  node_templates:
+
+    Compute:
+      type: tosca.nodes.Compute
+
+    Software:
+      type: alien.test.Software
+      requirements:
+        - host:
+            node: Compute
+            properties:
+              install_dir: /opt/software2

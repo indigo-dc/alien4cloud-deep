@@ -1,0 +1,225 @@
+tosca_definitions_version: alien_dsl_2_0_0
+
+metadata:
+  template_name: GalaxyCluster
+  template_version: 0.1.0-SNAPSHOT
+  template_author: admin
+
+description: ""
+
+imports:
+  - tosca-normative-types:1.0.0-ALIEN20
+  - indigo-types:1.0.0
+
+topology_template:
+  inputs:
+    wn_num:
+      type: integer
+      required: false
+      default: 1
+      description: "the number of resources"
+    wn_mem:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+    wn_cpus:
+      type: integer
+      required: false
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    export_dir:
+      type: string
+      required: true
+      default: "/export"
+      description: "path to store galaxy data"
+    fe_cpus:
+      type: integer
+      required: false
+      constraints:
+        - greater_or_equal: 1
+      description: "Number of (actual or virtual) CPUs associated with the Compute node."
+    fe_mem:
+      type: scalar-unit.size
+      required: false
+      constraints:
+        - greater_or_equal: 0 MB
+      description: "Size of memory available to applications running on the Compute node (default unit is MB)."
+    hybrid:
+      type: boolean
+      required: false
+      default: false
+      description: "Flag to specify that this WorkerNode will work in a hybrid environment"
+    admin_email:
+      type: string
+      required: false
+      default: "admin@admin.com"
+      description: "email of the admin user"
+    admin_api_key:
+      type: string
+      required: false
+      default: "not_very_secret_api_key"
+      description: "key to access the API with admin role"
+    version:
+      type: string
+      required: false
+      default: master
+      description: "galaxy version to install"
+    instance_description:
+      type: string
+      required: true
+      default: "INDIGO Galaxy test"
+      description: "galaxy instance description"
+    instance_key_pub:
+      type: string
+      required: true
+      default: "your_ssh_public_key"
+      description: "galaxy instance ssh public key"
+  node_templates:
+    lrms_wn:
+      metadata:
+        a4c_edit_x: "-348"
+        a4c_edit_y: "-83"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: { get_input: wn_num }
+            default_instances: 1
+        os:
+          properties:
+            image: "linux-ubuntu-16.04-vmi"
+        endpoint:
+          properties:
+            private_ip: true
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: wn_cpus }
+            mem_size: { get_input: wn_mem }
+    galaxy_wn:
+      type: tosca.nodes.indigo.GalaxyWN
+      properties:
+        export_dir: { get_input: export_dir }
+      requirements:
+        - hostedOnLrmsWnHost:
+            type_requirement: host
+            node: lrms_wn
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+    lrms_server:
+      metadata:
+        a4c_edit_x: "-90"
+        a4c_edit_y: "-86"
+      type: tosca.nodes.indigo.Compute
+      properties:
+        zabbix_server: "orchestrator.cloud.cnaf.infn.it"
+        zabbix_server_port: 10051
+        zabbix_server_metadata: "Linux      668c875e-9a39-4dc0-a710-17c41376c1e0"
+      capabilities:
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            count: 1
+            default_instances: 1
+        os:
+          properties:
+            image: "linux-ubuntu-16.04-vmi"
+        endpoint:
+          properties:
+            dns_name: slurmserver
+            private_ip: true
+            ports: 
+              ftp_port: 
+                protocol: tcp
+                source: 21
+              http_port: 
+                protocol: tcp
+                source: 80
+            protocol: tcp
+            secure: false
+            network_name: PUBLIC
+            initiator: source
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+    wn_node:
+      type: tosca.nodes.indigo.LRMS.WorkerNode.Slurm
+      properties:
+        hybrid: { get_input: hybrid }
+      requirements:
+        - hostedOnLrmsWnHost:
+            type_requirement: host
+            node: lrms_wn
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        wn:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+    lrms_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.Slurm
+      properties:
+        wn_ips: 
+        hybrid: { get_input: hybrid }
+      requirements:
+        - hostedOnLrmsServerHost:
+            type_requirement: host
+            node: lrms_server
+            capability: tosca.capabilities.indigo.Container
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        lrms:
+          properties:
+            type: slurm
+    galaxy_portal:
+      metadata:
+        a4c_edit_x: 42
+        a4c_edit_y: 80
+      type: tosca.nodes.indigo.GalaxyPortal
+      properties:
+        admin_email: { get_input: admin_email }
+        admin_api_key: { get_input: admin_api_key }
+        user: galaxy
+        install_path: "/home/galaxy/galaxy"
+        export_dir: { get_input: export_dir }
+        version: { get_input: version }
+        instance_description: { get_input: instance_description }
+        instance_key_pub: { get_input: instance_key_pub }
+        flavor: "galaxy-no-tools"
+        reference_data: true
+      requirements:
+        - hostedOnLrmsFrontEndLrms:
+            type_requirement: lrms
+            node: lrms_front_end
+            capability: tosca.capabilities.indigo.LRMS.Slurm
+            relationship: tosca.relationships.HostedOn
+      capabilities:
+        data_endpoint:
+          properties:
+            protocol: tcp
+            secure: false
+            network_name: PRIVATE
+            initiator: source
+        admin_endpoint:
+          properties:
+            secure: true
+            protocol: tcp
+            network_name: PRIVATE
+            initiator: source
+

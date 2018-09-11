@@ -2,9 +2,17 @@ package es.upv.indigodc.service;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Maintains a list of supported TOSCA types by the plugin
+ * @author asalic
+ *
+ */
 @Service
 public class ArtifactRegistryService {
 
+  /**
+   * The list of supported TOSCA types
+   */
   private static String[] SUPPORTED_TOSCA_TYPES = {
     //      "alien.nodes.LinuxFileSystem",
     //      "tosca.nodes.BlockStorage",

@@ -1,0 +1,17 @@
+<div class="content-head-error">
+  <span>{{'APPLICATIONS.TOPOLOGY.TASK.INPUT_ARTIFACT.LABEL' | translate}}</span>
+</div>
+<div class="content-body">
+  <table class="table table-condensed">
+      <tbody>
+      <tr ng-repeat="task in tasks">
+          <td>
+              <strong>{{task.inputArtifactName}}</strong>
+          </td>
+          <td>
+              {{'APPLICATIONS.TOPOLOGY.TASK.ARTIFACT.ERRORS.' + task.artifactTaskCode | translate }}
+          </td>
+      </tr>
+      </tbody>
+  </table>
+</div>
