@@ -144,7 +144,7 @@ public class OrchestratorConnectorTest {
         new TestBlockingServlet(
             TestBlockingServlet.CONTENT_TYPE_JSON,
             200,
-            om.writeValueAsString(new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("none")))));
+            om.writeValueAsString(new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     log.info(cc.getTokenEndpoint());

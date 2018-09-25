@@ -63,6 +63,7 @@ public final class SslContextBuilder {
             (X509Certificate)
                 certificateFactory.generateCertificate(certificateBuffer.inputStream());
         keyStore.setCertificateEntry(Integer.toString(nextName++), certificate);
+        certificateBuffer.close();
       }
 
       // Create an SSL context that uses these certificates as its trust store.

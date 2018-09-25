@@ -26,9 +26,12 @@ import lombok.ToString;
   "clientId",
   "clientSecret",
   "tokenEndpoint",
+  "tokenEndpointCert",
   "clientScopes",
   "orchestratorEndpoint",
+  "orchestratorEndpointCert",
   "iamHost",
+  "iamHostCert",
   "orchestratorPollInterval",
   "importIndigoCustomTypes"
 })

@@ -79,7 +79,7 @@ public class ArtifactProcessorService {
             artifact.setArtifactPath(artifactRepository.resolveFile(artifact.getArtifactRef()).toString());
             return;
         }
-        URL artifactURL = null;
+        /*URL artifactURL = null;
         if (artifact.getRepositoryName() == null) {
             // Short notation
             try {
@@ -114,8 +114,8 @@ public class ArtifactProcessorService {
         }
         if (log.isDebugEnabled()) {
             log.debug("Remote artifact from {} resolved to {}", artifact.getArtifactRef(), artifactPath);
-        }
-        artifact.setArtifactPath(artifactPath);
+        }*/
+        artifact.setArtifactPath("");//artifactPath);
     }
 
     private void processInterfaces(Map<String, Interface> interfaceMap) {

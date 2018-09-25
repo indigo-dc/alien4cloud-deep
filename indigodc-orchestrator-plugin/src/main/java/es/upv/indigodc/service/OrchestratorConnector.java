@@ -128,12 +128,14 @@ public class OrchestratorConnector {
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
     sbuf.append(WS_PATH_DEPLOYMENTS).append("?");
     sbuf.append("createdBy=")
-        .append(URLEncoder.encode(cloudConfiguration.getClientId(), "UTF-8"))
-        .append(URLEncoder.encode("@", "UTF-8"))
-        .append(URLEncoder.encode(cloudConfiguration.getIamHost(), "UTF-8"));
+        .append(URLEncoder.encode("me", "UTF-8"))
+        //.append(URLEncoder.encode("@", "UTF-8"))
+        //.append(URLEncoder.encode(cloudConfiguration.getIamHost(), "UTF-8"))
+        ;
 
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
+    headers.put("Content-Type", "application/json");
     headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
 
     URL requestURL = new URL(sbuf.toString());

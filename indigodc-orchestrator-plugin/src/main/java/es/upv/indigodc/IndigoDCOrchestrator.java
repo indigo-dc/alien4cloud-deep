@@ -103,7 +103,9 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
   @Override
   public void init(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
-    mappingService.init(activeDeployments.values());
+	 if (activeDeployments != null) {
+		 mappingService.init(activeDeployments.values());
+	 }
   }
 
   @Override
@@ -121,6 +123,7 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     CloudConfiguration configuration =
         cloudConfigurationHolder
             .getConfiguration(); // deploymentContext.getDeployment().getOrchestratorId();
+    String a4cUUIDDeployment = deploymentContext.getDeployment().getId();
 
     try {
       final String yamlPaasTopology = builderService.buildApp(deploymentContext,
@@ -133,13 +136,14 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
               yamlPaasTopology);
       final String orchestratorUUIDDeployment =
           OrchestratorConnector.getOrchestratorUUIDDeployment(response);
-      log.info("uuid a4c: " + deploymentContext.getDeploymentPaaSId());
+      log.info("uuid a4c: " + a4cUUIDDeployment);
       log.info("uuid orchestrator: " + orchestratorUUIDDeployment);
       mappingService.registerDeploymentInfo(
           orchestratorUUIDDeployment,
-          deploymentContext.getDeploymentPaaSId(),
+          a4cUUIDDeployment,
           deploymentContext.getDeployment().getOrchestratorId(),
           DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
+      //eventService.subscribe(configuration);
       callback.onSuccess(null);
     } catch (NoSuchFieldException e) {
       callback.onFailure(e);
@@ -169,14 +173,14 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     final CloudConfiguration configuration =
         cloudConfigurationHolder
             .getConfiguration(); // deploymentContext.getDeployment().getOrchestratorId();
-
+    String a4cUUIDDeployment = deploymentContext.getDeployment().getId();
     try {
-      if (mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId()) != null) {
+      if (mappingService.getByAlienDeploymentId(a4cUUIDDeployment) != null) {
         final String orchestratorUUIDDeployment =
             mappingService
-                .getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId())
+                .getByAlienDeploymentId(a4cUUIDDeployment)
                 .getOrchestratorUUIDDeployment();
-        log.info("Deployment paas id: " + deploymentContext.getDeploymentPaaSId());
+        log.info("Deployment paas id: " + a4cUUIDDeployment);
         log.info("uuid: " + orchestratorUUIDDeployment);
         final OrchestratorResponse result =
             orchestratorConnector.callUndeploy(configuration,
@@ -184,9 +188,11 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
                 userService.getCurrentUser().getPlainPassword(), orchestratorUUIDDeployment);
         mappingService.registerDeploymentInfo(
             orchestratorUUIDDeployment,
-            deploymentContext.getDeploymentPaaSId(),
+            a4cUUIDDeployment,
             deploymentContext.getDeployment().getOrchestratorId(),
             DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
+
+        //eventService.unsubscribe();
       }
       callback.onSuccess(null);
     } catch (IOException e) {
@@ -211,7 +217,7 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   public void getEventsSince(
       Date date, int maxEvents, IPaaSCallback<AbstractMonitorEvent[]> eventCallback) {
     eventCallback.onSuccess(eventService.flushEvents(date, maxEvents));
-    // log.info("call getEventsSince");
+    //log.info("call getEventsSince");
 
   }
 
@@ -220,13 +226,16 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       PaaSTopologyDeploymentContext deploymentContext,
       IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback) {
     log.info("call getInstancesInformation");
+    String a4cUUIDDeployment = deploymentContext.getDeployment().getId();
+
+    //deploymentContext.getDeploymentTopology().get
     final Map<String, Map<String, InstanceInformation>> topologyInfo = new HashMap<>();
     final Map<String, String> runtimeProps = new HashMap<>();
     final Map<String, InstanceInformation> instancesInfo = new HashMap<>();
     final String groupID = deploymentContext.getDeploymentPaaSId();
+    //final String 
     final OrchestratorDeploymentMapping indigoDCDeploymentMapping =
-        mappingService.getByAlienDeploymentId(deploymentContext.getDeployment().getId());
-    final String a4cUUIDDeployment = deploymentContext.getDeployment().getId();
+        mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentTopology().getId());
 
     if (indigoDCDeploymentMapping != null) {
       final String orchestratorUUIDDeployment =
@@ -243,13 +252,16 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             Util.indigoDCStatusToInstanceStatus(
                 OrchestratorConnector.getStatusTopologyDeployment(response).toUpperCase());
 
+//        Map<String, String> outputs = new HashMap<>();
+//        outputs.put("Compute_public_address", "none");
         final InstanceInformation instanceInformation =
             new InstanceInformation(
                 instanceStatusInfo.getState(),
                 instanceStatusInfo.getInstanceStatus(),
                 runtimeProps,
                 runtimeProps,
-                new HashMap<>());
+                //outputs);
+                response.getOutputs());
         instancesInfo.put(a4cUUIDDeployment, instanceInformation);
         topologyInfo.put(groupID, instancesInfo);
         callback.onSuccess(topologyInfo);
@@ -294,8 +306,10 @@ public class IndigoDCOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   public void getStatus(
       PaaSDeploymentContext deploymentContext, IPaaSCallback<DeploymentStatus> callback) {
     log.info("call get status");
+    String a4cUUIDDeployment = deploymentContext.getDeployment().getId();
+
     final OrchestratorDeploymentMapping indigoDCDeploymentMapping =
-        mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentPaaSId());
+        mappingService.getByAlienDeploymentId(a4cUUIDDeployment);
     if (indigoDCDeploymentMapping != null) {
       final String orchestratorUUIDDeployment =
           indigoDCDeploymentMapping.getOrchestratorUUIDDeployment();
