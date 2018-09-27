@@ -281,17 +281,17 @@ This section contains the information necessary for the user to use an already d
 We consider that the administrator(s) followed the guidelines from the previous section to set up a Docker container ready to be used.
 Please contact your administrator if you encounter any problem.
 
-We also strongly recommend to read the official guide available at [{2}](#{2}).
+We also strongly recommend to read the official guide available at [[Res2]](#res2).
 We try to summarize the steps in the following sub-sections.
 
 ### Registration
 
 Alien4Cloud can only be used by registered users.
-Before anything, please be sure that you have an account registered with [{1}](#{1}).
+Before anything, please be sure that you have an account registered with [[Res1]](#res1).
 
 ### Login
 
-You have to use the user name and password as entered during the registration process on [{1}](#{1}).
+You have to use the user name and password as entered during the registration process on [[Res1]](#res1).
 Alien4Cloud cannot be used without login.
 Once you logged in successfully, you can access different parts of the web platform.
 We use rights associated with each user, therefore it may be possible that you can't perform some actions (e.g. add new TOSCA custom types in the catalog).
@@ -379,8 +379,8 @@ Thanks for help go to:
 
 ## Resources
 
-#### {1} 
+#### [Res1] 
 IAM authentication portal: https://iam.deep-hybrid-datacloud.eu
 
-#### {2}
+#### [Res2]
 Alien4Cloud Official Documentation: https://alien4cloud.github.io/
