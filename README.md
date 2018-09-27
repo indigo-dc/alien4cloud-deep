@@ -272,7 +272,7 @@ We require a minimum of 70% overall coverage by unit tests. When the plugin is b
 
 #### Style
 
-The A4C orchestrator plugin's Java code must respect the Google Java formatting style [Res6](#res6).
+The A4C orchestrator plugin's Java code must respect the Google Java formatting style [[Res6]](#res6).
 
 We use checkstyle with Maven, as a plugin. This way we can rest assured that the committed code, that passes the continuous integration testing, respects the required formatting. The building process fails when warnings are encountered. We use the oficial checkstyle repository [[Res7]](#res7) to obtain a stable version of _com.puppycrawl.tools.checkstyle_ dependency of the _org.apache.maven.plugins.maven-checkstyle-plugin_ plugin. The checkstyle team includes a formatter ready to be used that respects Google's rules.
 
