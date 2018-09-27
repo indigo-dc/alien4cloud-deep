@@ -379,6 +379,8 @@ Thanks for help go to:
 
 ## Resources
 
-(#{1}) - IAM authentication portal: https://iam.deep-hybrid-datacloud.eu
+#### {1} 
+IAM authentication portal: https://iam.deep-hybrid-datacloud.eu
 
-(#{2}) - Alien4Cloud Official Documentation: https://alien4cloud.github.io/
+#### {2}
+Alien4Cloud Official Documentation: https://alien4cloud.github.io/
