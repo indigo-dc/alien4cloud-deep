@@ -1,30 +1,28 @@
 package es.upv.indigodc;
 
+import alien4cloud.model.orchestrators.ArtifactSupport;
+import alien4cloud.model.orchestrators.locations.LocationSupport;
+import alien4cloud.orchestrators.plugin.IOrchestratorPluginFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
+import es.upv.indigodc.configuration.CloudConfiguration;
+import es.upv.indigodc.location.LocationConfigurator;
+import es.upv.indigodc.service.ArtifactRegistryService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 import org.alien4cloud.tosca.model.definitions.PropertyDefinition;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
-
-import alien4cloud.model.orchestrators.ArtifactSupport;
-import alien4cloud.model.orchestrators.locations.LocationSupport;
-import alien4cloud.orchestrators.plugin.IOrchestratorPluginFactory;
-import es.upv.indigodc.configuration.CloudConfiguration;
-import es.upv.indigodc.location.LocationConfigurator;
-import es.upv.indigodc.service.ArtifactRegistryService;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component("indigodc-orchestrator-factory")
-public class IndigoDCOrchestratorFactory
-    implements IOrchestratorPluginFactory<IndigoDCOrchestrator, CloudConfiguration> {
+public class IndigoDcOrchestratorFactory
+    implements IOrchestratorPluginFactory<IndigoDcOrchestrator, CloudConfiguration> {
 
   public static final String CLOUD_CONFIGURATION_DEFAULTS_FILE =
       "/provider/cloud_conf_default.json";
@@ -34,7 +32,7 @@ public class IndigoDCOrchestratorFactory
   @Autowired private ArtifactRegistryService artifactRegistryService;
 
   @Override
-  public void destroy(IndigoDCOrchestrator arg0) {
+  public void destroy(IndigoDcOrchestrator arg0) {
     // TODO Auto-generated method stub
   }
 
@@ -52,7 +50,7 @@ public class IndigoDCOrchestratorFactory
   public CloudConfiguration getDefaultConfiguration() {
     ObjectMapper mapper = new ObjectMapper();
     InputStream is =
-        IndigoDCOrchestratorFactory.class.getResourceAsStream(CLOUD_CONFIGURATION_DEFAULTS_FILE);
+        IndigoDcOrchestratorFactory.class.getResourceAsStream(CLOUD_CONFIGURATION_DEFAULTS_FILE);
     CloudConfiguration c;
     try {
       c = mapper.readValue(is, CloudConfiguration.class);
@@ -88,12 +86,11 @@ public class IndigoDCOrchestratorFactory
 
   @Override
   public String getType() {
-    return IndigoDCOrchestrator.TYPE;
+    return IndigoDcOrchestrator.TYPE;
   }
 
   @Override
-  public IndigoDCOrchestrator newInstance() {
-    // log.warn("***************************************************************IndigoDCOrchestrator.newInstance");
-    return beanFactory.getBean(IndigoDCOrchestrator.class);
+  public IndigoDcOrchestrator newInstance() {
+    return beanFactory.getBean(IndigoDcOrchestrator.class);
   }
 }

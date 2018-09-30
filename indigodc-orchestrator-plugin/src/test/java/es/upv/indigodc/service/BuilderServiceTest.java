@@ -2,6 +2,9 @@ package es.upv.indigodc.service;
 
 import static org.junit.Assert.assertEquals;
 
+import es.upv.indigodc.IndigoDcOrchestrator;
+import es.upv.indigodc.TestUtil;
+import es.upv.indigodc.configuration.CloudConfiguration;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,14 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import lombok.extern.slf4j.Slf4j;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
-import es.upv.indigodc.IndigoDCOrchestrator;
-import es.upv.indigodc.TestUtil;
-import es.upv.indigodc.configuration.CloudConfiguration;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class BuilderServiceTest {
@@ -38,8 +37,9 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
-        cc.getImportIndigoCustomTypes()));
+    assertEquals(
+        yamlIndigoDC,
+        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -52,8 +52,9 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
-        cc.getImportIndigoCustomTypes()));
+    assertEquals(
+        yamlIndigoDC,
+        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -67,8 +68,9 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
-        cc.getImportIndigoCustomTypes()));
+    assertEquals(
+        yamlIndigoDC,
+        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -80,45 +82,62 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
-        cc.getImportIndigoCustomTypes()));
+    assertEquals(
+        yamlIndigoDC,
+        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
-  
+
   @Test
   public void rmEmptyNullPropertiesNodes() throws URISyntaxException, IOException {
-    URL url = BuilderServiceTest.class.getClassLoader().getResource("test_empty_null_property_rm_a4c.yaml");
+    URL url =
+        BuilderServiceTest.class
+            .getClassLoader()
+            .getResource("test_empty_null_property_rm_a4c.yaml");
     String yamlA4c =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    url = BuilderServiceTest.class.getClassLoader().getResource("test_empty_null_property_rm_orchestrator.yaml");
+    url =
+        BuilderServiceTest.class
+            .getClassLoader()
+            .getResource("test_empty_null_property_rm_orchestrator.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
-        cc.getImportIndigoCustomTypes()));
+    assertEquals(
+        yamlIndigoDC,
+        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
-  
+
   @Test
-  public void rmEmptyNullPropertiesNodesAndRmEmptyProperties() throws URISyntaxException, IOException {
-    URL url = BuilderServiceTest.class.getClassLoader().getResource("test_empty_null_property_rm_properties_rm_a4c.yaml");
+  public void rmEmptyNullPropertiesNodesAndRmEmptyProperties()
+      throws URISyntaxException, IOException {
+    URL url =
+        BuilderServiceTest.class
+            .getClassLoader()
+            .getResource("test_empty_null_property_rm_properties_rm_a4c.yaml");
     String yamlA4c =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    url = BuilderServiceTest.class.getClassLoader().getResource("test_empty_null_property_rm_properties_rm_orchestrator.yaml");
+    url =
+        BuilderServiceTest.class
+            .getClassLoader()
+            .getResource("test_empty_null_property_rm_properties_rm_orchestrator.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(yamlIndigoDC, BuilderService.getIndigoDCTopologyYaml(yamlA4c,
-        cc.getImportIndigoCustomTypes()));
+    assertEquals(
+        yamlIndigoDC,
+        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
-  
+
   @Test
   public void quoteAllToscaMethods() throws URISyntaxException, IOException {
-    URL url = BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_in.yaml");
+    URL url =
+        BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_in.yaml");
     String yamlA4c =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    url = BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_out.yaml");
+    url =
+        BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_out.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.encodeTOSCAMethods(yamlA4c));
+    assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
   }
-  
 }

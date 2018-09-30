@@ -1,5 +1,16 @@
 package es.upv.indigodc.service;
 
+import alien4cloud.paas.model.AbstractMonitorEvent;
+import alien4cloud.paas.model.PaaSDeploymentStatusMonitorEvent;
+import alien4cloud.security.model.User;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import es.upv.indigodc.Util;
+import es.upv.indigodc.configuration.CloudConfiguration;
+import es.upv.indigodc.service.model.AlienDeploymentMapping;
+import es.upv.indigodc.service.model.OrchestratorIamException;
+import es.upv.indigodc.service.model.OrchestratorResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -11,33 +22,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import alien4cloud.paas.model.AbstractMonitorEvent;
-import alien4cloud.paas.model.PaaSDeploymentStatusMonitorEvent;
-import alien4cloud.security.model.User;
-import es.upv.indigodc.configuration.CloudConfiguration;
-import es.upv.indigodc.service.model.AlienDeploymentMapping;
-import es.upv.indigodc.service.model.OrchestratorIAMException;
-import es.upv.indigodc.service.model.OrchestratorResponse;
-import es.upv.indigodc.Util;
-import lombok.extern.slf4j.Slf4j;
-
 @Service
 @Slf4j
 public class EventService {
-  
+
   public static final int EVENT_QUEUE_MAX_SIZE = 1000;
 
-  @Autowired
-  private UserService userService;
+  @Autowired private UserService userService;
 
   @Autowired
   @Qualifier("orchestrator-connector")
@@ -50,18 +47,25 @@ public class EventService {
   private final Queue<AbstractMonitorEvent> eventQueue = new ConcurrentLinkedQueue<>();
   private ScheduledExecutorService executor;
 
+  /**
+   * Subscribe to the event service that loads the events from the orchestrator by polling it every
+   * X seconds.
+   *
+   * @param cc the cloud configuration used for the orchestrator instance
+   */
   public void subscribe(CloudConfiguration cc) {
-//	  if (executor != null)
-//		  executor.shutdown();
-//    executor = Executors.newScheduledThreadPool(1);
-//
-//    executor.scheduleWithFixedDelay(
-//        new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue, userService.getCurrentUser()),
-//        0,
-//        cc.getOrchestratorPollInterval(),
-//        TimeUnit.SECONDS);
+    //	  if (executor != null)
+    //		  executor.shutdown();
+    //    executor = Executors.newScheduledThreadPool(1);
+    //
+    //    executor.scheduleWithFixedDelay(
+    //        new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue,
+    // userService.getCurrentUser()),
+    //        0,
+    //        cc.getOrchestratorPollInterval(),
+    //        TimeUnit.SECONDS);
   }
-  
+
   public void unsubscribe() {
     executor.shutdown();
     eventQueue.clear();
@@ -82,7 +86,7 @@ public class EventService {
       e = eventQueue.poll();
     }
     //// It doesn matter if we lose some stats
-    //eventQueue.clear();
+    // eventQueue.clear();
     return events.toArray(new AbstractMonitorEvent[events.size()]);
   }
 
@@ -95,13 +99,13 @@ public class EventService {
     private Queue<AbstractMonitorEvent> eventQueue;
 
     private MappingService mappingService;
-    
+
     private User user;
 
     public OrchestratorPollRunnable(
         OrchestratorConnector orchestratorConnector,
         final CloudConfiguration cc,
-        Queue<AbstractMonitorEvent> eventQueue, 
+        Queue<AbstractMonitorEvent> eventQueue,
         User user) {
       this.orchestratorConnector = orchestratorConnector;
       this.cc = cc;
@@ -113,24 +117,24 @@ public class EventService {
     public void run() {
       log.info("Event Service get deployments");
       try {
-        OrchestratorResponse response = orchestratorConnector.callGetDeployments(cc, 
-            user.getUsername(),
-            user.getPlainPassword());
-        if (response.isCodeOK()) {
+        OrchestratorResponse response =
+            orchestratorConnector.callGetDeployments(
+                cc, user.getUsername(), user.getPlainPassword());
+        if (response.isCodeOk()) {
           ObjectMapper objectMapper = new ObjectMapper();
           objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
           JsonNode root = objectMapper.readTree(response.getResponse().toString());
-        
+
           List<JsonNode> deployments = root.findValues("content");
           // For each deployment, add its status to the list
           for (JsonNode jsonNode : deployments) {
             PaaSDeploymentStatusMonitorEvent statusEv = new PaaSDeploymentStatusMonitorEvent();
             statusEv.setDeploymentStatus(
-                Util.indigoDCStatusToDeploymentStatus(jsonNode.findValue("status").get(0).asText()));
-            String orchestratorDeploymentUUID = 
-                jsonNode.findValue("uuid").get(0).asText();
+                Util.indigoDcStatusToDeploymentStatus(
+                    jsonNode.findValue("status").get(0).asText()));
+            String orchestratorDeploymentUuid = jsonNode.findValue("uuid").get(0).asText();
             AlienDeploymentMapping alienDeploymentMapping =
-                mappingService.getByOrchestratorUUIDDeployment(orchestratorDeploymentUUID);
+                mappingService.getByOrchestratorUuidDeployment(orchestratorDeploymentUuid);
             if (alienDeploymentMapping != null) {
               statusEv.setDeploymentId(alienDeploymentMapping.getDeploymentId());
               statusEv.setOrchestratorId(alienDeploymentMapping.getOrchetratorId());
@@ -139,10 +143,13 @@ public class EventService {
                   LocalDateTime.parse(jsonNode.findValue("updateTime").get(0).asText())
                       .toInstant(ZoneOffset.ofTotalSeconds(0))
                       .toEpochMilli());
-              if (eventQueue.size() < EVENT_QUEUE_MAX_SIZE)
+              if (eventQueue.size() < EVENT_QUEUE_MAX_SIZE) {
                 eventQueue.add(statusEv);
+              }
             } else {
-              log.warn(String.format("Deployment with ID %s not found in the A4C DB", orchestratorDeploymentUUID));
+              log.warn(
+                  String.format(
+                      "Deployment with ID %s not found in the A4C DB", orchestratorDeploymentUuid));
             }
           }
         } else {
@@ -161,7 +168,7 @@ public class EventService {
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } catch (OrchestratorIAMException e) {
+      } catch (OrchestratorIamException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (Error | Exception e) {

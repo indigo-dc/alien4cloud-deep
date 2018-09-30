@@ -22,9 +22,9 @@ public class TestUtil {
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
     if (fileNameResource == null)
-      fileNameResource = IndigoDCOrchestratorFactory.CLOUD_CONFIGURATION_DEFAULTS_FILE;
+      fileNameResource = IndigoDcOrchestratorFactory.CLOUD_CONFIGURATION_DEFAULTS_FILE;
     InputStream is =
-        IndigoDCOrchestratorFactory.class.getResourceAsStream(fileNameResource);
+        IndigoDcOrchestratorFactory.class.getResourceAsStream(fileNameResource);
     return mapper.readValue(is, CloudConfiguration.class);
   }
   

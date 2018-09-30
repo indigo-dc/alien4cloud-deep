@@ -1,6 +1,9 @@
 package alien4cloud.exception;
 
-public class NotFoundException extends TechnicalException {
+public class 
+import alien4cloud.exception.NotFoundException;
+import alien4cloud.paas.model.DeploymentStatus;
+import alien4cloud.paas.model.InstanceStatus; extends TechnicalException {
     private static final long serialVersionUID = -5838741067731786413L;
     /** Type of the element not found. */
     private String type;

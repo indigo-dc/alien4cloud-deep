@@ -1,48 +1,43 @@
 package es.upv.indigodc;
 
-import java.io.IOException;
+import alien4cloud.paas.model.DeploymentStatus;
+import alien4cloud.paas.model.InstanceStatus;
+
+import es.upv.indigodc.service.model.StatusNotFoundException;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import alien4cloud.exception.NotFoundException;
-import alien4cloud.paas.model.DeploymentStatus;
-import alien4cloud.paas.model.InstanceStatus;
-import es.upv.indigodc.service.OrchestratorConnector;
-import es.upv.indigodc.service.model.OrchestratorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Util class containing methods used in different components
- * @author asalic
+ * Util class containing methods used in different components.
  *
+ * @author asalic
  */
 public class Util {
 
   /**
-   * Store A4C status {@link alien4cloud.paas.model.InstanceStatus} and the Orchestrator state of the instance
-   * @author asalic
+   * Store A4C status {@link alien4cloud.paas.model.InstanceStatus} and the Orchestrator state of
+   * the instance.
    *
+   * @author asalic
    */
   @Getter
   @Setter
   @AllArgsConstructor
   public static class InstanceStatusInfo {
-    /**
-     * The A4C instance status
-     */
+    /** The A4C instance status. */
     protected InstanceStatus instanceStatus;
-    /**
-     * The Orchestrator instance state
-     */
+    /** The Orchestrator instance state . */
     protected String state;
   }
 
   /**
-   * Transform a Throwable to string
+   * Transform a Throwable to string.
+   *
    * @param e the Throwable to be transformed
    * @return the Throwable in String format
    */
@@ -53,14 +48,15 @@ public class Util {
   }
 
   /**
-   * Converts the status of a deployment on the IndigoDataCloud Orchestrator to the ALien4Cloud deployment status
+   * Converts the status of a deployment on the IndigoDataCloud Orchestrator to the ALien4Cloud
+   * deployment status.
+   *
    * @param status the IndigoDataCloud Orchestrator deployment status
    * @return the ALien4Cloud deployment status
-   * @throws JsonProcessingException
-   * @throws IOException
+   * @throws StatusNotFoundException when the orchestrator status cannot be mapped to A4C
    */
-  public static DeploymentStatus indigoDCStatusToDeploymentStatus(final String status)
-      throws NotFoundException {
+  public static DeploymentStatus indigoDcStatusToDeploymentStatus(final String status)
+      throws StatusNotFoundException {
     switch (status) {
       case "UNKNOWN":
         return DeploymentStatus.UNKNOWN;
@@ -83,20 +79,20 @@ public class Util {
       case "UPDATE_IN_PROGRESS":
         return DeploymentStatus.UPDATE_IN_PROGRESS;
       default:
-        throw new NotFoundException("Status \"" + status + "\" not supported yet");
+        throw new StatusNotFoundException(status);
     }
   }
 
   /**
-   * Converts the status of an instance of a node on the IndigoDataCloud Orchestrator to 
-   * the ALien4Cloud instance of a node status
+   * Converts the status of an instance of a node on the IndigoDataCloud Orchestrator to the
+   * ALien4Cloud instance of a node status.
+   *
    * @param status the IndigoDataCloud Orchestrator status
-   * @return the ALien4Cloud status
-   * @throws JsonProcessingException
-   * @throws IOException
+   * @return the Alien4Cloud status
+   * @throws StatusNotFoundException when the orchestrator status cannot be mapped to A4C
    */
-  public static InstanceStatusInfo indigoDCStatusToInstanceStatus(final String status)
-      throws JsonProcessingException, IOException {
+  public static InstanceStatusInfo indigoDcStatusToInstanceStatus(final String status)
+      throws StatusNotFoundException {
     switch (status) {
       case "UNKNOWN":
         return new InstanceStatusInfo(InstanceStatus.FAILURE, "UNKNOWN");
@@ -119,7 +115,7 @@ public class Util {
       case "UPDATE_IN_PROGRESS":
         return new InstanceStatusInfo(InstanceStatus.PROCESSING, "UPDATE_IN_PROGRESS");
       default:
-        throw new NotFoundException("Status \"" + status + "\" not supported yet");
+        throw new StatusNotFoundException(status);
     }
   }
 }

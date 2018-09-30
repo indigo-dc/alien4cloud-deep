@@ -2,6 +2,22 @@ package es.upv.indigodc.service;
 
 import static org.junit.Assert.assertEquals;
 
+import alien4cloud.security.model.User;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import es.upv.indigodc.IndigoDcOrchestratorFactory;
+import es.upv.indigodc.TestBlockingServlet;
+import es.upv.indigodc.TestServer;
+import es.upv.indigodc.TestUtil;
+import es.upv.indigodc.configuration.CloudConfiguration;
+import es.upv.indigodc.service.BuilderService.Deployment;
+import es.upv.indigodc.service.OrchestratorConnector.AccessToken;
+import es.upv.indigodc.service.model.OrchestratorIamException;
+import es.upv.indigodc.service.model.OrchestratorResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -21,23 +38,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.http.HttpMethod;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import alien4cloud.security.model.User;
-import es.upv.indigodc.IndigoDCOrchestratorFactory;
-import es.upv.indigodc.TestBlockingServlet;
-import es.upv.indigodc.TestServer;
-import es.upv.indigodc.TestUtil;
-import es.upv.indigodc.configuration.CloudConfiguration;
-import es.upv.indigodc.service.BuilderService.Deployment;
-import es.upv.indigodc.service.OrchestratorConnector.AccessToken;
-import es.upv.indigodc.service.model.OrchestratorIAMException;
-import es.upv.indigodc.service.model.OrchestratorResponse;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OrchestratorConnectorTest {
@@ -66,14 +66,16 @@ public class OrchestratorConnectorTest {
 
   @After
   public void end() throws Exception {
-    if (testServer.isStarted()) testServer.stop();
+    if (testServer.isStarted()) {
+      testServer.stop();
+    }
   }
 
   @Ignore("Test is ignored because it overstretches the orchestrator")
   @Test
   public void testLoginWithProductionInfo()
       throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
-          OrchestratorIAMException {
+          OrchestratorIamException {
     OrchestratorConnector oc = new OrchestratorConnector();
     CloudConfiguration cc = TestUtil.getRealConfiguration(null);
 
@@ -86,7 +88,7 @@ public class OrchestratorConnectorTest {
   @Test
   public void deployUndeployProductionAuthSingleToscaCompute()
       throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
-          OrchestratorIAMException {
+      OrchestratorIamException {
     OrchestratorConnector oc = new OrchestratorConnector();
 
     URL url =
@@ -144,13 +146,15 @@ public class OrchestratorConnectorTest {
         new TestBlockingServlet(
             TestBlockingServlet.CONTENT_TYPE_JSON,
             200,
-            om.writeValueAsString(new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
+            om.writeValueAsString(
+                new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     log.info(cc.getTokenEndpoint());
     OrchestratorConnector oc = new OrchestratorConnector();
     User user = TestUtil.getTestUser();
-    OrchestratorResponse or = oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
+    OrchestratorResponse or =
+        oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
     testServer.stop();
   }
 }

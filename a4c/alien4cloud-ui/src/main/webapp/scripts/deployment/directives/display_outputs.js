@@ -51,13 +51,13 @@ define(function (require) {
           _.forEach(scope.outputAttributes[nodeId], function(outputAttr){
             scope.outputAttributesValue[nodeId][instanceId][outputAttr] = _.get(instanceInfo.attributes, outputAttr);
           });
-          if (_.isEmpty(scope.outputAttributesValue[nodeId][instanceId])) {
-            delete scope.outputAttributesValue[nodeId][instanceId];
-          }
+//          if (_.isEmpty(scope.outputAttributesValue[nodeId][instanceId])) {
+//            delete scope.outputAttributesValue[nodeId][instanceId];
+//          }
         });
-        if (_.isEmpty(scope.outputAttributesValue[nodeId])) {
-          delete scope.outputAttributesValue[nodeId];
-        }
+//        if (_.isEmpty(scope.outputAttributesValue[nodeId])) {
+//          delete scope.outputAttributesValue[nodeId];
+//        }
       });
     }
 
@@ -76,6 +76,8 @@ define(function (require) {
           _.keys(scope.outputCapabilityProperties),
           _.keys(scope.outputAttributes)
         );
+    	console.log("processOutputsDef scope: ");
+    	console.dir(scope);
       }
     }
 
@@ -108,8 +110,9 @@ define(function (require) {
         };
 
         scope.somethingToDisplay = function(nodeId) {
-          var nodeIds = _.union(_.keys(scope.outputAttributesValue), _.keys(scope.outputPropertiesValue), _.keys(scope.outputCapabilityPropertiesValue));
-          return _.include(nodeIds, nodeId);
+          var nodeIds = _.union(_.keys(scope.outputAttributesValue), 
+        		  _.keys(scope.outputPropertiesValue), _.keys(scope.outputCapabilityPropertiesValue));
+          return true;//_.include(nodeIds, nodeId);
         };
 
       }

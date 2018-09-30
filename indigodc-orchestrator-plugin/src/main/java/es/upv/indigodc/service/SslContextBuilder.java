@@ -3,38 +3,34 @@ package es.upv.indigodc.service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import okio.Buffer;
 import okio.ByteString;
 
+import org.springframework.stereotype.Service;
+
+
 /**
- * Creates the context needed to communicate with different servers over HTTPS using custom certificates.
- * Some certificates may not be validaded automatically by the system, therefore we have to add them to
- * the database manually. 
- * We can also control what certificates are issued for a certain server 
- * These are stored  in a {@link es.upv.indigodc.configuration.CloudConfiguration} instance.
- * @author asalic
+ * Creates the context needed to communicate with different servers over HTTPS using custom
+ * certificates. Some certificates may not be validaded automatically by the system, therefore we
+ * have to add them to the database manually. We can also control what certificates are issued for a
+ * certain server These are stored in a {@link es.upv.indigodc.configuration.CloudConfiguration}
+ * instance.
  *
+ * @author asalic
  */
 @Service("ssl-context-builder")
 public final class SslContextBuilder {
   private final List<String> certificateBase64s = new ArrayList<String>();
 
   /**
-   * Add a certificate to the current context
+   * Add a certificate to the current context.
+   *
    * @param certificateBase64 The certificate encoded in BASE64
    * @return the instance of the builder that aggregated this certificate
    */
@@ -44,7 +40,8 @@ public final class SslContextBuilder {
   }
 
   /**
-   * Create the context for the certificates added with {@link #addCertificate}
+   * Create the context for the certificates added with {@link #addCertificate}.
+   *
    * @return the generated context with the custom certificates included
    */
   public SSLContext build() {
