@@ -87,4 +87,6 @@ ENTRYPOINT mkdir -p ${A4C_VOLUME_DIR} \
   && chown -R ${A4C_USER}:${A4C_USER} "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
   # Start a4c as user not root
   && cd "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
+  # But first flush the buffers to avoid /usr/bin/env: bad interpreter: Text file busy
+  && sync \
   && su ${A4C_USER} -s /bin/bash -c '"${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud.sh"'
