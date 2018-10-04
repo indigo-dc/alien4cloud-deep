@@ -63,7 +63,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
    */
   @Autowired
   @Qualifier("cloud-configuration-manager")
-  private CloudConfigurationManager cloudConfigurationHolder;
+  private CloudConfigurationManager cloudConfigurationManager;
 
   /** The service that executes the HTTP(S) calls to the Orchestrator. */
   @Autowired
@@ -105,22 +105,21 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     if (configuration == null) {
       throw new PluginConfigurationException("Configuration must not be null");
     }
-    cloudConfigurationHolder.setConfiguration(configuration);
-    cloudConfigurationHolder.setOrchestratorId(orchestratorId);
+    cloudConfigurationManager.addCloudConfiguration(orchestratorId, configuration);
   }
 
   @Override
   public void deploy(PaaSTopologyDeploymentContext deploymentContext, IPaaSCallback<?> callback) {
     CloudConfiguration configuration =
-        cloudConfigurationHolder
-            .getConfiguration(); // deploymentContext.getDeployment().getOrchestratorId();
+        cloudConfigurationManager
+            .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
     String a4cUuidDeployment = deploymentContext.getDeployment().getId();
 
     try {
       final String yamlPaasTopology =
           builderService.buildApp(
-              deploymentContext,
-              cloudConfigurationHolder.getConfiguration().getImportIndigoCustomTypes());
+              deploymentContext, configuration.getImportIndigoCustomTypes());
+      log.info("Deploying on: " + configuration.getOrchestratorEndpoint());
       log.info("Topology: " + yamlPaasTopology);
       OrchestratorResponse response =
           orchestratorConnector.callDeploy(
@@ -165,8 +164,8 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   @Override
   public void undeploy(PaaSDeploymentContext deploymentContext, IPaaSCallback<?> callback) {
     final CloudConfiguration configuration =
-        cloudConfigurationHolder
-            .getConfiguration(); // deploymentContext.getDeployment().getOrchestratorId();
+        cloudConfigurationManager
+            .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
     String a4cUuidDeployment = deploymentContext.getDeployment().getId();
     try {
       if (mappingService.getByAlienDeploymentId(a4cUuidDeployment) != null) {
@@ -238,7 +237,9 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
           orchestratorDeploymentMapping
               .getOrchestratorUuidDeployment(); // .getDeploymentId();//.getDeploymentPaaSId();
 
-      final CloudConfiguration configuration = cloudConfigurationHolder.getConfiguration();
+      final CloudConfiguration configuration =
+    	        cloudConfigurationManager
+                .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
       try {
         OrchestratorResponse response =
             orchestratorConnector.callDeploymentStatus(
@@ -316,7 +317,9 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       final String orchestratorUuidDeployment =
           orchestratorDeploymentMapping.getOrchestratorUuidDeployment();
       if (orchestratorUuidDeployment != null) {
-        final CloudConfiguration configuration = cloudConfigurationHolder.getConfiguration();
+        final CloudConfiguration configuration = 
+                cloudConfigurationManager
+                .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
         try {
           OrchestratorResponse response =
               orchestratorConnector.callDeploymentStatus(

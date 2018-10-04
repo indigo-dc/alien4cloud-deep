@@ -8,8 +8,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -81,9 +83,15 @@ public class OrchestratorResponse {
    */
   public Map<String, String> getOutputs() throws JsonProcessingException, IOException {
     Map<String, String> result = new HashMap<>();
-    List<JsonNode> outputs = getNodesByKey("outputs");
-    if (outputs != null && outputs.size() > 0) {
-      return objectMapper.convertValue(outputs.get(0), new TypeReference<Map<String, String>>() {});
+    List<JsonNode> outputsList = getNodesByKey("outputs");
+    if (outputsList != null && outputsList.size() > 0) {
+    	JsonNode output = outputsList.get(0);
+    	Iterator<Entry<String, JsonNode>> outputFields = output.fields();
+    	while (outputFields.hasNext()) {
+    		Entry<String, JsonNode> field = outputFields.next();
+    		result.put(field.getKey(), objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(field.getValue()));
+    	}
+      //return objectMapper.convertValue(outputs.get(0), new TypeReference<Map<String, String>>() {});
     }
     return result;
   }

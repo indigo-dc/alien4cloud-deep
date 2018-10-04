@@ -9,13 +9,16 @@ ARG a4c_install_dir=a4c
 ARG a4c_upv_ver=${a4c_ver}-UPV-1.0.0
 ARG a4c_user=a4c
 
-ENV A4C_PORT 8088
+ENV A4C_PORT_HTTP 8088
+ENV A4C_PORT_HTTPS 8443
 ENV A4C_VOLUME_DIR /mnt/a4c_instance_data
 
 ENV A4C_INSTALL_PATH=${a4c_install_path}
 ENV A4C_SRC_DIR=${a4c_src_dir}
 ENV A4C_INSTALL_DIR=${a4c_install_dir}
 ENV A4C_USER=${a4c_user}
+ENV A4C_ADMIN_USERNAME=admin
+ENV A4C_ADMIN_PASSWORD=admin
 
 ADD indigodc-orchestrator-plugin "${a4c_install_path}/indigodc-orchestrator-plugin"
 ADD a4c "${a4c_install_path}/${a4c_src_dir}"
@@ -73,7 +76,8 @@ RUN \
   # Install the a4c runtime dependencies
   && apk --no-cache add openjdk8-jre-base bash su-exec
 
-EXPOSE ${A4C_PORT}
+EXPOSE ${A4C_PORT_HTTP}
+EXPOSE ${A4C_PORT_HTTPS}
 
 ENTRYPOINT mkdir -p ${A4C_VOLUME_DIR} \
   && chown -R ${A4C_USER}:${A4C_USER} "${A4C_VOLUME_DIR}" \
@@ -84,6 +88,13 @@ ENTRYPOINT mkdir -p ${A4C_VOLUME_DIR} \
   && sed -i -e "s|<File name=\"FILE\" fileName=\"logs/alien4cloud.log\">|<File name=\"FILE\" fileName=\"${A4C_VOLUME_DIR}/logs/alien4cloud.log\">|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/log4j2.xml" \
   # Replace the paths for the elastic search folders so they point to ${A4C_VOLUME_DIR}  
   && sed -i -e "s|runtime/elasticsearch/|${A4C_VOLUME_DIR}/runtime/elasticsearch/|g" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/elasticsearch.yml" \
+  # Set the port custom ports
+  #&& sed -i -e "s|port: 8088|port: ${A4C_PORT_HTTP}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
+  #&& sed -i -e "s|port: 8443|port: ${A4C_PORT_HTTPS}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
+  # Set custom admin name & passw from ENV
+  #&& sed -i -e "s|username: admin|username: ${A4C_ADMIN_USERNAME}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
+  #&& sed -i -e "s|password: admin|password: ${A4C_ADMIN_PASSWORD}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
+  # Change persmissions to point towards the non-root user
   && chown -R ${A4C_USER}:${A4C_USER} "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
   # Start a4c as user not root
   && cd "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
