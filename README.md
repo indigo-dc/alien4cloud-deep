@@ -13,7 +13,11 @@ The default port for A4C is 8088.
 
 The default username / password are *admin*/*admin*. Please change them!
 
-Aside of the official requirements found at http://alien4cloud.github.io/#/documentation/2.0.0/getting_started/new_getting_started.html, Alien4Cloud needs at least 3GB of RAM to run.
+## Prerequisites
+
+Aside of the official requirements found at http://alien4cloud.github.io/#/documentation/2.0.0/getting_started/new_getting_started.html, Alien4Cloud needs at least 3GB of RAM to run and a dual core CPU.
+
+You also need Docker, we tested with the CE version 17.03 and above. We strongly advise you to install the latest version from the official https://docs.docker.com/install/ site.
 
 ## Docker Arguments
 
