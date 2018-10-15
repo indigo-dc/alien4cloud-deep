@@ -87,7 +87,7 @@ ENTRYPOINT mkdir -p ${A4C_VOLUME_DIR} \
   && sed -i -e "s|<Property name=\"deployment_path\">deployment_logs</Property>|<Property name=\"deployment_path\">${A4C_VOLUME_DIR}/deployment_logs</Property>|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/log4j2.xml" \
   && sed -i -e "s|<File name=\"FILE\" fileName=\"logs/alien4cloud.log\">|<File name=\"FILE\" fileName=\"${A4C_VOLUME_DIR}/logs/alien4cloud.log\">|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/log4j2.xml" \
   # Replace the paths for the elastic search folders so they point to ${A4C_VOLUME_DIR}  
-  && sed -i -e "s|runtime/elasticsearch/|${A4C_VOLUME_DIR}/runtime/elasticsearch/|g" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/elasticsearch.yml" \
+  && sed -i -e "s|: runtime/elasticsearch/|: ${A4C_VOLUME_DIR}/runtime/elasticsearch/|g" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/elasticsearch.yml" \
   # Set the port custom ports
   #&& sed -i -e "s|port: 8088|port: ${A4C_PORT_HTTP}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
   #&& sed -i -e "s|port: 8443|port: ${A4C_PORT_HTTPS}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
