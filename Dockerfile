@@ -20,6 +20,15 @@ ENV A4C_USER=${a4c_user}
 ENV A4C_ADMIN_USERNAME=admin
 ENV A4C_ADMIN_PASSWORD=admin
 
+# A4C_ENABLE_SSL can be either "true" or "false"
+# When it is true the non-secure link will be disabled
+ENV A4C_ENABLE_SSL true
+ENV A4C_KEY_STORE_PASSWORD default
+ENV A4C_KEY_PASSWORD default
+ENV A4C_PEM_CA_CERT_FILE ca.pem
+ENV A4C_PEM_CA_KEY_FILE ca-key.pem
+ENV A4C_PEM_ROOT_DIR /certs
+
 ADD indigodc-orchestrator-plugin "${a4c_install_path}/indigodc-orchestrator-plugin"
 ADD a4c "${a4c_install_path}/${a4c_src_dir}"
 ADD indigodc-2-a4c.py "${a4c_install_path}"
