@@ -191,6 +191,7 @@ public class OrchestratorConnector {
     URL requestUrl = new URL(sbuf.toString());
 
     SSLContext sslContext = getSslContext(cloudConfiguration);
+    LOGGER.info("Post Data: " + yamlTopology);
     return restCall(
         requestUrl,
         yamlTopology,
@@ -334,7 +335,6 @@ public class OrchestratorConnector {
       int postDataLength = pd.length;
       connection.setRequestProperty("Content-Length", Integer.toString(postDataLength));
 
-      LOGGER.info("Post Data: " + postData.toString());
       // //Send request
       DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
       wr.write(pd);
