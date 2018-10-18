@@ -8,30 +8,36 @@ ARG a4c_src_dir=alien4cloud
 ARG a4c_install_dir=a4c
 ARG a4c_upv_ver=${a4c_ver}-UPV-1.0.0
 ARG a4c_user=a4c
-
-ENV A4C_PORT_HTTP 8088
-ENV A4C_PORT_HTTPS 8443
-ENV A4C_VOLUME_DIR /mnt/a4c_instance_data
+ARG a4c_settings_manager_ver=0.0.1-SNAPSHOT
 
 ENV A4C_INSTALL_PATH=${a4c_install_path}
 ENV A4C_SRC_DIR=${a4c_src_dir}
 ENV A4C_INSTALL_DIR=${a4c_install_dir}
 ENV A4C_USER=${a4c_user}
+ENV A4C_SETTINGS_MANAGER_VER=${a4c_settings_manager_ver}
+
+ENV A4C_PORT_HTTP=8088
+ENV A4C_PORT_HTTPS=8443
+
+ENV A4C_RUNTIME_DIR=/mnt/a4c_runtime_data
+# This variable triggers the wipping of the old A4C
+# runtime data! be sure you know what you are doing!
+ENV A4C_RESET_CONFIG=false
 ENV A4C_ADMIN_USERNAME=admin
 ENV A4C_ADMIN_PASSWORD=admin
-
 # A4C_ENABLE_SSL can be either "true" or "false"
 # When it is true the non-secure link will be disabled
-ENV A4C_ENABLE_SSL true
-ENV A4C_KEY_STORE_PASSWORD default
-ENV A4C_KEY_PASSWORD default
-ENV A4C_PEM_CA_CERT_FILE ca.pem
-ENV A4C_PEM_CA_KEY_FILE ca-key.pem
-ENV A4C_PEM_ROOT_DIR /certs
+ENV A4C_ENABLE_SSL=true
+ENV A4C_KEY_STORE_PASSWORD=default
+ENV A4C_KEY_PASSWORD=default
+ENV A4C_PEM_CA_CERT_FILE=ca.pem
+ENV A4C_PEM_CA_KEY_FILE=ca-key.pem
+ENV A4C_CERTS_ROOT_PATH=/certs
 
 ADD indigodc-orchestrator-plugin "${a4c_install_path}/indigodc-orchestrator-plugin"
 ADD a4c "${a4c_install_path}/${a4c_src_dir}"
 ADD indigodc-2-a4c.py "${a4c_install_path}"
+ADD alien4cloud-settings-manager "${a4c_install_path}/alien4cloud-settings-manager/"
   
 RUN \
   # Install those dependencies that will be removed afterwards  
@@ -69,44 +75,35 @@ RUN \
   && cd "${a4c_install_path}/indigodc-orchestrator-plugin" \
   && mvn -e clean package \
   && cp ${a4c_install_path}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider-*.zip "${a4c_install_path}/${a4c_install_dir}/init/plugins/" \
+  # Compile and install the a4c settings manager
+  && cd "${a4c_install_path}/alien4cloud-settings-manager/" \
+  && mvn clean package \
+  && mv "${a4c_install_path}/alien4cloud-settings-manager/target/alien4cloud-settings-manager-${A4C_SETTINGS_MANAGER_VER}-jar-with-dependencies.jar" "${a4c_install_path}/${a4c_install_dir}/"\
   # Create a special user with limited access
   && addgroup -g ${user_gid} -S ${a4c_user} \
   && adduser -D -g "" -u ${user_uid} -G ${a4c_user} ${a4c_user} \
   && chown -R ${a4c_user}:${a4c_user} "${a4c_install_path}" \
   && chown -R ${a4c_user}:${a4c_user} "/home/${a4c_user}" \
   # Clean up the installed packages, files, everything
-  && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g\
-  && rm -rf "${a4c_install_path}/alien4cloud-dist-${a4c_ver}-dist.tar.gz" \
-    "${a4c_install_path}/${a4c_src_dir}" ${a4c_install_path}/indigodc-orchestrator-plugin\
-    /usr/lib/ruby \
-    "${a4c_install_path}/indigodc-2-a4c.py" \
-  && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/*\
-  && apk del build-dependencies \
+#  && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g\
+#  && rm -rf "${a4c_install_path}/alien4cloud-dist-${a4c_ver}-dist.tar.gz" \
+#    "${a4c_install_path}/${a4c_src_dir}" ${a4c_install_path}/indigodc-orchestrator-plugin\
+#    "${a4c_install_path}/alien4cloud-settings-manager/"\
+#    /usr/lib/ruby \
+#    "${a4c_install_path}/indigodc-2-a4c.py" \
+#  && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/*\
+#  && apk del build-dependencies \
   # Install the a4c runtime dependencies
   && apk --no-cache add openjdk8-jre-base bash su-exec
 
 EXPOSE ${A4C_PORT_HTTP}
 EXPOSE ${A4C_PORT_HTTPS}
 
-ENTRYPOINT mkdir -p ${A4C_VOLUME_DIR} \
-  && chown -R ${A4C_USER}:${A4C_USER} "${A4C_VOLUME_DIR}" \
-  # Replace the paths for the runtime folders so they point to ${A4C_VOLUME_DIR}
-  && sed -i -e "s|alien: runtime|alien: ${A4C_VOLUME_DIR}/runtime|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \  
-  # Replace the paths for the logs (deployment and log4j) folders so they point to ${A4C_VOLUME_DIR}  
-  && sed -i -e "s|<Property name=\"deployment_path\">deployment_logs</Property>|<Property name=\"deployment_path\">${A4C_VOLUME_DIR}/deployment_logs</Property>|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/log4j2.xml" \
-  && sed -i -e "s|<File name=\"FILE\" fileName=\"logs/alien4cloud.log\">|<File name=\"FILE\" fileName=\"${A4C_VOLUME_DIR}/logs/alien4cloud.log\">|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/log4j2.xml" \
-  # Replace the paths for the elastic search folders so they point to ${A4C_VOLUME_DIR}  
-  && sed -i -e "s|: runtime/elasticsearch/|: ${A4C_VOLUME_DIR}/runtime/elasticsearch/|g" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/elasticsearch.yml" \
-  # Set the port custom ports
-  #&& sed -i -e "s|port: 8088|port: ${A4C_PORT_HTTP}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
-  #&& sed -i -e "s|port: 8443|port: ${A4C_PORT_HTTPS}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
-  # Set custom admin name & passw from ENV
-  #&& sed -i -e "s|username: admin|username: ${A4C_ADMIN_USERNAME}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
-  #&& sed -i -e "s|password: admin|password: ${A4C_ADMIN_PASSWORD}|" "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/config/alien4cloud-config.yml" \
-  # Change persmissions to point towards the non-root user
-  && chown -R ${A4C_USER}:${A4C_USER} "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
-  # Start a4c as user not root
+ENTRYPOINT \
+  # Start a4c as non-root user
   && cd "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
-  # But first flush the buffers to avoid /usr/bin/env: bad interpreter: Text file busy
+  # But first generate the settings and the environment for secure connection
+  && java -jar "alien4cloud-settings-manager-${A4C_SETTINGS_MANAGER_VER}-jar-with-dependencies.jar"\
+  # And flush the buffers to avoid /usr/bin/env: bad interpreter: Text file busy
   && sync \
   && su ${A4C_USER} -s /bin/bash -c '"${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud.sh"'
