@@ -114,7 +114,7 @@ where you have to specify the secure port, the root path where the certificates 
 
 ## Usage
 
-Once Alien4Cloud started, you can connect to it using a [supported browser] (https://alien4cloud.github.io/#/documentation/2.0.0/admin_guide/supported_platforms.html).
+Once Alien4Cloud started, you can connect to it using a [supported browser](https://alien4cloud.github.io/#/documentation/2.0.0/admin_guide/supported_platforms.html).
 Before anything else, one should take a look at the [Alien4Cloud documentation](https://alien4cloud.github.io/#/documentation/2.0.0/).
 
 ### Plugin activation

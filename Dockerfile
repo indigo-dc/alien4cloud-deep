@@ -101,7 +101,7 @@ EXPOSE ${A4C_PORT_HTTPS}
 
 ENTRYPOINT \
   # Start a4c as non-root user
-  && cd "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
+  cd "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}" \
   # But first generate the settings and the environment for secure connection
   && java -jar "alien4cloud-settings-manager-${A4C_SETTINGS_MANAGER_VER}-jar-with-dependencies.jar"\
   # And flush the buffers to avoid /usr/bin/env: bad interpreter: Text file busy
