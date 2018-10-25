@@ -2,23 +2,12 @@ version: '3'
 services:
   a4c:
     container_name: a4c
-    image: indigodatacloud/alien4cloud-deep:v1.0.2-SNAPSHOT
+    image: indigodatacloud/alien4cloud-deep:1.1b0
     restart: unless-stopped
     env_file:
       - .env
+    ports:
+      - '443:8443'
     volumes:
       - ${A4C_VOLUME_DIR}:${A4C_VOLUME_DIR}
-
-  haproxy:
-    image: haproxy
-    links:
-      - a4c
-    depends_on:
-      - a4c
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-      - /etc/ssl/host.pem:/usr/local/etc/haproxy/haproxy.pem:ro
-
+      - /etc/ssl:/certs:ro
