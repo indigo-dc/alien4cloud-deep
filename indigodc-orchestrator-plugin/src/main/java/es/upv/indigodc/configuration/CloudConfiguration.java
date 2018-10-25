@@ -18,7 +18,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @FormProperties({
   "clientId",
   "clientSecret",
@@ -32,7 +31,6 @@ import lombok.ToString;
   "orchestratorPollInterval",
   "importIndigoCustomTypes"
 })
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloudConfiguration {

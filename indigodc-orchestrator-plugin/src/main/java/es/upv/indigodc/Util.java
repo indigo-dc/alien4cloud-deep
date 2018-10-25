@@ -26,7 +26,6 @@ public class Util {
    * @author asalic
    */
   @Getter
-  @Setter
   @AllArgsConstructor
   public static class InstanceStatusInfo {
     /** The A4C instance status. */
@@ -35,17 +34,17 @@ public class Util {
     protected String state;
   }
 
-  /**
-   * Transform a Throwable to string.
-   *
-   * @param e the Throwable to be transformed
-   * @return the Throwable in String format
-   */
-  public static String throwableToString(Throwable e) {
-    StringWriter sw = new StringWriter();
-    e.printStackTrace(new PrintWriter(sw));
-    return sw.toString();
-  }
+//  /**
+//   * Transform a Throwable to string.
+//   *
+//   * @param e the Throwable to be transformed
+//   * @return the Throwable in String format
+//   */
+//  public static String throwableToString(Throwable e) {
+//    StringWriter sw = new StringWriter();
+//    e.printStackTrace(new PrintWriter(sw));
+//    return sw.toString();
+//  }
 
   /**
    * Converts the status of a deployment on the IndigoDataCloud Orchestrator to the ALien4Cloud
@@ -57,30 +56,35 @@ public class Util {
    */
   public static DeploymentStatus indigoDcStatusToDeploymentStatus(final String status)
       throws StatusNotFoundException {
-    switch (status) {
-      case "UNKNOWN":
-        return DeploymentStatus.UNKNOWN;
-      case "CREATE_COMPLETE":
-        return DeploymentStatus.DEPLOYED;
-      case "CREATE_FAILED":
-        return DeploymentStatus.FAILURE;
-      case "CREATE_IN_PROGRESS":
-        return DeploymentStatus.DEPLOYMENT_IN_PROGRESS;
-      case "DELETE_COMPLETE":
-        return DeploymentStatus.UNDEPLOYED;
-      case "DELETE_FAILED":
-        return DeploymentStatus.FAILURE;
-      case "DELETE_IN_PROGRESS":
-        return DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS;
-      case "UPDATE_COMPLETE":
-        return DeploymentStatus.UPDATED;
-      case "UPDATE_FAILED":
-        return DeploymentStatus.UPDATE_FAILURE;
-      case "UPDATE_IN_PROGRESS":
-        return DeploymentStatus.UPDATE_IN_PROGRESS;
-      default:
-        throw new StatusNotFoundException(status);
-    }
+
+	try {
+	    switch (IndigoDcDeploymentStatus.valueOf(status)) {
+	      case UNKNOWN:
+	        return DeploymentStatus.UNKNOWN;
+	      case CREATE_COMPLETE:
+	        return DeploymentStatus.DEPLOYED;
+	      case CREATE_FAILED:
+	        return DeploymentStatus.FAILURE;
+	      case CREATE_IN_PROGRESS:
+	        return DeploymentStatus.DEPLOYMENT_IN_PROGRESS;
+	      case DELETE_COMPLETE:
+	        return DeploymentStatus.UNDEPLOYED;
+	      case DELETE_FAILED:
+	        return DeploymentStatus.FAILURE;
+	      case DELETE_IN_PROGRESS:
+	        return DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS;
+	      case UPDATE_COMPLETE:
+	        return DeploymentStatus.UPDATED;
+	      case UPDATE_FAILED:
+	        return DeploymentStatus.UPDATE_FAILURE;
+	      case UPDATE_IN_PROGRESS:
+	        return DeploymentStatus.UPDATE_IN_PROGRESS;
+	      default:
+	        throw new StatusNotFoundException(status);
+	    }
+	} catch (IllegalArgumentException ex) {
+		throw new StatusNotFoundException(status);
+	}
   }
 
   /**
@@ -93,29 +97,33 @@ public class Util {
    */
   public static InstanceStatusInfo indigoDcStatusToInstanceStatus(final String status)
       throws StatusNotFoundException {
-    switch (status) {
-      case "UNKNOWN":
-        return new InstanceStatusInfo(InstanceStatus.FAILURE, "UNKNOWN");
-      case "CREATE_COMPLETE":
-        return new InstanceStatusInfo(InstanceStatus.SUCCESS, "CREATE_COMPLETE");
-      case "CREATE_FAILED":
-        return new InstanceStatusInfo(InstanceStatus.FAILURE, "CREATE_FAILED");
-      case "CREATE_IN_PROGRESS":
-        return new InstanceStatusInfo(InstanceStatus.PROCESSING, "CREATE_IN_PROGRESS");
-      case "DELETE_COMPLETE":
-        return new InstanceStatusInfo(InstanceStatus.SUCCESS, "DELETE_COMPLETE");
-      case "DELETE_FAILED":
-        return new InstanceStatusInfo(InstanceStatus.FAILURE, "DELETE_FAILED");
-      case "DELETE_IN_PROGRESS":
-        return new InstanceStatusInfo(InstanceStatus.PROCESSING, "DELETE_IN_PROGRESS");
-      case "UPDATE_COMPLETE":
-        return new InstanceStatusInfo(InstanceStatus.SUCCESS, "UPDATE_COMPLETE");
-      case "UPDATE_FAILED":
-        return new InstanceStatusInfo(InstanceStatus.FAILURE, "UPDATE_FAILED");
-      case "UPDATE_IN_PROGRESS":
-        return new InstanceStatusInfo(InstanceStatus.PROCESSING, "UPDATE_IN_PROGRESS");
-      default:
-        throw new StatusNotFoundException(status);
-    }
+	try {
+	    switch (IndigoDcDeploymentStatus.valueOf(status)) {
+	      case UNKNOWN:
+	        return new InstanceStatusInfo(InstanceStatus.FAILURE, IndigoDcDeploymentStatus.UNKNOWN.name());
+	      case CREATE_COMPLETE:
+	        return new InstanceStatusInfo(InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.CREATE_COMPLETE.name());
+	      case CREATE_FAILED:
+	        return new InstanceStatusInfo(InstanceStatus.FAILURE, IndigoDcDeploymentStatus.CREATE_FAILED.name());
+	      case CREATE_IN_PROGRESS:
+	        return new InstanceStatusInfo(InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.CREATE_IN_PROGRESS.name());
+	      case DELETE_COMPLETE:
+	        return new InstanceStatusInfo(InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.DELETE_COMPLETE.name());
+	      case DELETE_FAILED:
+	        return new InstanceStatusInfo(InstanceStatus.FAILURE, IndigoDcDeploymentStatus.DELETE_FAILED.name());
+	      case DELETE_IN_PROGRESS:
+	        return new InstanceStatusInfo(InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.DELETE_IN_PROGRESS.name());
+	      case UPDATE_COMPLETE:
+	        return new InstanceStatusInfo(InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.UPDATE_COMPLETE.name());
+	      case UPDATE_FAILED:
+	        return new InstanceStatusInfo(InstanceStatus.FAILURE, IndigoDcDeploymentStatus.UPDATE_FAILED.name());
+	      case UPDATE_IN_PROGRESS:
+	        return new InstanceStatusInfo(InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.UPDATE_IN_PROGRESS.name());
+	      default:
+	        throw new StatusNotFoundException(status);
+	    }
+	} catch (IllegalArgumentException ex) {
+		throw new StatusNotFoundException(status);
+	}
   }
 }

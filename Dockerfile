@@ -85,14 +85,14 @@ RUN \
   && chown -R ${a4c_user}:${a4c_user} "${a4c_install_path}" \
   && chown -R ${a4c_user}:${a4c_user} "/home/${a4c_user}" \
   # Clean up the installed packages, files, everything
-#  && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g\
-#  && rm -rf "${a4c_install_path}/alien4cloud-dist-${a4c_ver}-dist.tar.gz" \
-#    "${a4c_install_path}/${a4c_src_dir}" ${a4c_install_path}/indigodc-orchestrator-plugin\
-#    "${a4c_install_path}/alien4cloud-settings-manager/"\
-#    /usr/lib/ruby \
-#    "${a4c_install_path}/indigodc-2-a4c.py" \
-#  && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/*\
-#  && apk del build-dependencies \
+  && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g\
+  && rm -rf "${a4c_install_path}/alien4cloud-dist-${a4c_ver}-dist.tar.gz" \
+    "${a4c_install_path}/${a4c_src_dir}" ${a4c_install_path}/indigodc-orchestrator-plugin\
+    "${a4c_install_path}/alien4cloud-settings-manager/"\
+    /usr/lib/ruby \
+    "${a4c_install_path}/indigodc-2-a4c.py" \
+  && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/*\
+  && apk del build-dependencies \
   # Install the a4c runtime dependencies
   && apk --no-cache add openjdk8-jre-base bash su-exec
 

@@ -3,7 +3,11 @@ package es.upv.indigodc;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Ignore;
 
@@ -14,7 +18,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import alien4cloud.security.model.User;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.OrchestratorConnectorTest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TestUtil {
   
   @Ignore("Not testing method")
@@ -46,5 +52,80 @@ public class TestUtil {
     CloudConfiguration cf = mapper.readValue(is, CloudConfiguration.class);
     return cf;
   }
+  
+  @Ignore("Not testing method")
+  static void setFinalStatic(Field field, Object newValue) throws Exception {
+      field.setAccessible(true);        
+      Field modifiersField = Field.class.getDeclaredField("modifiers");
+      modifiersField.setAccessible(true);
+      modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+      field.set(null, newValue);
+  }
+  
+	public static int setAllPrivateFields(Object target, String fieldsName, Object value) 
+			throws IllegalArgumentException, IllegalAccessException {
+	  Class<?> tmpClass = target.getClass();
+	  int count = 0;
+	  do {
+	      try {
+	          Field f = tmpClass.getDeclaredField(fieldsName);
+	          f.setAccessible(true);
+	          f.set(target, value);
+	          count++;
+	      } catch (NoSuchFieldException e) {
+	    	  log.info(String.format("Class %s has no field %s", tmpClass.getClass().getCanonicalName(), fieldsName));
+	      }
+          tmpClass = tmpClass.getSuperclass();
+	  } while (tmpClass != null);
+	  return count;
+	}
+	
+	public static void setPrivateFieldSuperClass(Object target, String fieldsName, Object value) 
+			throws IllegalArgumentException, IllegalAccessException {
+	  Class<?> tmpClass = target.getClass();
+	  do {
+	      try {
+	          Field f = tmpClass.getDeclaredField(fieldsName);
+	          f.setAccessible(true);
+	          f.set(target, value);
+	    	  log.info(String.format("Field %s found in class %s", fieldsName, tmpClass.getClass().getCanonicalName()));
+	          return;
+	      } catch (NoSuchFieldException e) {
+	    	  log.info(String.format("Class %s has no field %s", tmpClass.getClass().getCanonicalName(), fieldsName));
+	      }
+          tmpClass = tmpClass.getSuperclass();
+	  } while (tmpClass != null);
+	}
+  
+  
+  @Ignore("Not testing method")
+  public static void setPrivateField(Object target, String fieldName, Object value){
+      try{
+          Field privateField = target.getClass().getDeclaredField(fieldName);
+          privateField.setAccessible(true);
+          privateField.set(target, value);
+      }catch(Exception e){
+          throw new RuntimeException(e);
+      }
+  }
+//  
+//  public static List<Field> getField(Class<?> clazz, String fieldName) {
+//	    Class<?> tmpClass = clazz;
+//	    List<Field> result = new ArrayList<Field>();
+//	    do {
+//	        try {
+//	            Field f = tmpClass.getDeclaredField(fieldName);
+//	            result.add(f);
+//	        } catch (NoSuchFieldException e) {
+//	            tmpClass = tmpClass.getSuperclass();
+//	        }
+//	    } while (tmpClass != null);
+//	    if (result.isEmpty())
+//		    throw new RuntimeException("Field '" + fieldName
+//		            + "' not found on class " + clazz);
+//	    else
+//	    	return result;
+//	}
+
 
 }

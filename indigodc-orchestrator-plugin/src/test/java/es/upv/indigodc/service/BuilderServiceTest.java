@@ -140,4 +140,5 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
   }
+  
 }

@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
  * @author asalic
  *
  */
-@Getter 
-@Setter
+
 @Component("cloud-configuration-manager")
 public class CloudConfigurationManager {
 	

@@ -33,9 +33,35 @@
     <dep.ver.jetty>9.4.9.v20180320</dep.ver.jetty>
     <dep.ver.snakeyaml>1.18</dep.ver.snakeyaml>
     <dep.ver.jetty.servlet>9.4.9.v20180320</dep.ver.jetty.servlet>
+    <dep.ver.mockito>2.23.0</dep.ver.mockito>
+    <dep.ver.powermock>1.7.4</dep.ver.powermock>
+    <dep.ver.junit>5.3.1</dep.ver.junit>
   </properties>
 
   <dependencies>
+<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-core</artifactId>
+    <version>${dep.ver.mockito}</version>
+    <scope>test</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.powermock</groupId>
+    <artifactId>powermock-core</artifactId>
+    <version>${dep.ver.powermock}</version>
+    <scope>test</scope>
+</dependency>
+
+  <dependency>
+    <groupId>org.powermock</groupId>
+    <artifactId>powermock-api-mockito2</artifactId>
+    <version>${dep.ver.powermock}</version>
+    <scope>test</scope>
+</dependency>
+  
+  
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlet</artifactId>
@@ -65,13 +91,14 @@
     </dependency>
 
 
-    <!-- https://mvnrepository.com/artifact/junit/junit -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
+<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>${dep.ver.junit}</version>
+    <scope>test</scope>
+</dependency>
+
 
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
     <dependency>

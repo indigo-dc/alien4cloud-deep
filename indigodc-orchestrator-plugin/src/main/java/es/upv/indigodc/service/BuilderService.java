@@ -26,8 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.alien4cloud.tosca.editor.EditionContextManager;
 import org.alien4cloud.tosca.exporter.ArchiveExportService;
+import org.alien4cloud.tosca.model.Csar;
 import org.alien4cloud.tosca.model.definitions.AbstractPropertyValue;
 import org.alien4cloud.tosca.model.definitions.PropertyValue;
+import org.alien4cloud.tosca.model.templates.Topology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -44,20 +46,20 @@ import org.yaml.snakeyaml.DumperOptions;
 public class BuilderService {
 
   /** Gets the TOSCA topology in text format from the A4C topology editor. */
-  @Inject private ArchiveExportService exportService;
+  @Inject protected ArchiveExportService exportService;
   /** Initializes the the manager of the TOSCA editor for a certain deployment. */
-  @Inject private EditionContextManager editionContextManager;
+  @Inject protected EditionContextManager editionContextManager;
   /** Retrieves the configuration for the plugin. */
   @Autowired
   @Qualifier("cloud-configuration-manager")
-  private CloudConfigurationManager cloudConfigurationHolder;
+  protected CloudConfigurationManager cloudConfigurationHolder;
   /** The Orchestrator's accepted TOSCA YAML definition declaration. */
   public static final String TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_0";
   /**
    * The options used by the TOSCA YAML writer to generate the text representation. of the topology
    * that is sent to the Orchestrator
    */
-  private static final DumperOptions dumperOptions;
+  protected static final DumperOptions dumperOptions;
 
   static {
     dumperOptions = new DumperOptions();
@@ -81,11 +83,11 @@ public class BuilderService {
   public static class Deployment {
 
     /** The textual representation of the TOSCA topology that will be sent to the Orchestrator. */
-    private String template;
+    protected String template;
     /** The inputs from the TOSCA topology. */
-    private Map<String, Object> parameters;
+    protected Map<String, Object> parameters;
     /** The callback function used by the Orchestrator. */
-    private String callback;
+    protected String callback;
 
     /**
      * Generates the text representation of the deployment of a topology as requested by the
@@ -264,10 +266,18 @@ public class BuilderService {
     d.setCallback("http://localhost:8080/callback");
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
-        exportService.getYaml(EditionContextManager.getCsar(), EditionContextManager.getTopology());
+        exportService.getYaml(getEditionContextManagerCsar(), getEditionContextManagerTopology());
     String yamlIndigoD = getIndigoDcTopologyYaml(a4cTopologyYaml, importIndigoCustomTypes);
     d.setTemplate(yamlIndigoD);
     return d.toOrchestratorString();
+  }
+  
+  protected Csar getEditionContextManagerCsar() {
+	  return EditionContextManager.getCsar();
+  }
+  
+  protected Topology getEditionContextManagerTopology() {
+	  return EditionContextManager.getTopology();
   }
 
   /**

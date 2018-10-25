@@ -26,6 +26,9 @@ public class IndigoDcOrchestratorFactory
 
   public static final String CLOUD_CONFIGURATION_DEFAULTS_FILE =
       "/provider/cloud_conf_default.json";
+  public static final String NO_DEFAULT_CONF_FILE =
+	      "Not set; No default conf file found in the package!";
+  public static final int NO_DEFAULT_CONF_FILE_POLL = 5;
 
   @Autowired private BeanFactory beanFactory;
 
@@ -33,7 +36,7 @@ public class IndigoDcOrchestratorFactory
 
   @Override
   public void destroy(IndigoDcOrchestrator arg0) {
-    // TODO Auto-generated method stub
+	  arg0.destroy();
   }
 
   @Override
@@ -50,28 +53,30 @@ public class IndigoDcOrchestratorFactory
   public CloudConfiguration getDefaultConfiguration() {
     ObjectMapper mapper = new ObjectMapper();
     InputStream is =
-        IndigoDcOrchestratorFactory.class.getResourceAsStream(CLOUD_CONFIGURATION_DEFAULTS_FILE);
+        IndigoDcOrchestratorFactory.class.getResourceAsStream(getCloudConfDefaultFile());
     CloudConfiguration c;
     try {
       c = mapper.readValue(is, CloudConfiguration.class);
     } catch (IOException e) {
       e.printStackTrace();
-      log.error(e.toString());
-      c =
-          new CloudConfiguration(
-              "clientId",
-              "csecret",
-              "tendpoint",
-              "tendpointcert",
-              "cscopes",
-              "oendpoint",
-              "oendpointCert",
-              "iamhost",
-              "iamhostCert",
-              5,
-              "https://raw.githubusercontent.com/indigo-dc/tosca-types/devel-deep/custom_types.yaml");
+      c = new CloudConfiguration(
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE,
+    		  NO_DEFAULT_CONF_FILE_POLL,
+              NO_DEFAULT_CONF_FILE);
     }
     return c;
+  }
+  
+  protected String getCloudConfDefaultFile() {
+	  return CLOUD_CONFIGURATION_DEFAULTS_FILE;
   }
 
   @Override

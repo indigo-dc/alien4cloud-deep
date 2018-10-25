@@ -1,9 +1,11 @@
 package es.upv.indigodc.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import alien4cloud.security.model.User;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,6 +38,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.rules.ExpectedException;
 import org.springframework.http.HttpMethod;
 
@@ -150,11 +154,195 @@ public class OrchestratorConnectorTest {
                 new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
-    log.info(cc.getTokenEndpoint());
     OrchestratorConnector oc = new OrchestratorConnector();
     User user = TestUtil.getTestUser();
     OrchestratorResponse or =
         oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
     testServer.stop();
   }
+  
+  @Test
+  public void testDeployWithTestServerUnsecure() throws Exception {
+    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+    ObjectMapper om = new ObjectMapper();
+    servlets.put(
+        "/token",
+        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+    servlets.put(
+        ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS,
+        new TestBlockingServlet(
+            TestBlockingServlet.CONTENT_TYPE_JSON,
+            200,
+            om.writeValueAsString(
+                new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
+    testServer.start(servlets);
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
+    OrchestratorConnector oc = new OrchestratorConnector();
+    User user = TestUtil.getTestUser();
+    oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
+    testServer.stop();
+  }
+  
+  @Test
+  public void testDeploymentStatus() throws Exception {
+    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+    ObjectMapper om = new ObjectMapper();
+    servlets.put(
+        "/token",
+        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+    servlets.put(
+        ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS + "/id",
+        new TestBlockingServlet(
+            TestBlockingServlet.CONTENT_TYPE_JSON,
+            200,
+            om.writeValueAsString(
+                new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{\"status\": \"ok\"}")))));
+    testServer.start(servlets);
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
+    OrchestratorConnector oc = new OrchestratorConnector();
+    User user = TestUtil.getTestUser();
+    OrchestratorResponse or  = oc.callDeploymentStatus(cc, user.getName(), user.getPassword(), "id");
+    testServer.stop();
+  }
+  
+  @Test
+  public void testGetDeploymentsWithTestServer404Response() throws Exception {
+    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+    ObjectMapper om = new ObjectMapper();
+    servlets.put(
+        "/token",
+        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+    servlets.put(
+        ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS,
+        new TestBlockingServlet(
+            TestBlockingServlet.CONTENT_TYPE_JSON,
+            404,
+            om.writeValueAsString(
+                new OrchestratorResponse(404, HttpMethod.GET, new StringBuilder("{\"status\": \"ok\"}")))));
+    testServer.start(servlets);
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
+    OrchestratorConnector oc = new OrchestratorConnector();
+    User user = TestUtil.getTestUser();
+    Executable callGetDeployments = () -> oc.callGetDeployments(cc, user.getName(), user.getPassword());
+    assertThrows(OrchestratorIamException.class, callGetDeployments);
+    testServer.stop();
+  }
+  
+  @Test
+  public void testGetDeploymentsWithTestServer() throws Exception {
+    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+    ObjectMapper om = new ObjectMapper();
+    servlets.put(
+        "/token",
+        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+    servlets.put(
+            ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS,
+        new TestBlockingServlet(
+            TestBlockingServlet.CONTENT_TYPE_JSON,
+            200,
+            om.writeValueAsString(
+                new OrchestratorResponse(200, HttpMethod.GET, new StringBuilder("{}")))));
+    testServer.start(servlets);
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
+    OrchestratorConnector oc = new OrchestratorConnector();
+    User user = TestUtil.getTestUser();
+    OrchestratorResponse or =
+        oc.callGetDeployments(cc, user.getName(), user.getPassword());
+    testServer.stop();
+  }
+  
+  @Test
+  public void testUndeployWithTestServer() throws Exception {
+    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+    ObjectMapper om = new ObjectMapper();
+    servlets.put(
+        "/token",
+        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+    servlets.put(
+            ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS + "/id",
+        new TestBlockingServlet(
+            TestBlockingServlet.CONTENT_TYPE_JSON,
+            200,
+            om.writeValueAsString(
+                new OrchestratorResponse(200, HttpMethod.DELETE, new StringBuilder("{}")))));
+    testServer.start(servlets);
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
+    OrchestratorConnector oc = new OrchestratorConnector();
+    User user = TestUtil.getTestUser();
+    OrchestratorResponse or =
+        oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
+    testServer.stop();
+  }
+  
+  @Test
+  public void testUndeployWithTestServerNotSecure() throws Exception {
+    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+    ObjectMapper om = new ObjectMapper();
+    servlets.put(
+        "/token",
+        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+    servlets.put(
+            ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS + "/id",
+        new TestBlockingServlet(
+            TestBlockingServlet.CONTENT_TYPE_JSON,
+            200,
+            om.writeValueAsString(
+                new OrchestratorResponse(200, HttpMethod.DELETE, new StringBuilder("{}")))));
+    testServer.start(servlets);
+    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
+    OrchestratorConnector oc = new OrchestratorConnector();
+    User user = TestUtil.getTestUser();
+    OrchestratorResponse or =
+        oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
+    testServer.stop();
+  }
+  
+  @Test
+  public void testUndeployWithTestServer404NotSecure() throws Exception {
+	  testUndeployDifferentHttpCodesUnsecured(404);
+  }
+  
+  @Test
+  public void testUndeployWithTestServer101NotSecure() throws Exception {
+	  testUndeployDifferentHttpCodesUnsecured(101);
+  }
+  
+  @Test
+  public void testUndeployWithTestServer301NotSecure() throws Exception {
+	  testUndeployDifferentHttpCodesUnsecured(301);
+  }
+  
+  @Test
+  public void testUndeployWithTestServer501NotSecure() throws Exception {
+	  testUndeployDifferentHttpCodesUnsecured(501);
+  }
+  
+  @Test
+  public void testUndeployWithTestServer601NotSecure() throws Exception {
+	  testUndeployDifferentHttpCodesUnsecured(601);
+  }
+  
+  @Ignore
+  protected void testUndeployDifferentHttpCodesUnsecured(int code) throws Exception {
+	    Map<String, TestBlockingServlet> servlets = new HashMap<>();
+	    ObjectMapper om = new ObjectMapper();
+	    servlets.put(
+	        "/token",
+	        new TestBlockingServlet(TestBlockingServlet.CONTENT_TYPE_JSON, 200, TOKEN_AUTH_RESPONSE));
+	    servlets.put(
+	            ORCHESTRATOR_COMMON_PATH + OrchestratorConnector.WS_PATH_DEPLOYMENTS + "/id",
+	        new TestBlockingServlet(
+	            TestBlockingServlet.CONTENT_TYPE_JSON,
+	            code,
+	            om.writeValueAsString(
+	                new OrchestratorResponse(code, HttpMethod.DELETE, new StringBuilder("{}")))));
+	    testServer.start(servlets);
+	    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
+	    OrchestratorConnector oc = new OrchestratorConnector();
+	    User user = TestUtil.getTestUser();
+	    Executable callUndeploy = () -> oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
+	    assertThrows(OrchestratorIamException.class, callUndeploy);
+	    testServer.stop();
+  }
+  
 }

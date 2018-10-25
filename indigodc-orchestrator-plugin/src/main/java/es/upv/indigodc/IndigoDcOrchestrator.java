@@ -98,6 +98,13 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       mappingService.init(activeDeployments.values());
     }
   }
+  
+  /**
+   * Method called when this instance is scrapped
+   */
+  public void destroy() {
+	  
+  }
 
   @Override
   public void setConfiguration(String orchestratorId, CloudConfiguration configuration)
@@ -128,7 +135,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
               userService.getCurrentUser().getPlainPassword(),
               yamlPaasTopology);
       final String orchestratorUuidDeployment =
-          OrchestratorConnector.getOrchestratorUuidDeployment(response);
+    		  response.getOrchestratorUuidDeployment();
       log.info("uuid a4c: " + a4cUuidDeployment);
       log.info("uuid orchestrator: " + orchestratorUuidDeployment);
       mappingService.registerDeploymentInfo(
@@ -142,17 +149,17 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       callback.onFailure(e);
       log.error("Error deployment", e);
       mappingService.registerDeploymentInfoAlienToIndigoDc(
-          deploymentContext.getDeploymentPaaSId(), DeploymentStatus.FAILURE);
+    		  a4cUuidDeployment, DeploymentStatus.FAILURE);
     } catch (IOException e) {
       callback.onFailure(e);
       log.error("Error deployment ", e);
       mappingService.registerDeploymentInfoAlienToIndigoDc(
-          deploymentContext.getDeploymentPaaSId(), DeploymentStatus.FAILURE);
+    		  a4cUuidDeployment, DeploymentStatus.FAILURE);
     } catch (OrchestratorIamException e) {
       callback.onFailure(e);
       log.error("Error deployment ", e);
       mappingService.registerDeploymentInfoAlienToIndigoDc(
-          deploymentContext.getDeploymentPaaSId(), DeploymentStatus.FAILURE);
+    		  a4cUuidDeployment, DeploymentStatus.FAILURE);
     }
   }
 
@@ -194,17 +201,17 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       log.error("Error undeployment", e);
       callback.onFailure(e);
       mappingService.registerDeploymentInfoAlienToIndigoDc(
-          deploymentContext.getDeploymentPaaSId(), DeploymentStatus.FAILURE);
+    		  a4cUuidDeployment, DeploymentStatus.FAILURE);
     } catch (NoSuchFieldException e) {
       log.error("Error undeployment", e);
       callback.onFailure(e);
       mappingService.registerDeploymentInfoAlienToIndigoDc(
-          deploymentContext.getDeploymentPaaSId(), DeploymentStatus.FAILURE);
+    		  a4cUuidDeployment, DeploymentStatus.FAILURE);
     } catch (OrchestratorIamException e) {
       callback.onFailure(e);
       log.error("Error deployment ", e);
       mappingService.registerDeploymentInfoAlienToIndigoDc(
-          deploymentContext.getDeploymentPaaSId(), DeploymentStatus.FAILURE);
+    		  a4cUuidDeployment, DeploymentStatus.FAILURE);
     }
   }
 
@@ -230,7 +237,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     final String groupId = deploymentContext.getDeploymentPaaSId();
     // final String
     final OrchestratorDeploymentMapping orchestratorDeploymentMapping =
-        mappingService.getByAlienDeploymentId(deploymentContext.getDeploymentTopology().getId());
+        mappingService.getByAlienDeploymentId(a4cUuidDeployment);
 
     if (orchestratorDeploymentMapping != null) {
       final String orchestratorUuidDeployment =
@@ -247,9 +254,11 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
                 userService.getCurrentUser().getUsername(),
                 userService.getCurrentUser().getPlainPassword(),
                 orchestratorUuidDeployment);
+        
+        log.info(response.getResponse().toString());
         Util.InstanceStatusInfo instanceStatusInfo =
             Util.indigoDcStatusToInstanceStatus(
-                OrchestratorConnector.getStatusTopologyDeployment(response).toUpperCase());
+            		response.getStatusTopologyDeployment().toUpperCase());
 
         // Map<String, String> outputs = new HashMap<>();
         // outputs.put("Compute_public_address", "none");
@@ -264,9 +273,6 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
                 response.getOutputs());
         instancesInfo.put(a4cUuidDeployment, instanceInformation);
         topologyInfo.put(groupId, instancesInfo);
-        callback.onSuccess(topologyInfo);
-      } catch (NullPointerException e) {
-        log.error("Null error", e);
         callback.onSuccess(topologyInfo);
       } catch (NoSuchFieldException e) {
         callback.onFailure(e);
@@ -327,15 +333,11 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
                   userService.getCurrentUser().getUsername(),
                   userService.getCurrentUser().getPlainPassword(),
                   orchestratorUuidDeployment);
-
+          String statusTopologyDeployment = response.getStatusTopologyDeployment();
           callback.onSuccess(
               Util.indigoDcStatusToDeploymentStatus(
-                  OrchestratorConnector.getStatusTopologyDeployment(response).toUpperCase()));
+            		  statusTopologyDeployment.toUpperCase()));
 
-        } catch (RuntimeException e) {
-          log.error("Error getStatus", e);
-          callback.onFailure(e);
-          callback.onSuccess(DeploymentStatus.UNKNOWN);
         } catch (NoSuchFieldException e) {
           log.error("Error getStatus", e);
           callback.onFailure(e);
@@ -382,7 +384,6 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       String nodeTemplateId,
       int instances,
       IPaaSCallback<?> callback) {
-    throw new NotImplementedException();
   }
 
   @Override
@@ -400,7 +401,6 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       NodeOperationExecRequest request,
       IPaaSCallback<Map<String, String>> operationResultCallback)
       throws OperationExecutionException {
-    throw new NotImplementedException();
   }
 
   @Override
@@ -410,13 +410,11 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       String instanceId,
       boolean maintenanceModeOn)
       throws MaintenanceModeException {
-    throw new NotImplementedException();
   }
 
   @Override
   public void switchMaintenanceMode(
       PaaSDeploymentContext deploymentContext, boolean maintenanceModeOn)
       throws MaintenanceModeException {
-    throw new NotImplementedException();
   }
 }
