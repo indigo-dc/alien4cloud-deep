@@ -1,6 +1,5 @@
 package es.upv.indigodc.service;
 
-import static org.junit.Assert.assertEquals;
 
 import es.upv.indigodc.IndigoDcOrchestrator;
 import es.upv.indigodc.TestUtil;
@@ -14,15 +13,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import lombok.extern.slf4j.Slf4j;
 
-import org.junit.Ignore;
-import org.junit.Test;
 
 @Slf4j
 public class BuilderServiceTest {
 
-  @Ignore
+	@Disabled
   @Test
   public void convertYamlTopoEditorToOrchestratorFormatJupyterKubernetesDemo()
       throws URISyntaxException, IOException {
@@ -37,7 +39,7 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(
+    Assertions.assertEquals(
         yamlIndigoDC,
         BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
@@ -52,7 +54,7 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(
+    Assertions.assertEquals(
         yamlIndigoDC,
         BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
@@ -68,7 +70,7 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(
+    Assertions.assertEquals(
         yamlIndigoDC,
         BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
@@ -82,7 +84,7 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(
+    Assertions.assertEquals(
         yamlIndigoDC,
         BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
@@ -102,7 +104,7 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(
+    Assertions.assertEquals(
         yamlIndigoDC,
         BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
@@ -123,7 +125,7 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    assertEquals(
+    Assertions.assertEquals(
         yamlIndigoDC,
         BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
   }
@@ -138,7 +140,7 @@ public class BuilderServiceTest {
         BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_out.yaml");
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
+    Assertions.assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
   }
   
 }

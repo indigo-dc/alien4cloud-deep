@@ -1,8 +1,8 @@
 package es.upv.indigodc.service;
 
-import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import alien4cloud.paas.model.DeploymentStatus;
 import es.upv.indigodc.service.model.AlienDeploymentMapping;
@@ -18,9 +18,9 @@ public class MappingServiceTest {
 		MappingService ms = new MappingService();
 		ms.registerDeploymentInfo("orchestratorUuidDeployment", "alienDeploymentId", "orchestratorId", DeploymentStatus.DEPLOYED);
 		OrchestratorDeploymentMapping odm = ms.getByAlienDeploymentId("alienDeploymentId");
-		assertEquals(odm.getOrchestratorUuidDeployment(), "orchestratorUuidDeployment");
+		Assertions.assertEquals(odm.getOrchestratorUuidDeployment(), "orchestratorUuidDeployment");
 		AlienDeploymentMapping adm = ms.getByOrchestratorUuidDeployment("orchestratorUuidDeployment");
-		assertEquals(adm.getDeploymentId(), "alienDeploymentId");
-		assertEquals(adm.getOrchetratorId(), "orchestratorId");
+		Assertions.assertEquals(adm.getDeploymentId(), "alienDeploymentId");
+		Assertions.assertEquals(adm.getOrchetratorId(), "orchestratorId");
 	}
 }

@@ -9,7 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TestUtil {
   
-  @Ignore("Not testing method")
+	@Disabled("Not testing method")
   public static CloudConfiguration getRealConfiguration(String fileNameResource)
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
@@ -34,7 +34,7 @@ public class TestUtil {
     return mapper.readValue(is, CloudConfiguration.class);
   }
   
-  @Ignore("Not testing method")
+	@Disabled("Not testing method")
   public static User getTestUser()
       throws JsonParseException, JsonMappingException, IOException {
     User u = new User();
@@ -43,7 +43,7 @@ public class TestUtil {
     return u;
   }
 
-  @Ignore("Not testing method")
+	@Disabled("Not testing method")
   public static CloudConfiguration getTestConfiguration(String fileNameResource)
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
@@ -53,7 +53,7 @@ public class TestUtil {
     return cf;
   }
   
-  @Ignore("Not testing method")
+	@Disabled("Not testing method")
   static void setFinalStatic(Field field, Object newValue) throws Exception {
       field.setAccessible(true);        
       Field modifiersField = Field.class.getDeclaredField("modifiers");
@@ -62,6 +62,7 @@ public class TestUtil {
       field.set(null, newValue);
   }
   
+	@Disabled("Not testing method")
 	public static int setAllPrivateFields(Object target, String fieldsName, Object value) 
 			throws IllegalArgumentException, IllegalAccessException {
 	  Class<?> tmpClass = target.getClass();
@@ -79,7 +80,7 @@ public class TestUtil {
 	  } while (tmpClass != null);
 	  return count;
 	}
-	
+	@Disabled("Not testing method")
 	public static void setPrivateFieldSuperClass(Object target, String fieldsName, Object value) 
 			throws IllegalArgumentException, IllegalAccessException {
 	  Class<?> tmpClass = target.getClass();
@@ -98,7 +99,7 @@ public class TestUtil {
 	}
   
   
-  @Ignore("Not testing method")
+	@Disabled("Not testing method")
   public static void setPrivateField(Object target, String fieldName, Object value){
       try{
           Field privateField = target.getClass().getDeclaredField(fieldName);

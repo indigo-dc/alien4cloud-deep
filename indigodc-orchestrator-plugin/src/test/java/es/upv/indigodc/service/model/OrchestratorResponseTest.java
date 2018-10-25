@@ -1,16 +1,16 @@
 package es.upv.indigodc.service.model;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,10 +55,11 @@ public class OrchestratorResponseTest {
 		assertEquals(or.getOrchestratorUuidDeployment(), "1234");
 	}
 	
-	@Test(expected = JsonProcessingException.class)
+	@Test
 	public void errorOnMalformedOrchestratorResponseJson() throws JsonProcessingException, IOException {
 		StringBuilder response = new StringBuilder(ORCHESTRTOR_RESPONS_MALFORMED);
-		OrchestratorResponse or = new OrchestratorResponse(200, HttpMethod.GET, response);
+		Assertions.assertThrows(JsonProcessingException.class,
+				() -> {OrchestratorResponse or = new OrchestratorResponse(200, HttpMethod.GET, response);});
 	}
 	
 	@Test

@@ -1,7 +1,12 @@
 package es.upv.indigodc.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.function.Executable;
 
 import alien4cloud.security.model.User;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -33,31 +38,19 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.jupiter.api.function.Executable;
-import org.junit.rules.ExpectedException;
 import org.springframework.http.HttpMethod;
 
 
 @Slf4j
 public class OrchestratorConnectorTest {
 
-  protected TestServer testServer;
 
   public static final String TOKEN_AUTH_RESPONSE =
       "{\"expires_in\": 1000000, \"access_token\": \"none\"}";
   public static final String ORCHESTRATOR_COMMON_PATH = "/orchestrator";
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
-
-  @Before
-  public void setup() throws Exception {
-    testServer =
-        new TestServer(
+  public TestServer getTestServer() throws Exception {
+    return new TestServer(
             18080,
             18443,
             OrchestratorConnectorTest.class.getClassLoader().getResource("keystore").getPath(),
@@ -68,14 +61,8 @@ public class OrchestratorConnectorTest {
     // testServer.start();
   }
 
-  @After
-  public void end() throws Exception {
-    if (testServer.isStarted()) {
-      testServer.stop();
-    }
-  }
 
-  @Ignore("Test is ignored because it overstretches the orchestrator")
+  @Disabled("Test is ignored because it overstretches the orchestrator")
   @Test
   public void testLoginWithProductionInfo()
       throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
@@ -85,10 +72,10 @@ public class OrchestratorConnectorTest {
 
     User user = TestUtil.getTestUser();
     AccessToken at = oc.obtainAuthTokens(cc, user.getUsername(), user.getPassword());
-    assertEquals(true, at.getAccessToken() != null);
+    Assertions.assertEquals(true, at.getAccessToken() != null);
   }
 
-  @Ignore("Test is ignored because it overstretches the orchestrator")
+  @Disabled("Test is ignored because it overstretches the orchestrator")
   @Test
   public void deployUndeployProductionAuthSingleToscaCompute()
       throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
@@ -117,13 +104,13 @@ public class OrchestratorConnectorTest {
     objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
     JsonNode root = objectMapper.readTree(or.getResponse().toString());
     List<JsonNode> vals = root.findValues("uuid");
-    assertEquals(true, vals.size() >= 1);
+    Assertions.assertEquals(true, vals.size() >= 1);
     String uuid = vals.get(0).asText();
     // log.info("UUID of the app: " + uuid);
     vals = root.findValues("status");
-    assertEquals(true, vals.size() >= 1);
+    Assertions.assertEquals(true, vals.size() >= 1);
     vals = root.findValues("callback");
-    assertEquals(true, vals.size() >= 1);
+    Assertions.assertEquals(true, vals.size() >= 1);
 
     // now let us see the status
     or = oc.callDeploymentStatus(cc, user.getUsername(), user.getPassword(), uuid);
@@ -131,7 +118,7 @@ public class OrchestratorConnectorTest {
 
     // now let us undeploy
     or = oc.callUndeploy(cc, user.getUsername(), user.getPassword(), uuid);
-    assertEquals(204, or.getCode());
+    Assertions.assertEquals(204, or.getCode());
 
     // now let us see the status
     or = oc.callDeploymentStatus(cc, user.getUsername(), user.getPassword(), uuid);
@@ -152,6 +139,7 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(
                 new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
@@ -175,6 +163,7 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(
                 new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
     OrchestratorConnector oc = new OrchestratorConnector();
@@ -197,6 +186,7 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(
                 new OrchestratorResponse(1, HttpMethod.GET, new StringBuilder("{\"status\": \"ok\"}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
@@ -219,12 +209,13 @@ public class OrchestratorConnectorTest {
             404,
             om.writeValueAsString(
                 new OrchestratorResponse(404, HttpMethod.GET, new StringBuilder("{\"status\": \"ok\"}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
     User user = TestUtil.getTestUser();
-    Executable callGetDeployments = () -> oc.callGetDeployments(cc, user.getName(), user.getPassword());
-    assertThrows(OrchestratorIamException.class, callGetDeployments);
+    Executable callGetDeployments = () -> {oc.callGetDeployments(cc, user.getName(), user.getPassword());};
+    Assertions.assertThrows(OrchestratorIamException.class, callGetDeployments);
     testServer.stop();
   }
   
@@ -242,6 +233,7 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(
                 new OrchestratorResponse(200, HttpMethod.GET, new StringBuilder("{}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
@@ -265,6 +257,7 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(
                 new OrchestratorResponse(200, HttpMethod.DELETE, new StringBuilder("{}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
@@ -288,6 +281,7 @@ public class OrchestratorConnectorTest {
             200,
             om.writeValueAsString(
                 new OrchestratorResponse(200, HttpMethod.DELETE, new StringBuilder("{}")))));
+    TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
     OrchestratorConnector oc = new OrchestratorConnector();
@@ -322,7 +316,7 @@ public class OrchestratorConnectorTest {
 	  testUndeployDifferentHttpCodesUnsecured(601);
   }
   
-  @Ignore
+  @Disabled
   protected void testUndeployDifferentHttpCodesUnsecured(int code) throws Exception {
 	    Map<String, TestBlockingServlet> servlets = new HashMap<>();
 	    ObjectMapper om = new ObjectMapper();
@@ -336,12 +330,13 @@ public class OrchestratorConnectorTest {
 	            code,
 	            om.writeValueAsString(
 	                new OrchestratorResponse(code, HttpMethod.DELETE, new StringBuilder("{}")))));
+	    TestServer testServer = getTestServer();
 	    testServer.start(servlets);
 	    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
 	    OrchestratorConnector oc = new OrchestratorConnector();
 	    User user = TestUtil.getTestUser();
 	    Executable callUndeploy = () -> oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
-	    assertThrows(OrchestratorIamException.class, callUndeploy);
+	    Assertions.assertThrows(OrchestratorIamException.class, callUndeploy);
 	    testServer.stop();
   }
   

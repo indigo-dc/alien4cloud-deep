@@ -1,6 +1,6 @@
 package es.upv.indigodc;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,10 +16,10 @@ import org.alien4cloud.tosca.model.Csar;
 import org.alien4cloud.tosca.model.definitions.AbstractPropertyValue;
 import org.alien4cloud.tosca.model.definitions.PropertyValue;
 import org.alien4cloud.tosca.model.templates.Topology;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
 
@@ -65,8 +65,8 @@ public class IndigoDcOrchestratorTest {
 	@Test
 	public void setNullConfiguration() throws PluginConfigurationException, JsonParseException, JsonMappingException, IOException, IllegalArgumentException, IllegalAccessException {
 		IndigoDcOrchestrator idco = getIndigoDcOrchestratorWithTestConfig();
-		Executable setConfiguration = () -> idco.setConfiguration("id", null);
-		assertThrows(PluginConfigurationException.class, setConfiguration);
+		Executable setConfiguration = () -> {idco.setConfiguration("id", null);};
+		Assertions.assertThrows(PluginConfigurationException.class, setConfiguration);
 	}
 	
 	
@@ -101,7 +101,7 @@ public class IndigoDcOrchestratorTest {
 		deployMockWithError(OrchestratorIamException.class);
 	}
 	
-	@Ignore
+	@Disabled
 	protected void deployMockWithError(Class errorClass) 
 			throws PluginConfigurationException, JsonParseException, JsonMappingException, IOException, NoSuchFieldException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
@@ -146,7 +146,7 @@ public class IndigoDcOrchestratorTest {
 		undeployMockWithError(OrchestratorIamException.class);
 	}
 	
-	@Ignore
+	@Disabled
 	protected void undeployMockWithError(Class errorClass) 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
@@ -232,7 +232,7 @@ public class IndigoDcOrchestratorTest {
 		idco.getInstancesInformation(deploymentContext, callback);
 	}
 	
-	@Ignore
+	@Disabled
 	protected void getMockInstancesInformationError(Class errorClass, String orchestratorStatus) 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
@@ -291,7 +291,7 @@ public class IndigoDcOrchestratorTest {
 	}
 	
 	
-	@Ignore
+	@Disabled
 	protected void getMockStatusError(Class errorClass, String orchestratorStatus) 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSDeploymentContext deploymentContext = Mockito.mock(PaaSDeploymentContext.class);
@@ -306,7 +306,7 @@ public class IndigoDcOrchestratorTest {
 		idco.getStatus(deploymentContext, callback);	
 	}
 	
-	@Ignore
+	@Disabled
 	protected IndigoDcOrchestrator setupIndigoDcOrchestratorWithTestConfigDeploy(PaaSDeploymentContext deploymentContext,
 			IPaaSCallback callback, OrchestratorConnector orchestratorConnector) 
 			throws JsonProcessingException, IOException, PluginConfigurationException, NoSuchFieldException, OrchestratorIamException, 
@@ -342,7 +342,7 @@ public class IndigoDcOrchestratorTest {
 		return idco;
 	}
 	
-	@Ignore
+	@Disabled
 	protected IndigoDcOrchestrator getIndigoDcOrchestratorWithTestConfig() 
 			throws JsonParseException, JsonMappingException, IOException, PluginConfigurationException, IllegalArgumentException, IllegalAccessException {
 		CloudConfigurationManager cfm = new CloudConfigurationManager();

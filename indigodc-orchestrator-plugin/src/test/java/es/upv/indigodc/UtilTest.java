@@ -1,6 +1,8 @@
 package es.upv.indigodc;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import es.upv.indigodc.service.model.StatusNotFoundException;
 
@@ -15,10 +17,10 @@ public class UtilTest {
 	}
 	
 	
-	@Test(expected=StatusNotFoundException.class)
+	@Test
 	public void checkAllSupportedA4CDeploymentStatusesStatusNotFound() throws StatusNotFoundException {
-			Util.indigoDcStatusToDeploymentStatus("bad value");
-			Util.indigoDcStatusToInstanceStatus("bad value");
+			Assertions.assertThrows(StatusNotFoundException.class, () -> {Util.indigoDcStatusToDeploymentStatus("bad value");});
+			Assertions.assertThrows(StatusNotFoundException.class, () -> {Util.indigoDcStatusToInstanceStatus("bad value");});
 	}
 	
 
