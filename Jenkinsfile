@@ -59,12 +59,12 @@ pipeline {
             }
             steps {
                 checkout scm
-                OWASPDependencyCheckRun("$WORKSPACE/indigodc-orchestrator-plugin/src", project="alien4cloud-deep")
+                OWASPDependencyCheckRun("${env.WORKSPACE}/indigodc-orchestrator-plugin/src", project="alien4cloud-deep")
             }
             post {
                 always {
                     OWASPDependencyCheckPublish()
-                    HTMLReport('$WORKSPACE/indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
+                    HTMLReport('indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
                     deleteDir()
                 }
             }
