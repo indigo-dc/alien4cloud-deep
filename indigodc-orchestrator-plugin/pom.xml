@@ -244,7 +244,8 @@
 							<consoleOutput>true</consoleOutput>
 							<failsOnError>true</failsOnError>
 							<linkXRef>false</linkXRef>
-							<configLocation>${basedir}/checkstyle_google.xml</configLocation>
+							<!--configLocation>${basedir}/checkstyle_google.xml</configLocation-->
+              <configLocation>google_checks.xml</configLocation>
 						</configuration>
 						<goals>
 							<goal>check</goal>
