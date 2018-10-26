@@ -226,9 +226,13 @@ If you want to visualize the results in a human friendly format, you can convert
 java -jar jacoco/lib/jacococli.jar report target/coverage-reports/jacoco-deep.exec --classfiles target/classes/ --html plugin-html-coverage-report/
 ```
 
+We require a minimum of 70% overall coverage by unit tests. When the plugin is built, Maven checks if the minimum threshold has been achieved or exceeded. If it hasn't, then the whole process has failed.
+
 ### Style
 
-The A4C orchestrator plugin's Java code must respect the Google Java formatting style. We use checkstyle with Maven as a plugin. This way we can be assured that the committed code respects the required formatting. Furthermore, the building process fails when warnings are encountered.
+The A4C orchestrator plugin's Java code must respect the Google Java formatting style, on [Github](https://github.com/google/google-java-format).
+
+We use checkstyle with Maven, as a plugin. This way we can rest assured that the committed code, that passes the continuous integration testing, respects the required formatting. The building process fails when warnings are encountered. We use the [oficial checkstyle repository](https://github.com/checkstyle/checkstyle) to obtain a stable version of _com.puppycrawl.tools.checkstyle_ dependency of the _org.apache.maven.plugins.maven-checkstyle-plugin_ plugin. The checkstyle team includes a formatter ready to be used that respects Google's rules. 
 
 ## Known Issues
 
