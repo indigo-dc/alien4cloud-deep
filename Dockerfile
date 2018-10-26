@@ -8,7 +8,7 @@ ARG a4c_src_dir=alien4cloud
 ARG a4c_install_dir=a4c
 ARG a4c_upv_ver=${a4c_ver}-UPV-1.0.0
 ARG a4c_user=a4c
-ARG a4c_settings_manager_ver=0.0.1-SNAPSHOT
+ARG a4c_settings_manager_ver=0.0.2-SNAPSHOT
 
 ENV A4C_INSTALL_PATH=${a4c_install_path}
 ENV A4C_SRC_DIR=${a4c_src_dir}
