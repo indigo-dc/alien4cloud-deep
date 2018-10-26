@@ -1,14 +1,11 @@
 package es.upv.indigodc.configuration;
 
 import alien4cloud.ui.form.annotation.FormProperties;
-
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * Container class that has all the fields that allow the user to configure an orchestrator
@@ -18,32 +15,32 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@FormProperties({
-  "clientId",
-  "clientSecret",
-  "tokenEndpoint",
-  "tokenEndpointCert",
-  "clientScopes",
-  "orchestratorEndpoint",
-  "orchestratorEndpointCert",
-  "iamHost",
-  "iamHostCert",
-  "orchestratorPollInterval",
-  "importIndigoCustomTypes"
-})
+@FormProperties({"clientId", "clientSecret", "tokenEndpoint", "tokenEndpointCert", "clientScopes",
+    "orchestratorEndpoint", "orchestratorEndpointCert", "iamHost", "iamHostCert",
+    "orchestratorPollInterval", "importIndigoCustomTypes"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloudConfiguration {
 
-  @NotNull private String clientId;
-  @NotNull private String clientSecret;
-  @NotNull private String tokenEndpoint;
-  @NotNull private String tokenEndpointCert;
-  @NotNull private String clientScopes;
-  @NotNull private String orchestratorEndpoint;
-  @NotNull private String orchestratorEndpointCert;
-  @NotNull private String iamHost;
-  @NotNull private String iamHostCert;
+  @NotNull
+  private String clientId;
+  @NotNull
+  private String clientSecret;
+  @NotNull
+  private String tokenEndpoint;
+  @NotNull
+  private String tokenEndpointCert;
+  @NotNull
+  private String clientScopes;
+  @NotNull
+  private String orchestratorEndpoint;
+  @NotNull
+  private String orchestratorEndpointCert;
+  @NotNull
+  private String iamHost;
+  @NotNull
+  private String iamHostCert;
   private int orchestratorPollInterval;
-  @NotNull private String importIndigoCustomTypes;
+  @NotNull
+  private String importIndigoCustomTypes;
 }

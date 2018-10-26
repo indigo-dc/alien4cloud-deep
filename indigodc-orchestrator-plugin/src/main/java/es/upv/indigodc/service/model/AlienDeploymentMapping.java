@@ -9,9 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AlienDeploymentMapping {
 
-  public static final AlienDeploymentMapping EMPTY =
-      new AlienDeploymentMapping(
-          "unknown_deployment_id", "unknown_orchestrator_id", DeploymentStatus.UNKNOWN);
+  public static final AlienDeploymentMapping EMPTY = new AlienDeploymentMapping(
+      "unknown_deployment_id", "unknown_orchestrator_id", DeploymentStatus.UNKNOWN);
 
   /**
    * The id of the whole deployment (basically the instance if the topology launched at one time on

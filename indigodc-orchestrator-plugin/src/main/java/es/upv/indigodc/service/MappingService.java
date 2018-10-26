@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,16 +34,12 @@ public class MappingService {
    * @param alienDeploymentId the id of the deployment in Alien
    * @param status The running status of the deployment, Deploying or Undeploying.
    */
-  public void registerDeploymentInfo(
-      String orchestratorUuidDeployment,
-      String alienDeploymentId,
-      String orchestratorId,
-      DeploymentStatus status) {
-    indigoDcToAlienDeploymentMap.put(
-        orchestratorUuidDeployment,
+  public void registerDeploymentInfo(String orchestratorUuidDeployment, String alienDeploymentId,
+      String orchestratorId, DeploymentStatus status) {
+    indigoDcToAlienDeploymentMap.put(orchestratorUuidDeployment,
         new AlienDeploymentMapping(alienDeploymentId, orchestratorId, status));
-    alienToIndigoDcDeploymentMap.put(
-        alienDeploymentId, new OrchestratorDeploymentMapping(orchestratorUuidDeployment, status));
+    alienToIndigoDcDeploymentMap.put(alienDeploymentId,
+        new OrchestratorDeploymentMapping(orchestratorUuidDeployment, status));
   }
 
   /**
@@ -53,10 +48,10 @@ public class MappingService {
    * @param alienDeploymentId the A4C deployment ID
    * @param status its status
    */
-  public void registerDeploymentInfoAlienToIndigoDc(
-      String alienDeploymentId, DeploymentStatus status) {
-    alienToIndigoDcDeploymentMap.put(
-        alienDeploymentId, new OrchestratorDeploymentMapping(null, status));
+  public void registerDeploymentInfoAlienToIndigoDc(String alienDeploymentId,
+      DeploymentStatus status) {
+    alienToIndigoDcDeploymentMap.put(alienDeploymentId,
+        new OrchestratorDeploymentMapping(null, status));
   }
 
   public OrchestratorDeploymentMapping getByAlienDeploymentId(String alienDeploymentId) {
@@ -80,15 +75,14 @@ public class MappingService {
    */
   public void init(Collection<PaaSTopologyDeploymentContext> activeDeployments) {
     log.info("call");
-    activeDeployments.forEach(
-        context -> {
-          // Initialize a new group mapping
-          final String groupId = context.getDeploymentPaaSId().toLowerCase();
-          // Fill app mapping
-          // registerGroupMapping(groupId, context.getDeploymentId());
-          //          context.getPaaSTopology().getNonNatives().forEach(nodeTemplate ->
-          //          	registerAppMapping(groupId, nodeTemplate.getId().toLowerCase(),
-          // nodeTemplate.getId()));
-        });
+    activeDeployments.forEach(context -> {
+      // Initialize a new group mapping
+      final String groupId = context.getDeploymentPaaSId().toLowerCase();
+      // Fill app mapping
+      // registerGroupMapping(groupId, context.getDeploymentId());
+      // context.getPaaSTopology().getNonNatives().forEach(nodeTemplate ->
+      // registerAppMapping(groupId, nodeTemplate.getId().toLowerCase(),
+      // nodeTemplate.getId()));
+    });
   }
 }

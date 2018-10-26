@@ -1,15 +1,10 @@
 package es.upv.indigodc.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,17 +16,12 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.logging.Logger;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
@@ -83,14 +73,13 @@ public class OrchestratorConnector {
    * @param cloudConfiguration The configuration used for the plugin instance
    * @return the information received from the authorization service
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *     data.
+   *         data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *     and 299.
+   *         and 299.
    */
-  public AccessToken obtainAuthTokens(
-      CloudConfiguration cloudConfiguration, String userName, String userPassword)
-      throws IOException, NoSuchFieldException, OrchestratorIamException {
+  public AccessToken obtainAuthTokens(CloudConfiguration cloudConfiguration, String userName,
+      String userPassword) throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     StringBuilder sbuf = new StringBuilder();
     sbuf.append("grant_type=password&");
@@ -103,14 +92,14 @@ public class OrchestratorConnector {
 
     AccessToken at = null;
     SSLContext sslContext = getSslContext(cloudConfiguration);
-    OrchestratorResponse r =
+    OrchestratorResponse response =
         restCall(requestUrl, sbuf.toString(), null, true, sslContext, HttpMethod.GET);
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> map =
-        mapper.readValue(r.getResponse().toString(), new TypeReference<Map<String, String>>() {});
-    at =
-        new AccessToken(
-            Integer.parseInt((String) map.get("expires_in")), (String) map.get("access_token"));
+        mapper.readValue(response.getResponse().toString(), 
+            new TypeReference<Map<String, String>>() {});
+    at = new AccessToken(Integer.parseInt((String) map.get("expires_in")),
+        (String) map.get("access_token"));
 
     return at;
   }
@@ -122,13 +111,13 @@ public class OrchestratorConnector {
    * @param cloudConfiguration The configuration used for the plugin instance
    * @return The response from the orchestrator
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *     data.
+   *         data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *     and 299.
+   *         and 299.
    */
-  public OrchestratorResponse callGetDeployments(
-      CloudConfiguration cloudConfiguration, String userName, String userPassword)
+  public OrchestratorResponse callGetDeployments(CloudConfiguration cloudConfiguration,
+      String userName, String userPassword)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
@@ -147,13 +136,8 @@ public class OrchestratorConnector {
     URL requestUrl = new URL(sbuf.toString());
 
     SSLContext sslContext = getSslContext(cloudConfiguration);
-    return restCall(
-        requestUrl,
-        null,
-        headers,
-        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
-        sslContext,
-        HttpMethod.GET);
+    return restCall(requestUrl, null, headers,
+        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, HttpMethod.GET);
   }
 
   /**
@@ -162,20 +146,17 @@ public class OrchestratorConnector {
    *
    * @param cloudConfiguration The configuration used for the plugin instance
    * @param yamlTopology The actual topology accepted by the orchestrator. It is a string formated
-   *     and packed for the orchestrator e.g. new lines are replaced with their representation of
-   *     '\n'.
+   *        and packed for the orchestrator e.g. new lines are replaced with their representation of
+   *        '\n'.
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *     data.
+   *         data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *     and 299.
+   *         and 299.
    */
-  public OrchestratorResponse callDeploy(
-      CloudConfiguration cloudConfiguration,
-      String userName,
-      String userPassword,
-      String yamlTopology)
+  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, String userName,
+      String userPassword, String yamlTopology)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
 
@@ -192,13 +173,8 @@ public class OrchestratorConnector {
 
     SSLContext sslContext = getSslContext(cloudConfiguration);
     LOGGER.info("Post Data: " + yamlTopology);
-    return restCall(
-        requestUrl,
-        yamlTopology,
-        headers,
-        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
-        sslContext,
-        HttpMethod.POST);
+    return restCall(requestUrl, yamlTopology, headers,
+        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, HttpMethod.POST);
   }
 
   /**
@@ -208,16 +184,13 @@ public class OrchestratorConnector {
    * @param deploymentId The id of the deployment we need the information for
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *     data.
+   *         data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *     and 299.
+   *         and 299.
    */
-  public OrchestratorResponse callDeploymentStatus(
-      CloudConfiguration cloudConfiguration,
-      String userName,
-      String userPassword,
-      String deploymentId)
+  public OrchestratorResponse callDeploymentStatus(CloudConfiguration cloudConfiguration,
+      String userName, String userPassword, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call deployment status for UUID " + deploymentId);
 
@@ -233,13 +206,8 @@ public class OrchestratorConnector {
     URL requestUrl = new URL(sbuf.toString());
 
     SSLContext sslContext = getSslContext(cloudConfiguration);
-    return restCall(
-        requestUrl,
-        null,
-        headers,
-        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
-        sslContext,
-        HttpMethod.GET);
+    return restCall(requestUrl, null, headers,
+        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, HttpMethod.GET);
   }
 
   /**
@@ -249,16 +217,13 @@ public class OrchestratorConnector {
    * @param deploymentId The id of the deployment we need to undeploy
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *     data.
+   *         data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *     and 299.
+   *         and 299.
    */
-  public OrchestratorResponse callUndeploy(
-      CloudConfiguration cloudConfiguration,
-      String userName,
-      String userPassword,
-      String deploymentId)
+  public OrchestratorResponse callUndeploy(CloudConfiguration cloudConfiguration, String userName,
+      String userPassword, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     log.info("call undeploy");
@@ -275,13 +240,8 @@ public class OrchestratorConnector {
     URL requestUrl = new URL(sbuf.toString());
 
     SSLContext sslContext = getSslContext(cloudConfiguration);
-    return restCall(
-        requestUrl,
-        null,
-        headers,
-        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()),
-        sslContext,
-        HttpMethod.DELETE);
+    return restCall(requestUrl, null, headers,
+        isUrlSecured(cloudConfiguration.getOrchestratorEndpoint()), sslContext, HttpMethod.DELETE);
   }
 
   /**
@@ -296,18 +256,13 @@ public class OrchestratorConnector {
    * @param requestType one of the following values: OrchestratorConnector.{POST, GET, DELETE, PUT}
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *     data.
+   *         data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *     and 299.
+   *         and 299.
    */
-  public OrchestratorResponse restCall(
-      URL requestUrl,
-      String postData,
-      Map<String, String> headers,
-      boolean isSecured,
-      SSLContext sslContext,
-      HttpMethod requestType)
+  public OrchestratorResponse restCall(URL requestUrl, String postData, Map<String, String> headers,
+      boolean isSecured, SSLContext sslContext, HttpMethod requestType)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     URLConnection connection = null;
@@ -366,7 +321,7 @@ public class OrchestratorConnector {
       StringBuilder response = getResponse(is);
       LOGGER.info("Response content: " + response);
       return new OrchestratorResponse(responseCode, requestType, response);
-    } else if (400<=responseCode && responseCode <= 599){
+    } else if (400 <= responseCode && responseCode <= 599) {
       if (isSecured) {
         is = ((HttpsURLConnection) connection).getErrorStream();
       } else {
@@ -376,7 +331,7 @@ public class OrchestratorConnector {
       LOGGER.info("Response content: " + response);
       throw new OrchestratorIamException(responseCode, title, response.toString());
     } else {
-    	throw new OrchestratorIamException(responseCode, title, "{}");
+      throw new OrchestratorIamException(responseCode, title, "{}");
     }
   }
 

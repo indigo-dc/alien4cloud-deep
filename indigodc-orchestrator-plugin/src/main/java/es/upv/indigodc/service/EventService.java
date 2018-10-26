@@ -19,11 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -34,7 +31,8 @@ public class EventService {
 
   public static final int EVENT_QUEUE_MAX_SIZE = 1000;
 
-  @Autowired private UserService userService;
+  @Autowired
+  private UserService userService;
 
   @Autowired
   @Qualifier("orchestrator-connector")
@@ -54,16 +52,16 @@ public class EventService {
    * @param cc the cloud configuration used for the orchestrator instance
    */
   public void subscribe(CloudConfiguration cc) {
-    //	  if (executor != null)
-    //		  executor.shutdown();
-    //    executor = Executors.newScheduledThreadPool(1);
+    // if (executor != null)
+    // executor.shutdown();
+    // executor = Executors.newScheduledThreadPool(1);
     //
-    //    executor.scheduleWithFixedDelay(
-    //        new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue,
+    // executor.scheduleWithFixedDelay(
+    // new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue,
     // userService.getCurrentUser()),
-    //        0,
-    //        cc.getOrchestratorPollInterval(),
-    //        TimeUnit.SECONDS);
+    // 0,
+    // cc.getOrchestratorPollInterval(),
+    // TimeUnit.SECONDS);
   }
 
   public void unsubscribe() {
@@ -78,12 +76,12 @@ public class EventService {
    */
   public AbstractMonitorEvent[] flushEvents(Date date, int maxEvents) {
     ArrayList<AbstractMonitorEvent> events = new ArrayList<>(eventQueue.size());
-    AbstractMonitorEvent e = eventQueue.poll();
+    AbstractMonitorEvent ame = eventQueue.poll();
     int count = 0;
-    while (e != null && e.getDate() > date.getTime() && count < maxEvents) {
-      events.add(e);
+    while (ame != null && ame.getDate() > date.getTime() && count < maxEvents) {
+      events.add(ame);
       ++count;
-      e = eventQueue.poll();
+      ame = eventQueue.poll();
     }
     //// It doesn matter if we lose some stats
     // eventQueue.clear();
@@ -102,11 +100,8 @@ public class EventService {
 
     private User user;
 
-    public OrchestratorPollRunnable(
-        OrchestratorConnector orchestratorConnector,
-        final CloudConfiguration cc,
-        Queue<AbstractMonitorEvent> eventQueue,
-        User user) {
+    public OrchestratorPollRunnable(OrchestratorConnector orchestratorConnector,
+        final CloudConfiguration cc, Queue<AbstractMonitorEvent> eventQueue, User user) {
       this.orchestratorConnector = orchestratorConnector;
       this.cc = cc;
       this.eventQueue = eventQueue;
@@ -117,9 +112,8 @@ public class EventService {
     public void run() {
       log.info("Event Service get deployments");
       try {
-        OrchestratorResponse response =
-            orchestratorConnector.callGetDeployments(
-                cc, user.getUsername(), user.getPlainPassword());
+        OrchestratorResponse response = orchestratorConnector.callGetDeployments(cc,
+            user.getUsername(), user.getPlainPassword());
         if (response.isCodeOk()) {
           ObjectMapper objectMapper = new ObjectMapper();
           objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
@@ -129,9 +123,8 @@ public class EventService {
           // For each deployment, add its status to the list
           for (JsonNode jsonNode : deployments) {
             PaaSDeploymentStatusMonitorEvent statusEv = new PaaSDeploymentStatusMonitorEvent();
-            statusEv.setDeploymentStatus(
-                Util.indigoDcStatusToDeploymentStatus(
-                    jsonNode.findValue("status").get(0).asText()));
+            statusEv.setDeploymentStatus(Util
+                .indigoDcStatusToDeploymentStatus(jsonNode.findValue("status").get(0).asText()));
             String orchestratorDeploymentUuid = jsonNode.findValue("uuid").get(0).asText();
             AlienDeploymentMapping alienDeploymentMapping =
                 mappingService.getByOrchestratorUuidDeployment(orchestratorDeploymentUuid);
@@ -139,40 +132,34 @@ public class EventService {
               statusEv.setDeploymentId(alienDeploymentMapping.getDeploymentId());
               statusEv.setOrchestratorId(alienDeploymentMapping.getOrchetratorId());
               // Get date/time from ISO to long since 1.1.1970
-              statusEv.setDate(
-                  LocalDateTime.parse(jsonNode.findValue("updateTime").get(0).asText())
-                      .toInstant(ZoneOffset.ofTotalSeconds(0))
-                      .toEpochMilli());
+              statusEv.setDate(LocalDateTime.parse(jsonNode.findValue("updateTime").get(0).asText())
+                  .toInstant(ZoneOffset.ofTotalSeconds(0)).toEpochMilli());
               if (eventQueue.size() < EVENT_QUEUE_MAX_SIZE) {
                 eventQueue.add(statusEv);
               }
             } else {
-              log.warn(
-                  String.format(
-                      "Deployment with ID %s not found in the A4C DB", orchestratorDeploymentUuid));
+              log.warn(String.format("Deployment with ID %s not found in the A4C DB",
+                  orchestratorDeploymentUuid));
             }
           }
         } else {
           log.error("Error calling deployments");
         }
-        //        if (vals.size() > 0)
-        //          vals.get(0).asText();
-        //        else
-        //          throw new NoSuchElementException("The response for deployment doesn't contain an
+        // if (vals.size() > 0)
+        // vals.get(0).asText();
+        // else
+        // throw new NoSuchElementException("The response for deployment doesn't contain an
         // uuid field");
 
         log.info("Event Service get deployments 2");
-      } catch (NoSuchFieldException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (OrchestratorIamException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (Error | Exception e) {
-        e.printStackTrace();
+      } catch (NoSuchFieldException ex) {
+        ex.printStackTrace();
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      } catch (OrchestratorIamException ex) {
+        ex.printStackTrace();
+      } catch (Error | Exception ex) {
+        ex.printStackTrace();
       }
     }
   }

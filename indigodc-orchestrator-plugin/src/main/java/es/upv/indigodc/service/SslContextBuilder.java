@@ -11,7 +11,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import okio.Buffer;
 import okio.ByteString;
-
 import org.springframework.stereotype.Service;
 
 
@@ -56,9 +55,8 @@ public final class SslContextBuilder {
       int nextName = 1;
       for (String certificateBase64 : certificateBase64s) {
         Buffer certificateBuffer = new Buffer().write(ByteString.decodeBase64(certificateBase64));
-        X509Certificate certificate =
-            (X509Certificate)
-                certificateFactory.generateCertificate(certificateBuffer.inputStream());
+        X509Certificate certificate = (X509Certificate) certificateFactory
+            .generateCertificate(certificateBuffer.inputStream());
         keyStore.setCertificateEntry(Integer.toString(nextName++), certificate);
         certificateBuffer.close();
       }
@@ -68,10 +66,10 @@ public final class SslContextBuilder {
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
       return sslContext;
-    } catch (GeneralSecurityException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    } catch (GeneralSecurityException er) {
+      throw new RuntimeException(er);
+    } catch (IOException er) {
+      throw new RuntimeException(er);
     }
   }
 }

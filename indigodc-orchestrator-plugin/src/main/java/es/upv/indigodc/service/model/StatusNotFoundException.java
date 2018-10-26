@@ -12,7 +12,8 @@ public class StatusNotFoundException extends Exception {
   /** Default. */
   private static final long serialVersionUID = 1L;
   /** The status that cannot be found. */
-  @Getter protected String status;
+  @Getter
+  protected String status;
 
   /**
    * Creates an exception with the status.

@@ -5,12 +5,14 @@ import alien4cloud.model.orchestrators.locations.LocationResourceTemplate;
 import alien4cloud.orchestrators.plugin.ILocationConfiguratorPlugin;
 import alien4cloud.orchestrators.plugin.ILocationResourceAccessor;
 import alien4cloud.orchestrators.plugin.model.PluginArchive;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.ApplicationContext;
@@ -29,7 +31,8 @@ import org.springframework.stereotype.Component;
 public class LocationConfiguratorFactory {
 
   /** The context of the whole application. */
-  @Inject private ApplicationContext applicationContext;
+  @Inject
+  private ApplicationContext applicationContext;
 
   /**
    * Generates a new instance for a location.

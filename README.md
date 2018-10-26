@@ -209,6 +209,27 @@ We currently do not support showing information about individual nodes of the de
 We implemented a series of tests that should be executed during the maven building step.
 You can find them in the **indigodc-orchestrator-plugin/src/test/** directory.
 
+You can run the unit tests by calling _mvn_ with a specific target:
+
+```
+mvn clean test
+```
+
+### Coverage
+
+During the plugin building process, we use Jacoco (through the Eclipse plugin for fast coverage execution, or Maven for automatic release).
+Jacoco generates the _jacoco-deep.exec_ file in the target/coverage-reports/ directory, after running the maven **test** lifecycle. 
+
+If you want to visualize the results in a human friendly format, you can convert the _jacoco-deep.exec_ file to html using the CLI from the package at https://www.eclemma.org/jacoco/, e.g.
+
+```
+java -jar jacoco/lib/jacococli.jar report target/coverage-reports/jacoco-deep.exec --classfiles target/classes/ --html plugin-html-coverage-report/
+```
+
+### Style
+
+The A4C orchestrator plugin's Java code must respect the Google Java formatting style. We use checkstyle with Maven as a plugin. This way we can be assured that the committed code respects the required formatting. Furthermore, the building process fails when warnings are encountered.
+
 ## Known Issues
 
 Please take a look at the issues list on Github.

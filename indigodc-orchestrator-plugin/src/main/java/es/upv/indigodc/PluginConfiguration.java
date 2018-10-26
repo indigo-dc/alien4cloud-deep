@@ -6,4 +6,5 @@ import org.springframework.context.annotation.Configuration;
 /** Plugin spring context configuration. */
 @Configuration
 @ComponentScan(basePackages = "es.upv.indigodc")
-public class PluginConfiguration {}
+public class PluginConfiguration {
+}

@@ -22,9 +22,9 @@ public class UserService {
    * @return the A4C user instance
    */
   public User getCurrentUser() {
-    User u = AuthorizationUtil.getCurrentUser();
+    User user = AuthorizationUtil.getCurrentUser();
     // log.info("Username is: " + u.getUsername());
     // log.info("Password plain is: " + u.getPlainPassword());
-    return u;
+    return user;
   }
 }
