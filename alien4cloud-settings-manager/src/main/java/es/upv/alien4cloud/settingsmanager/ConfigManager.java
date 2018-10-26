@@ -189,13 +189,20 @@ public class ConfigManager {
 	  Security.addProvider(new BouncyCastleProvider());
 
 	    PEMParser pemParser = new PEMParser(new InputStreamReader(new FileInputStream(caKeyFullPath)));
-	    PEMEncryptedKeyPair encryptedKeyPair = (PEMEncryptedKeyPair) pemParser.readObject();
-	    PEMDecryptorProvider decryptorProvider = new JcePEMDecryptorProviderBuilder().build(keyPassword.toCharArray());
-	    PEMKeyPair pemKeyPair = encryptedKeyPair.decryptKeyPair(decryptorProvider);
-
-	    JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-	    pemParser.close();
-	    return converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+	    Object keyPair = pemParser.readObject();
+	    PrivateKey privateKey = null;
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+	    if (keyPair instanceof PEMEncryptedKeyPair) {
+    	    PEMEncryptedKeyPair encryptedKeyPair = (PEMEncryptedKeyPair) keyPair;
+    	    PEMDecryptorProvider decryptorProvider = new JcePEMDecryptorProviderBuilder().build(keyPassword.toCharArray());
+    	    PEMKeyPair pemKeyPair = encryptedKeyPair.decryptKeyPair(decryptorProvider);
+    	    privateKey = converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+	    } else {
+	       PEMKeyPair pemKeyPair = (PEMKeyPair) keyPair;
+	       privateKey = converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+	    }
+        pemParser.close();
+	    return privateKey;
   }
   
   public void writeConfig(String outFileFullPath) 
