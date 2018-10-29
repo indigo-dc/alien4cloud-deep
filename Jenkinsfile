@@ -24,12 +24,12 @@ pipeline {
                 dir("indigodc-orchestrator-plugin") {
                     sh 'wget https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml'
                     sh 'wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.13/checkstyle-8.13-all.jar'
-                    sh 'java -jar checkstyle-8.13-all.jar -c google_checks.xml .'
+                    sh 'java -jar checkstyle-8.13-all.jar -c google_checks.xml src/ -e src/test/ -e src/main/assembly/ -f xml -o checkstyle-result.xml'
                 }
             }
             post {
                 always {
-                    CheckstyleReport()
+                    CheckstyleReport('checkstyle-result.xml')
                 }
             }
         }
@@ -59,12 +59,12 @@ pipeline {
             }
             steps {
                 checkout scm
-                OWASPDependencyCheckRun("$WORKSPACE/indigodc-orchestrator-plugin/src", project="alien4cloud-deep")
+                OWASPDependencyCheckRun("${env.WORKSPACE}/indigodc-orchestrator-plugin/src", project="alien4cloud-deep")
             }
             post {
                 always {
                     OWASPDependencyCheckPublish()
-                    HTMLReport('$WORKSPACE/indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
+                    HTMLReport('indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
                     deleteDir()
                 }
             }
