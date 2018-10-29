@@ -100,6 +100,15 @@ public class ConfigManager {
           String.format("Can't find the server node in the %s template", CONFIG_TEMPLATE_PATH));
   }
   
+  public void disableSsl() throws ValueNotFoundException {
+    ObjectNode server = (ObjectNode) root.findValue("server");
+    if (server != null) {
+      server.remove("ssl");
+    } else 
+      throw new ValueNotFoundException(
+          String.format("Can't find the server node in the %s template", CONFIG_TEMPLATE_PATH));
+  }
+  
   public void enableSsl(String keystorePassword, String keyPassword,
 		  String caCertFullPath, String caKeyFullPath) throws ValueNotFoundException, 
     NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
@@ -113,7 +122,8 @@ public class ConfigManager {
         boolean created = this.createJavaKeystore(keystoreFullPath, keystorePassword, keyPassword,
             caCertFullPath, caKeyFullPath);
         if (!created) {
-          log.error("Unable to store the certificate to enable SSL");
+          log.error("Unable to store the certificate to enable HTTPS");
+          this.disableSsl();
         } else {
           ssl.put("key-store-password", keystorePassword);
           ssl.put("key-password", keyPassword);        
