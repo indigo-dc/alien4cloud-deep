@@ -38,6 +38,7 @@ import okio.Buffer;
 import okio.ByteString;
 
 import org.apache.logging.log4j.util.Strings;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -109,10 +110,14 @@ public class ConfigManager {
       if (ssl != null) {
         String keystoreFullPath = this.installPathDir + "/" +  
             ssl.get("key-store").asText();
-        ssl.put("key-store-password", keystorePassword);
-        ssl.put("key-password", keyPassword);
-        this.createJavaKeystore(keystoreFullPath, keystorePassword, keyPassword,
-        		caCertFullPath, caKeyFullPath);
+        boolean created = this.createJavaKeystore(keystoreFullPath, keystorePassword, keyPassword,
+            caCertFullPath, caKeyFullPath);
+        if (!created) {
+          log.error("Unable to store the certificate to enable SSL");
+        } else {
+          ssl.put("key-store-password", keystorePassword);
+          ssl.put("key-password", keyPassword);        
+        }
       }
     } else 
       throw new ValueNotFoundException(
@@ -135,10 +140,10 @@ public class ConfigManager {
           String.format("Can't find the alien_security node in the %s template", CONFIG_TEMPLATE_PATH));
   }
   
-  private void createJavaKeystore(String keystoreFullPath, 
+  private boolean createJavaKeystore(String keystoreFullPath, 
       String keystorePassword, String keyPassword,
       String caCertFullPath, String caKeyFullPath) throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
-    
+      boolean result = true;
     
 //    CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 //    TrustManagerFactory trustManagerFactory =
@@ -158,7 +163,11 @@ public class ConfigManager {
 //            certificateFactory.generateCertificate(certificateBuffer.inputStream());
     X509Certificate cert = getCertificate(caCertFullPath);
     ks.setCertificateEntry(CERTIFICATE_KEY_ALIAS, cert);
-    ks.setKeyEntry(CERTIFICATE_KEY_ALIAS, getKey(caKeyFullPath, keyPassword), keyPassword.toCharArray(), new Certificate[] {cert});
+    PrivateKey key = getKey(caKeyFullPath, keyPassword);
+    if (key != null)
+      ks.setKeyEntry(CERTIFICATE_KEY_ALIAS, key, keyPassword.toCharArray(), new Certificate[] {cert});
+    else
+      result = false;
     //certificateBuffer.close();
 
 
@@ -166,6 +175,7 @@ public class ConfigManager {
     FileOutputStream fos = new FileOutputStream(keystoreFullPath);
     ks.store(fos, password);
     fos.close();
+    return result;
   }
   
 //  private String certToBase64(String pemFullPath) throws IOException, CertificateException {
@@ -193,14 +203,21 @@ public class ConfigManager {
 	    PrivateKey privateKey = null;
         JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
 	    if (keyPair instanceof PEMEncryptedKeyPair) {
+	        log.info("PEMEncryptedKeyPair format found");
     	    PEMEncryptedKeyPair encryptedKeyPair = (PEMEncryptedKeyPair) keyPair;
     	    PEMDecryptorProvider decryptorProvider = new JcePEMDecryptorProviderBuilder().build(keyPassword.toCharArray());
     	    PEMKeyPair pemKeyPair = encryptedKeyPair.decryptKeyPair(decryptorProvider);
     	    privateKey = converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
-	    } else {
+	    } else if (keyPair instanceof PEMKeyPair) {
+          log.info("PEMKeyPair format found");
 	       PEMKeyPair pemKeyPair = (PEMKeyPair) keyPair;
 	       privateKey = converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
-	    }
+	    } else if (keyPair instanceof PrivateKeyInfo )  {
+          log.info("PrivateKeyInfo format found");
+	      PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) keyPair;
+	      privateKey = converter.getPrivateKey(privateKeyInfo);
+	    } else 
+	      log.error(String.format("Key format %s not handled; Please contact the devs", keyPair.getClass().getCanonicalName()));
         pemParser.close();
 	    return privateKey;
   }
