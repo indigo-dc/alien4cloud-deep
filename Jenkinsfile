@@ -8,7 +8,7 @@ pipeline {
     }
     
     environment {
-        dockerhub_repo = "indigodatacloud/alien4cloud"
+        dockerhub_repo = "indigodatacloud/alien4cloud-deep"
         dockerhub_image_id = ''
     }
 
