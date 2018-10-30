@@ -30,8 +30,8 @@ ENV A4C_ADMIN_PASSWORD=admin
 ENV A4C_ENABLE_SSL=true
 ENV A4C_KEY_STORE_PASSWORD=default
 ENV A4C_KEY_PASSWORD=default
-ENV A4C_PEM_CA_CERT_FILE=ca.pem
-ENV A4C_PEM_CA_KEY_FILE=ca-key.pem
+ENV A4C_PEM_CERT_FILE=ca.pem
+ENV A4C_PEM_KEY_FILE=ca-key.pem
 ENV A4C_CERTS_ROOT_PATH=/certs
 
 ADD indigodc-orchestrator-plugin "${a4c_install_path}/indigodc-orchestrator-plugin"

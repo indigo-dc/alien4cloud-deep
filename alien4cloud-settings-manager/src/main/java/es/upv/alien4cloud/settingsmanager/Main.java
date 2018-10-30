@@ -42,8 +42,8 @@ public class Main {
         String keystorePassword = getEnvValue("A4C_KEY_STORE_PASSWORD");
         String keyPassword = getEnvValue("A4C_KEY_PASSWORD");
         String certsRootPath = getEnvValue("A4C_CERTS_ROOT_PATH");
-        String caCertFile = getEnvValue("A4C_PEM_CA_CERT_FILE");
-        String caKeyFile = getEnvValue("A4C_PEM_CA_KEY_FILE");
+        String caCertFile = getEnvValue("A4C_PEM_CERT_FILE");
+        String caKeyFile = getEnvValue("A4C_PEM_KEY_FILE");
         boolean enableSsl = Boolean.parseBoolean(getEnvValue("A4C_ENABLE_SSL"));
         boolean resetConfig = Boolean.parseBoolean(getEnvValue("A4C_RESET_CONFIG"));
         boolean executeMethod = true;    

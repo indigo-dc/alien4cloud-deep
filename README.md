@@ -60,16 +60,27 @@ If the name of a variable is the same as the name of an argument, but with capit
 * **A4C_ADMIN_PASSWORD** (RW) - the password of the default admin user of A4C
 * **A4C_ENABLE_SSL** (RW) - enable SSL mode for A4C; HTTP will be disabled; Either "true" or "false" 
 * **A4C_KEY_STORE_PASSWORD** (RW) - the password of the keystore used by A4C
-* **A4C_KEY_PASSWORD** (RW) - the password of the key that is added using the PEM file refered by the ENV **A4C_PEM_CA_KEY_FILE** 
-* **A4C_PEM_CA_CERT_FILE** (RW) - the name of the PEM file with the certificate used to secure the A4C instance (just the name, without path)
-* **A4C_PEM_CA_KEY_FILE** (RW) - the name of the PEM file with the key used to secure the A4C instance (just the name, without path)
-* **A4C_CERTS_ROOT_PATH** (RW) - the full path to the directory containing the files refered by **A4C_PEM_CA_CERT_FILE** and **A4C_PEM_CA_KEY_FILE**, respectively
+* **A4C_KEY_PASSWORD** (RW) - the password of the key that is added using the PEM file refered by the ENV **A4C_PEM_KEY_FILE** 
+* **A4C_PEM_CERT_FILE** (RW) - the name of the PEM file with the certificate used to secure the A4C instance (just the name, without path)
+* **A4C_PEM_KEY_FILE** (RW) - the name of the PEM file with the key used to secure the A4C instance (just the name, without path)
+* **A4C_CERTS_ROOT_PATH** (RW) - the full path to the directory containing the files refered by **A4C_PEM_CERT_FILE** and **A4C_PEM_KEY_FILE**, respectively
+
+## Settings Manager
+
+We included a small Java utility program that runs each time the container is started.
+It takes some of the values defined by the Docker ENV variables listed earlier, and modifies the config files of the a4c instance.
+The **A4C_ADMIN_USERNAME** defines a custom name for the admin user. 
+This utility writes it in the **a4c_install_path**/**a4c_install_dir**/config/alien4cloud-config.yml.
+The code is in the _alien4cloud-settings-manager_ folder.
+
+We also use this application to convert the certificates provided as detailed in the next sections to a Java storing format.
+You can protect this way the a4c communication with SSL.
 
 ## Security
 
 Skip this section if you don't want to deploy a secured A4C instance.
 
-If you want to activate the HTTPS protocol for the A4C instance, you must set the **A4C_ENABLE_SSL** ENV to "true", without double quotes. Furthermore, you must mount an external volume containing a ca pem certificate (with the file name controlled by the **A4C_PEM_CA_CERT_FILE** ENV) and a ca pem key (with the file name controlled by the **A4C_PEM_CA_KEY_FILE** ENV). Finally, since the previous two files must be just file names, you can control the path inside the container for the mount using the **A4C_CERTS_ROOT_PATH** ENV. You can control the Java keystore password by the means of the **A4C_KEY_STORE_PASSWORD** ENV, and set the password for your key using the **A4C_KEY_PASSWORD** ENV. Take a look at the examples in the _Deployment_ section.
+If you want to activate the HTTPS protocol for the A4C instance, you must set the **A4C_ENABLE_SSL** ENV to "true", without double quotes. Furthermore, you must mount an external volume containing a ca pem certificate (with the file name controlled by the **A4C_PEM_CERT_FILE** ENV) and a ca pem key (with the file name controlled by the **A4C_PEM_KEY_FILE** ENV). Finally, since the previous two files must be just file names, you can control the path inside the container for the mount using the **A4C_CERTS_ROOT_PATH** ENV. You can control the Java keystore password by the means of the **A4C_KEY_STORE_PASSWORD** ENV, and set the password for your key using the **A4C_KEY_PASSWORD** ENV. Take a look at the examples in the _Deployment_ section.
 
 ## Deployment
 
@@ -107,7 +118,7 @@ where ${A4C_VOLUME_DIR} & ${A4C_PORT} are explained in the *Docker Variables* se
 * In order to secure the A4C connection you can use the following:
 
 ```
-docker run -d --name alien4cloud-deep  -p ${A4C_PORT_HTTPS}:${A4C_PORT_HTTPS} -e A4C_RUNTIME_DIR=${A4C_RUNTIME_DIR_MINE} -v <path to directory that will hold A4C's runtime data>:${A4C_RUNTIME_DIR_MINE} -e A4C_CERTS_ROOT_PATH=${A4C_CERTS_ROOT_PATH_MINE} -v <path to certificates root>:${A4C_CERTS_ROOT_PATH_MINE} -e A4C_PEM_CA_CERT_FILE=<ca cert file name> -e A4C_PEM_CA_KEY_FILE=<ca private key file name> -e A4C_KEY_PASSWORD=<password used to sign the certificate> -e A4C_ENABLE_SSL=true indigodatacloud/alien4cloud-deep
+docker run -d --name alien4cloud-deep  -p ${A4C_PORT_HTTPS}:${A4C_PORT_HTTPS} -e A4C_RUNTIME_DIR=${A4C_RUNTIME_DIR_MINE} -v <path to directory that will hold A4C's runtime data>:${A4C_RUNTIME_DIR_MINE} -e A4C_CERTS_ROOT_PATH=${A4C_CERTS_ROOT_PATH_MINE} -v <path to certificates root>:${A4C_CERTS_ROOT_PATH_MINE} -e A4C_PEM_CERT_FILE=<ca cert file name> -e A4C_PEM_KEY_FILE=<ca private key file name> -e A4C_KEY_PASSWORD=<password used to sign the certificate> -e A4C_ENABLE_SSL=true indigodatacloud/alien4cloud-deep
 ```
 
 where you have to specify the secure port, the root path where the certificates are on the host and its mapping inside the container, the names of the key and certificates pems and to enable SSL
