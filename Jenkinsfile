@@ -101,7 +101,7 @@ pipeline {
             }
             post {
                 success {
-                    DockerPush(image_id)
+                    DockerPush(dockerhub_image_id)
                 }
                 failure {
                     DockerClean()
