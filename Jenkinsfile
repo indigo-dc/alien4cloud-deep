@@ -4,15 +4,15 @@
 
 pipeline {
     agent {
-        label 'java'
+        label 'java-a4c'
     }
     
     environment {
         dockerhub_repo = "indigodatacloud/alien4cloud"
+        dockerhub_image_id = ''
     }
 
     stages {
-           
         stage('Code fetching') {
             steps {
                 checkout scm 
@@ -30,6 +30,19 @@ pipeline {
             post {
                 always {
                     CheckstyleReport('checkstyle-result.xml')
+                }
+            }
+        }
+
+        stage('Unit testing coverage') {
+            steps {
+                dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+                    MavenRun('clean test')
+                }
+            }
+            post {
+                always {
+                    jacoco()
                 }
             }
         }
@@ -67,6 +80,53 @@ pipeline {
                     HTMLReport('indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
                     deleteDir()
                 }
+            }
+        }
+
+        stage('DockerHub delivery') {
+            when {
+                anyOf {
+                    branch 'master'
+                    buildingTag()
+                }
+            }
+            agent {
+                label 'docker-build'
+            }
+            steps {
+                checkout scm
+                script {
+                    dockerhub_image_id = DockerBuild(dockerhub_repo, env.BRANCH_NAME)
+                }
+            }
+            post {
+                success {
+                    DockerPush(image_id)
+                }
+                failure {
+                    DockerClean()
+                }
+                always {
+                    cleanWs()
+                }
+            }
+        }
+        
+        stage('Notifications') {
+            when {
+                buildingTag()
+            }
+            steps {
+                JiraIssueNotification(
+                    'DEEP',
+                    'DPM',
+                    '10204',
+                    "[preview-testbed] New alien4cloud version ${env.BRANCH_NAME} available",
+                    "Check new artifacts at:\n\t- Docker image: [${dockerhub_image_id}:${env.BRANCH_NAME}|https://hub.docker.com/r/${dockerhub_image_id}/tags/]\n",
+                    ['wp3', 'preview-testbed', "alien4cloud-${env.BRANCH_NAME}"],
+                    'Task',
+                    'mariojmdavid'
+                )
             }
         }
     }
