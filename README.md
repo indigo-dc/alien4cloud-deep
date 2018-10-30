@@ -140,7 +140,30 @@ If you change it in the IAM, you have to manually update it for each A4C instanc
 The A4C user roles are not taken in consideration by the plugin.
 The admin should consider the proper role(s) for a user only in the context of the A4C running instance.
 
-### Obtain Certificate
+### Plugin Parameters
+
+<!---* **user** - The user used to obtain the authorization token to deploy topologies on the DEEP orchestrator. One can register on the page defined by the **iamHost** variable.
+* **password** - The password used in conjuction with **user** to obtain the authorization token to deploy topologies on the DEEP orchestrator. One can register on the page defined by the **iamHost** variable.-->
+* **clientId** - Once one has an account on the **iamHost**, an application can be registered. After registration, the IAM server generates a unique pair of a **clientId** and a **clientSecret** that is needed to get a token.
+* **clientSecret** - Once one has an account on the **iamHost**, an application can be registered. After registration, the IAM server generates a unique pair of a **clientId** and a **clientSecret** that is needed to get a token.
+* **tokenEndpoint** - Once one has a **clientId** and a **clientSecret**, a token can be obtained using the endpoint defined by this variable.
+* **tokenEndpointCert** - The certificate used by the **tokenEndpoint**, if the server uses an encrypted connection (HTTPS). Take a look at *Obtain Certificate* subsection to learn how to obtain the certificate.
+* **clientScopes** - When calling the token generator endpoint, one has to supply a list of scopes for the token. This list has the elements separated by a space e.g. *openid profile email offline_access*
+* **orchestratorEndpoint** - The endpoint of the orchestrator used to deploy the topologies.
+* **orchestratorEndpointCert** - The certificate of the **orchestratorEndpoint** server. Take a look at *Obtain Certificate* subsection to learn how to obtain the certificate.
+* **iamHost** - The host that allows one to register an account, and get the **clientId** and the **clientSecret**.
+* **iamHostCert** - The certificate of the **iamHost** server. Take a look at *Obtain Certificate* subsection to learn how to obtain the certificate.
+* **orchestratorPollInterval** - Alien4Cloud tries to obtain the history of events every number of seconds. This parameter sets that number.
+* **importIndigoCustomTypes** - Depending on the status of the work, there can be a different location of the indigo types definition file that is sent to the orchestrator. This field allows the admin to specify which TOSCA types file is used for all deployments that go through the IndigoDCOrchestrator plugin. Please keep in mind that this field affects only the future deployments. This happens because it is read when a topology is deployed.
+
+#### Obtain Certificate
+
+In order to obtain the certificates used by the plugin and stored in the **tokenEndpointCert**, **orchestratorEndpointCert**, and **iamHostCert** respectively, you should follow the steps described in this subsection for each different server. 
+We refer to servers as in the following unit: _*.domain.extension_.
+Two variables may point towards the same server, but with different paths.
+_deep-paas.cloud.ba.infn.it/rest/v1_ and _deep-paas.cloud.ba.infn.it/token_ point towards the same domain/subdomains with different paths, therefore you only have to execute the following procedure once, for _deep-paas.cloud.ba.infn.it_.
+You also need the port (normally 443 for HTTPS), as you'll see next.
+
 
 1. Install openssl
 
@@ -171,21 +194,6 @@ cat crt_solos.tmp | tr -d '\n'
 
 5. This BASE64 string can now be used with the app
 
-### Plugin Parameters
-
-<!---* **user** - The user used to obtain the authorization token to deploy topologies on the DEEP orchestrator. One can register on the page defined by the **iamHost** variable.
-* **password** - The password used in conjuction with **user** to obtain the authorization token to deploy topologies on the DEEP orchestrator. One can register on the page defined by the **iamHost** variable.-->
-* **clientId** - Once one has an account on the **iamHost**, an application can be registered. After registration, the IAM server generates a unique pair of a **clientId** and a **clientSecret** that is needed to get a token.
-* **clientSecret** - Once one has an account on the **iamHost**, an application can be registered. After registration, the IAM server generates a unique pair of a **clientId** and a **clientSecret** that is needed to get a token.
-* **tokenEndpoint** - Once one has a **clientId** and a **clientSecret**, a token can be obtained using the endpoint defined by this variable.
-* **tokenEndpointCert** - The certificate used by the **tokenEndpoint**, if the server uses an encrypted connection (HTTPS). Take a look at *Obtain Certificate* subsection to learn how to obtain the certificate.
-* **clientScopes** - When calling the token generator endpoint, one has to supply a list of scopes for the token. This list has the elements separated by a space e.g. *openid profile email offline_access*
-* **orchestratorEndpoint** - The endpoint of the orchestrator used to deploy the topologies.
-* **orchestratorEndpointCert** - The certificate of the **orchestratorEndpoint** server. Take a look at *Obtain Certificate* subsection to learn how to obtain the certificate.
-* **iamHost** - The host that allows one to register an account, and get the **clientId** and the **clientSecret**.
-* **iamHostCert** - The certificate of the **iamHost** server. Take a look at *Obtain Certificate* subsection to learn how to obtain the certificate.
-* **orchestratorPollInterval** - Alien4Cloud tries to obtain the history of events every number of seconds. This parameter sets that number.
-* **importIndigoCustomTypes** - Depending on the status of the work, there can be a different location of the indigo types definition file that is sent to the orchestrator. This field allows the admin to specify which TOSCA types file is used for all deployments that go through the IndigoDCOrchestrator plugin. Please keep in mind that this field affects only the future deployments. This happens because it is read when a topology is deployed.
 
 ### Launching a Topology (Fast Lane)
 
