@@ -4,7 +4,7 @@
 
 pipeline {
     agent {
-        label 'java'
+        label 'java-a4c'
     }
     
     environment {
@@ -12,7 +12,6 @@ pipeline {
     }
 
     stages {
-           
         stage('Code fetching') {
             steps {
                 checkout scm 
@@ -30,6 +29,19 @@ pipeline {
             post {
                 always {
                     CheckstyleReport('checkstyle-result.xml')
+                }
+            }
+        }
+
+        stage('Unit testing coverage') {
+            steps {
+                dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+                    MavenRun('clean test')
+                }
+            }
+            post {
+                always {
+                    jacoco()
                 }
             }
         }
