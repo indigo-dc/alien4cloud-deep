@@ -2,7 +2,7 @@ version: '3'
 services:
   a4c:
     container_name: a4c
-    image: indigodatacloud/alien4cloud-deep:1.1b0
+    image: indigodatacloud/alien4cloud-deep:1.1-r0
     restart: unless-stopped
     env_file:
       - .env
