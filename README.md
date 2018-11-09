@@ -135,26 +135,28 @@ We list some examples in the following paragraphs.
 ```
  # Set the A4C server
 export ALIEN_URL='http://example.com:8088'
-[#] Set the cookie file path 
+ # Set the cookie file path 
 export ALIEN_COOKIE='/tmp/a4c cookie.txt'
-[#] Authenticate, check if the file
-[#] This call protects the username and password by using the read call
-[#] When you execute the following line, the shell will wait for two values separated by the ENTER key, before executing the curl call
-[#] The first value is the username, the second is the password 
+ # Authenticate, check if the file
+ # This call protects the username and password by using the read call
+ # When you execute the following line, the shell will wait for two values separated by the ENTER key, before executing the curl call
+ # The first value is the username, the second is the password 
 curl -k -c "${ALIEN_COOKIE}" "$ALIEN_URL/login" --data-urlencode "username=$( read -s U; echo $U )" --data-urlencode "password=$( read -s P; echo $P )" --data-urlencode "submit=Login" -XPOST -H 'Content-Type: application/x-www-form-urlencoded'
 ```
 
 * create a new user (you can select either combination of the roles; we list all available)
 
-# Create new user; the cookie must be from an ADMIN type user
+```
+ # Create new user; the cookie must be from an ADMIN type user
 curl -k -b "${ALIEN_COOKIE}" -XPOST -H 'Content-Type: application/json; charset=UTF-8' -H 'Accept: application/json, text/plain, */*' --data '{"email": "a@a", "firstName": "fn", "lastName": "ln", "password": "pass new", "roles": ["ADMIN", "APPLICATIONS_MANAGER", "ARCHITECT", "COMPONENTS_BROWSER",  "COMPONENTS_MANAGER"], "username": "tst2"}' "$ALIEN_URL/rest/v1/users"
+```
 
 * update existing user 
 
 ```
-# Set the username you want to change; you can use the read call as when you authenticated yourself
+ # Set the username you want to change; you can use the read call as when you authenticated yourself
 export ALIEN_USERNAME='tst2'
-# Update user; the cookie must be from an ADMIN type user
+ # Update user; the cookie must be from an ADMIN type user
 curl -k -b "${ALIEN_COOKIE}" -XPUT -H 'Content-Type: application/json; charset=UTF-8' -H 'Accept: application/json, text/plain, */*' --data '{"email": "a@a", "firstName": "fn", "lastName": "ln", "password": "pass new", "roles": ["ADMIN", "APPLICATIONS_MANAGER", "ARCHITECT", "COMPONENTS_BROWSER",  "COMPONENTS_MANAGER"], "username": "${ALIEN_USERNAME}"}' "$ALIEN_URL/rest/v1/users/${ALIEN_USERNAME}"
 ```
 
