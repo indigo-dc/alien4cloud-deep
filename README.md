@@ -133,7 +133,7 @@ We list some examples in the following paragraphs.
 
 * (MUST BE DONE FIRST) authenticate & set general variables
 ```
-[#] Set the A4C server
+ # Set the A4C server
 export ALIEN_URL='http://example.com:8088'
 [#] Set the cookie file path 
 export ALIEN_COOKIE='/tmp/a4c cookie.txt'
