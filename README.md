@@ -133,14 +133,14 @@ We list some examples in the following paragraphs.
 
 * (MUST BE DONE FIRST) authenticate & set general variables
 ```
-# Set the A4C server
+[#] Set the A4C server
 export ALIEN_URL='http://example.com:8088'
-# Set the cookie file path 
+[#] Set the cookie file path 
 export ALIEN_COOKIE='/tmp/a4c cookie.txt'
-# Authenticate, check if the file
-# This call protects the username and password by using the read call
-# When you execute the following line, the shell will wait for two values separated by the ENTER key, before executing the curl call
-# The first value is the username, the second is the password 
+[#] Authenticate, check if the file
+[#] This call protects the username and password by using the read call
+[#] When you execute the following line, the shell will wait for two values separated by the ENTER key, before executing the curl call
+[#] The first value is the username, the second is the password 
 curl -k -c "${ALIEN_COOKIE}" "$ALIEN_URL/login" --data-urlencode "username=$( read -s U; echo $U )" --data-urlencode "password=$( read -s P; echo $P )" --data-urlencode "submit=Login" -XPOST -H 'Content-Type: application/x-www-form-urlencoded'
 ```
 
