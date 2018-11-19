@@ -29,7 +29,7 @@ pipeline {
             }
             post {
                 always {
-                    CheckstyleReport('checkstyle-result.xml')
+                    CheckstyleReport('**/checkstyle-result.xml')
                 }
             }
         }
