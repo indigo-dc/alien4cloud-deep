@@ -28,9 +28,9 @@
 		<dep.ver.snakeyaml>1.18</dep.ver.snakeyaml>
 		<dep.ver.jetty.servlet>9.4.9.v20180320</dep.ver.jetty.servlet>
 		<dep.ver.bouncycastle>1.60</dep.ver.bouncycastle>
-		<dep.ver.jackson.dataformat>2.9.4</dep.ver.jackson.dataformat>
-		<dep.ver.jackson.core>2.9.4</dep.ver.jackson.core>
-		<dep.ver.jackson.jaxrs>2.9.4</dep.ver.jackson.jaxrs>
+		<dep.ver.jackson.dataformat>2.9.5</dep.ver.jackson.dataformat>
+		<dep.ver.jackson.core>2.9.5</dep.ver.jackson.core>
+		<dep.ver.jackson.jaxrs>2.9.5</dep.ver.jackson.jaxrs>
 		<dep.ver.junit>4.12</dep.ver.junit>
 		<dep.ver.projectlombok>1.18.2</dep.ver.projectlombok>
 		<dep.ver.okio>2.1.0</dep.ver.okio>
