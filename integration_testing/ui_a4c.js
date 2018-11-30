@@ -218,7 +218,7 @@ async function doCreateApp(page, orchestratorInstanceName, appName, pageW, pageH
     await page.reload();
 }
 
-puppeteer.launch({headless: false, dumpio: true}).then(async browser => {
+puppeteer.launch({headless: true, dumpio: true}).then(async browser => {
   const page = await browser.newPage();
   page.on('console', consoleObj => console.log(consoleObj.text()));
   await page.setViewport({ width: pageW, height: pageH })
