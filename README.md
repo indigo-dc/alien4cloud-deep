@@ -2,6 +2,7 @@
 
 [![GitHub license](https://img.shields.io/github/license/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)](https://github.com/indigo-dc/alien4cloud-deep/blob/master/LICENSE)
 ![Repo size](https://img.shields.io/github/repo-size/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)
+[![Build Status](https://jenkins.indigo-datacloud.eu:8080/buildStatus/icon?job=Pipeline-as-code/alien4cloud-deep/master)](https://jenkins.indigo-datacloud.eu:8080/job/Pipeline-as-code/job/alien4cloud-deep/job/master/)
 
 
 This repository contains the necessary parts needed to create a Docker image holding the Alien4cloud application, along with the DEEP - Indigo Data Cloud TOSCA types, and the plugin which connects Alien4Cloud (A4C) to the orchestrator used in DEEP.
@@ -27,7 +28,7 @@ The default username / password are *admin*/*admin*. Please change them!
 
 Aside of the official requirements found at [[Res2]](#res2), Alien4Cloud needs at least 3GB of RAM to run and a dual core CPU.
 
-You also need Docker, we tested with the CE version 17.03 and above. 
+You also need Docker, we tested with the CE version 17.03 and above.
 We strongly advise you to install the latest version from the official Docker site.
 
 ### Docker Arguments
@@ -380,7 +381,7 @@ Thanks for help go to:
 
 ## Resources
 
-#### [Res1] 
+#### [Res1]
 IAM authentication portal: https://iam.deep-hybrid-datacloud.eu
 
 #### [Res2]
