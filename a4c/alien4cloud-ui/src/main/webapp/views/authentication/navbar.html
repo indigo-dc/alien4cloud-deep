@@ -81,6 +81,9 @@
         </div>
         <button type="submit" class="btn btn-success" name="btn-login"><i class="fa fa-sign-in"></i> {{ 'NAVBAR.BUTTON_LOGIN' | translate }}</button>
       </form>
+      <form name="loginForm" class="navbar-form" role="login" ng-submit="iamLogin()">
+          <button type="submit" class="btn btn-success" name="btn-iam-login"><i class="fa fa-sign-in"></i> IAM Login </button>
+      </form>
     </div>
     <!-- sneaky delete
     <div ng-if="status.currentStatus.data.isLogged" class="nav navbar-nav navbar-right">

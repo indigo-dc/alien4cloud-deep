@@ -21,6 +21,9 @@ define(function (require) {
         var data = 'username=' + $scope.login.username + '&password=' + $scope.login.password + '&submit=Login';
         authService.logIn(data, $scope);
       };
+      $scope.iamLogin = function() {
+        authService.iamLogin();
+      };
 
       // Recover alien version and display github tag link if it's not snapshot (cached request)
       $http.get('/version.json', {

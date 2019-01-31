@@ -174,6 +174,10 @@ define(function(require) {
           });
         },
 
+        iamLogin: function() {
+          window.location.href = 'https://iam.deep-hybrid-datacloud.eu/authorize?client_id=0cbb8496-2947-40b4-9461-fa6459bc74c0&redirect_uri=http://localhost:8088/login/oauth2/code/monitoring&scope=openid&response_type=code';
+        },
+
         /**
          * Checks if the current user has the requested role.
          */

@@ -4,16 +4,12 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -27,15 +23,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.social.security.SpringSocialConfigurer;
 
-import alien4cloud.security.AuthorizationUtil;
-
 import com.google.common.collect.Lists;
+
+import alien4cloud.security.AuthorizationUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 @ConditionalOnProperty(value = "saml.enabled", havingValue = "false")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
+//@Order(SecurityProperties.ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Resource
     private SecurityProperties security;
@@ -81,7 +78,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider);
+    	super.configure(auth);
+        //auth.authenticationProvider(authenticationProvider);
+        //auth.authenticationProvider(oauthProvider);
     }
 
     @Override
@@ -94,6 +93,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             log.info("GitHub profile is active - enabling Spring Social features");
             http.apply(new SpringSocialConfigurer().postLoginUrl("/").alwaysUsePostLoginUrl(true));
         }
+        http.oauth2Login();
     }
 
     @Override

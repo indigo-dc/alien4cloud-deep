@@ -121,9 +121,9 @@ public class ToscaParser extends YamlParser<ArchiveRoot> {
             return registry.get(DEFINITION_TYPE);
         } else {
             throw new ParsingException(null,
-                    new ParsingError(ErrorCode.SYNTAX_ERROR, "File is not a valid tosca definition file.", new Mark("root", 0, 0, 0, null, 0),
+                    new ParsingError(ErrorCode.SYNTAX_ERROR, "File is not a valid tosca definition file.", new Mark("root", 0, 0, 0, "".toCharArray(), 0),
                             "The provided yaml file doesn't follow the Top-level key definitions of a valid TOSCA Simple profile file.",
-                            new Mark("root", 0, 0, 0, null, 0), "TOSCA Definitions"));
+                            new Mark("root", 0, 0, 0, "".toCharArray(), 0), "TOSCA Definitions"));
         }
     }
 
@@ -147,7 +147,7 @@ public class ToscaParser extends YamlParser<ArchiveRoot> {
             first = false;
         }
         throw new ParsingException(null, new ParsingError(ErrorCode.MISSING_TOSCA_VERSION, "File is not a valid tosca definition file.",
-                new Mark("root", 0, 0, 0, null, 0), "Unable to find the mandatory tosca_definitions_version.", new Mark("root", 0, 0, 0, null, 0), null));
+                new Mark("root", 0, 0, 0, "".toCharArray(), 0), "Unable to find the mandatory tosca_definitions_version.", new Mark("root", 0, 0, 0, "".toCharArray(), 0), null));
     }
 
     private class DefinitionVersionInfo {

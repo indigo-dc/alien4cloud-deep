@@ -12,6 +12,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.nodes.*;
 
 import com.google.common.collect.Maps;
@@ -141,7 +142,9 @@ public class MappingGenerator implements INodeParser<Map<String, INodeParser>> {
                 IMappingBuilder builder = mappingBuilders.get(type);
                 if (builder != null) {
                     mappingNode.getValue().add(0, new NodeTuple(new ScalarNode(new Tag(builder.getKey()), builder.getKey(), tuple.getKeyNode().getStartMark(),
-                            tuple.getKeyNode().getEndMark(), 'c'), tuple.getValueNode()));
+                            tuple.getKeyNode().getEndMark(), ScalarStyle.DOUBLE_QUOTED), tuple.getValueNode()));
+                    /*mappingNode.getValue().add(0, new NodeTuple(new ScalarNode(new Tag(builder.getKey()), builder.getKey(), tuple.getKeyNode().getStartMark(),
+                            tuple.getKeyNode().getEndMark(), 'c'), tuple.getValueNode()));*/
 
                     // there is a builder
                     parser = builder.buildMapping(mappingNode, context).getParser();

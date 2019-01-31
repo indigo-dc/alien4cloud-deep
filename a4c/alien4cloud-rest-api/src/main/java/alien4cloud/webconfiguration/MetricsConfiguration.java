@@ -5,11 +5,8 @@ import java.lang.management.ManagementFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +24,8 @@ import com.codahale.metrics.servlets.MetricsServlet;
 import com.ryantenney.metrics.spring.config.annotation.EnableMetrics;
 import com.ryantenney.metrics.spring.config.annotation.MetricsConfigurerAdapter;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Configuration
 @EnableMetrics(proxyTargetClass = true)
@@ -40,12 +39,14 @@ public class MetricsConfiguration extends MetricsConfigurerAdapter implements En
     private static final String PROP_METRIC_REG_JVM_BUFFERS = "jvm.buffers";
     private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
     private static final HealthCheckRegistry HEALTH_CHECK_REGISTRY = new HealthCheckRegistry();
-    private RelaxedPropertyResolver propertyResolver;
+    //private RelaxedPropertyResolver propertyResolver;
+    private Environment environment;
     private JmxReporter jmxReporter;
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.propertyResolver = new RelaxedPropertyResolver(environment, ENV_METRICS);
+        //this.propertyResolver = new RelaxedPropertyResolver(environment, ENV_METRICS);
+    	this.environment = environment;
     }
 
     @PostConstruct
@@ -56,7 +57,8 @@ public class MetricsConfiguration extends MetricsConfigurerAdapter implements En
         METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_THREADS, new ThreadStatesGaugeSet());
         METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_FILES, new FileDescriptorRatioGauge());
         METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_BUFFERS, new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
-        if (propertyResolver.getProperty(PROP_JMX_ENABLED, Boolean.class, false)) {
+        //if (propertyResolver.getProperty(PROP_JMX_ENABLED, Boolean.class, false)) {
+        if (environment.getProperty(ENV_METRICS + PROP_JMX_ENABLED, Boolean.class, false)) {
             log.info("Initializing Metrics JMX reporting");
             jmxReporter = JmxReporter.forRegistry(METRIC_REGISTRY).build();
             jmxReporter.start();

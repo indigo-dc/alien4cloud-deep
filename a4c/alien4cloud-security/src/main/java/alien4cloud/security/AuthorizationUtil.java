@@ -412,7 +412,7 @@ public final class AuthorizationUtil {
      */
     public static void configure(HttpSecurity httpSecurity, LogoutSuccessHandler successLogoutHandler) throws Exception {
         // authorizations
-        httpSecurity.authorizeRequests().antMatchers("/*").permitAll();
+        httpSecurity.authorizeRequests().antMatchers("/*", "/login/**").permitAll();
         httpSecurity.authorizeRequests().antMatchers("/static/tosca/**").hasAnyAuthority("ADMIN", "COMPONENTS_MANAGER", "COMPONENTS_BROWSER");
         httpSecurity.authorizeRequests().antMatchers("/rest/admin/health").permitAll();
         httpSecurity.authorizeRequests().antMatchers("/rest/admin/**").hasAuthority("ADMIN");
@@ -429,8 +429,8 @@ public final class AuthorizationUtil {
         httpSecurity.authorizeRequests().antMatchers("/rest/v1/audit/**").hasAuthority("ADMIN");
 
         // login
-        httpSecurity.formLogin().defaultSuccessUrl("/rest/auth/status").failureUrl("/rest/auth/authenticationfailed").loginProcessingUrl("/login")
-                .usernameParameter("username").passwordParameter("password").permitAll();
+        /*httpSecurity.formLogin().defaultSuccessUrl("/rest/auth/status").failureUrl("/rest/auth/authenticationfailed").loginProcessingUrl("/login")
+                .usernameParameter("username").passwordParameter("password").permitAll();*/
         if (successLogoutHandler == null) {
             httpSecurity.logout().logoutSuccessUrl("/").deleteCookies("JSESSIONID");
         } else {
