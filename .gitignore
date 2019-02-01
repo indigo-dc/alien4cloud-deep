@@ -4,3 +4,7 @@
 indigodc-orchestrator-plugin/target/
 indigodc-orchestrator-plugin/lib/
 a4c-tmp/**
+.idea
+**/.factorypath
+a4c/alien4cloud-ui/package-lock.json
+a4c/alien4cloud-ui/config

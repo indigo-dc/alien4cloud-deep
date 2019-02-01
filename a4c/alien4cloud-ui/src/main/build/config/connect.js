@@ -14,7 +14,7 @@ module.exports = {
      * requests
      */
     {
-      context: ['/rest', '/api-docs', '/login', '/logout', '/img', '/static', '/saml'],
+      context: ['/rest', '/api-docs', '/login', '/logout', '/img', '/static', '/saml', '/auth'],
       host: 'localhost',
       port: 8088
     }

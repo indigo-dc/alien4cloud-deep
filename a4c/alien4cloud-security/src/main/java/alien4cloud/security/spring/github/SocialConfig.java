@@ -30,7 +30,7 @@ public class SocialConfig implements SocialConfigurer {
 
     @Override
     public void addConnectionFactories(ConnectionFactoryConfigurer connectionFactoryConfigurer, Environment environment) {
-        connectionFactoryConfigurer.addConnectionFactory(new GitHubConnectionFactory("ff20f678550f291c177e", "9361d219c221976bba3451080985affb54d685e8"));
+        connectionFactoryConfigurer.addConnectionFactory(new GitHubConnectionFactory("6dee0f1f3504e97c38cc", "c73348b4b6390d9c8bc63a88846fc593b5380b73"));
     }
 
     @Override

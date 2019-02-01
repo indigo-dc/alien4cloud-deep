@@ -22,6 +22,10 @@ define(function (require) {
         authService.logIn(data, $scope);
       };
 
+      $scope.gitHubSignIn = function() {
+        authService.gitHubLogin();
+      };
+
       // Recover alien version and display github tag link if it's not snapshot (cached request)
       $http.get('/version.json', {
         cache: 'true'

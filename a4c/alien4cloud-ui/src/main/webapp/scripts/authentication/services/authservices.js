@@ -174,6 +174,10 @@ define(function(require) {
           });
         },
 
+        gitHubLogin: function() {
+          $http.post('signin/github');
+        },
+
         /**
          * Checks if the current user has the requested role.
          */
