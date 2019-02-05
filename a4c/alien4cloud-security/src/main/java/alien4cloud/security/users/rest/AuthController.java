@@ -78,6 +78,8 @@ public class AuthController {
 
         if (env.acceptsProfiles("github-auth")) {
             userStatus.setAuthSystem("github");
+        } else if (env.acceptsProfiles("indigo-dc")) {
+            userStatus.setAuthSystem("indigo-dc");
         } else if (samlEnabled) {
             userStatus.setAuthSystem("saml");
         } else {

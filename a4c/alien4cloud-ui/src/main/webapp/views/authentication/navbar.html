@@ -82,6 +82,13 @@
         <button type="submit" class="btn btn-success" name="btn-login"><i class="fa fa-sign-in"></i> {{ 'NAVBAR.BUTTON_LOGIN' | translate }}</button>
       </form>
     </div>
+    <div ng-if="!status.currentStatus.data.isLogged && status.currentStatus.data.authSystem==='indigo-dc'" class="nav navbar-nav btn-group navbar-right"
+         style="margin-right: 4px;">
+      <a class="btn btn-success navbar-btn" href="/auth/indigo-dc">
+        <i class="fa fa-sign-in"></i> Indigo-DC IAM
+      </a>
+      <button ng-click="displayInternalLogin()" class="btn btn-success navbar-btn" name="btn-login"><i class="fa fa-key"></i></button>
+    </div>
     <!-- sneaky delete
     <div ng-if="status.currentStatus.data.isLogged" class="nav navbar-nav navbar-right">
       <div class="collapse navbar-collapse" id="alien-navbar-collapse" uib-collapse="isCollapsed">

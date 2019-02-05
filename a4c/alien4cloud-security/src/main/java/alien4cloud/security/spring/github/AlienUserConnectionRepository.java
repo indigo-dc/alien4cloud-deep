@@ -1,43 +1,82 @@
 package alien4cloud.security.spring.github;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import alien4cloud.exception.NotFoundException;
+import alien4cloud.security.model.Role;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionKey;
 import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.connect.UserProfile;
 import org.springframework.social.connect.UsersConnectionRepository;
 import org.springframework.util.MultiValueMap;
 
 import alien4cloud.security.model.User;
 import alien4cloud.security.users.IAlienUserDao;
 
+import javax.annotation.PostConstruct;
+
 @Slf4j
 @Profile("github-auth")
 public class AlienUserConnectionRepository implements UsersConnectionRepository {
     private IAlienUserDao alienUserDao;
+
+    @Value("${indigo-dc.roles}")
+    private String roles;
+
+    private String[] roleList;
 
     @Autowired
     public AlienUserConnectionRepository(IAlienUserDao alienUserDao) {
         this.alienUserDao = alienUserDao;
     }
 
+    @PostConstruct
+    public void init() {
+        if (roles == null) {
+            roleList = new String[]{};
+        } else {
+            String[] roleSplit = roles.split(",");
+            List<String> goodRoles = Arrays.asList(roleSplit).stream()
+                    .map(role -> {
+                        try {
+                            return Role.getStringFormatedRole(role);
+                        } catch (NotFoundException e) {
+                            return null;
+                        }
+                    })
+                    .filter(role -> role != null)
+                    .collect(Collectors.toList());
+            roleList = goodRoles.toArray(new String[goodRoles.size()]);
+        }
+    }
+
     @Override
     public List<String> findUserIdsWithConnection(Connection<?> connection) {
 
         ConnectionKey key = connection.getKey();
-        String userId = key.getProviderId() + "::" + key.getProviderUserId();
+        UserProfile profile = connection.fetchUserProfile();
+        String userId = profile.getUsername() + "@" + key.getProviderId() + "::" + key.getProviderUserId();
         User user = alienUserDao.find(userId);
         if (user == null) {
             user = new User();
             user.setUsername(userId);
-            user.setFirstName(connection.getDisplayName());
+            user.setFirstName(profile.getFirstName());
+            user.setLastName(profile.getLastName());
+            user.setEmail(profile.getEmail());
+            user.setRoles(roleList);
             alienUserDao.save(user);
             return Lists.newArrayList(userId);
             // TODO what connexion(s) means in spring sec ?

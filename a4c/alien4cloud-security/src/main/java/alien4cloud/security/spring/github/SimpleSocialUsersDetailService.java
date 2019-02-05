@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import alien4cloud.security.users.IAlienUserDao;
 
 @Component
-@Profile("github-auth")
+@Profile({"github-auth", "indigo-dc"})
 public class SimpleSocialUsersDetailService implements SocialUserDetailsService {
     @Resource
     private IAlienUserDao userDao;

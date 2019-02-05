@@ -19,5 +19,8 @@
         <logger name="org.alien4cloud.alm.deployment.configuration.flow.modifiers.FlowPhaseModifiersExecutor"
                 level="debug"/>
         <logger name="alien4cloud.tosca.container.ToscaTypeLoader" level="error"/>
+        <logger name="org.springframework.social" level="debug"/>
+        <logger name="org.springframework.social.security" level="debug"/>
+        <logger name="org.springframework.social.oidc.indigodc.connect" level="debug"/>
     </Loggers>
 </Configuration>
