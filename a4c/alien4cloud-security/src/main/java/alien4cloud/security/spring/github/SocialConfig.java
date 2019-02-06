@@ -46,6 +46,6 @@ public class SocialConfig implements SocialConfigurer {
 
     @Override
     public UsersConnectionRepository getUsersConnectionRepository(ConnectionFactoryLocator connectionFactoryLocator) {
-        return new AlienUserConnectionRepository(alienUserDao);
+        return new AlienUserConnectionRepository(alienUserDao, connectionFactoryLocator);
     }
 }
