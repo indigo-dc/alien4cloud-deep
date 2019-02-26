@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library']) _
+@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.0.0']) _
 
 pipeline {
     agent {
@@ -77,7 +77,10 @@ pipeline {
             post {
                 always {
                     OWASPDependencyCheckPublish()
-                    HTMLReport('indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
+                    HTMLReport(
+                        "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
+                        'dependency-check-report.html',
+                        'OWASP Dependency Report')
                     deleteDir()
                 }
             }
@@ -96,7 +99,8 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    dockerhub_image_id = DockerBuild(dockerhub_repo, env.BRANCH_NAME)
+                    dockerhub_image_id = DockerBuild(dockerhub_repo,
+                                                     tag: env.BRANCH_NAME)
                 }
             }
             post {
