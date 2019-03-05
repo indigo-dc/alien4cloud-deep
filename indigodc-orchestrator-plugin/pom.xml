@@ -5,7 +5,7 @@
 
 	<groupId>es.upv</groupId>
 	<artifactId>alien4cloud-indigodc-provider</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>alien4cloud-indigodc-provider</name>
@@ -30,7 +30,9 @@
 		<!--checkstyle.config.location>${basedir}/checkstyle_google.xml</checkstyle.config.location -->
 
 		<!-- Libraries versions section -->
-		<dep.ver.alien4cloud.core>2.0.0-UPV-1.0.0</dep.ver.alien4cloud.core>
+		<dep.ver.alien4cloud.core>2.1.0-UPV-1.0.0</dep.ver.alien4cloud.core>
+		
+		
 		<dep.ver.jetty>9.4.11.v20180605</dep.ver.jetty>
 		<dep.ver.snakeyaml>1.18</dep.ver.snakeyaml>
 		<dep.ver.jetty.servlet>9.4.9.v20180320</dep.ver.jetty.servlet>
@@ -222,7 +224,7 @@
 
 		</resources>
 		<plugins>
-			<plugin>
+			<!--plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>${dep.ver.plugin.checkstyle}</version>
@@ -244,7 +246,6 @@
 							<consoleOutput>true</consoleOutput>
 							<failsOnError>true</failsOnError>
 							<linkXRef>false</linkXRef>
-							<!--configLocation>${basedir}/checkstyle_google.xml</configLocation-->
               <configLocation>google_checks.xml</configLocation>
 						</configuration>
 						<goals>
@@ -252,26 +253,21 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin-->
 
 
-			<plugin>
+			<!--plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${dep.ver.plugin.jacoco}</version>
 				<executions>
-					<!-- Prepares the property pointing to the JaCoCo runtime agent which 
-						is passed as VM argument when Maven the Surefire plugin is executed. -->
 					<execution>
 						<id>pre-unit-test</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
 							<destFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</destFile>
-							<!-- Sets the name of the property containing the settings for JaCoCo 
-								runtime agent. -->
 							<propertyName>surefireArgLine</propertyName>
 						</configuration>
 					</execution>
@@ -283,8 +279,6 @@
             </goals>
             <configuration>
               <dataFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</dataFile>
-              <!-- Add rules to fail the building process if the coverage is less 
-                than threshold -->
               <rules>
                 <rule implementation="org.jacoco.maven.RuleConfiguration">
                   <element>BUNDLE</element>
@@ -300,8 +294,6 @@
               </rules>
             </configuration>
           </execution>
-					<!-- Ensures that the code coverage report for unit tests is created 
-						after unit tests have been run. -->
 					<execution>
 						<id>post-unit-test</id>
 						<phase>test</phase>
@@ -309,14 +301,12 @@
 							<goal>report</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
 							<outputDirectory>${project.reporting.outputDirectory}/jacoco-deep</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin-->
 
 
 			<plugin>
