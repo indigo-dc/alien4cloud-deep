@@ -1,5 +1,6 @@
 package es.upv.indigodc;
 
+import alien4cloud.model.deployment.DeploymentTopology;
 import alien4cloud.orchestrators.plugin.ILocationConfiguratorPlugin;
 import alien4cloud.orchestrators.plugin.IOrchestratorPlugin;
 import alien4cloud.orchestrators.plugin.model.PluginArchive;
@@ -53,8 +54,9 @@ import org.springframework.stereotype.Component;
 @Component("indigodc-orchestrator")
 @Scope("prototype")
 public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfiguration> {
-
-  public static String TYPE = "IndigoDC";
+  
+  public final static String DEFAULT_NOT_SET_OUTPUT_VALUE = "<not_set>";
+  public final static String TYPE = "IndigoDC";
 
   /**
    * The configuration manager used to obtain the
@@ -215,7 +217,6 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback) {
     log.info("call getInstancesInformation");
     String a4cUuidDeployment = deploymentContext.getDeployment().getId();
-
     // deploymentContext.getDeploymentTopology().get
     final Map<String, Map<String, InstanceInformation>> topologyInfo = new HashMap<>();
     final Map<String, String> runtimeProps = new HashMap<>();
@@ -224,7 +225,8 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     // final String
     final OrchestratorDeploymentMapping orchestratorDeploymentMapping =
         mappingService.getByAlienDeploymentId(a4cUuidDeployment);
-
+    final Map<String, String> outputsVars = 
+        extractTopologyOutputs(deploymentContext.getDeploymentTopology());
     if (orchestratorDeploymentMapping != null) {
       final String orchestratorUuidDeployment =
           orchestratorDeploymentMapping.getOrchestratorUuidDeployment(); 
@@ -244,11 +246,14 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         // Map<String, String> outputs = new HashMap<>();
         // outputs.put("Compute_public_address", "none");
         // runtimeProps.put("Compute_public_address", "value");
+
+        response.getOutputs().entrySet().stream()
+          .forEach(outputE -> outputsVars.replace(outputE.getKey(), outputE.getValue()));
         final InstanceInformation instanceInformation =
             new InstanceInformation(instanceStatusInfo.getState(),
                 instanceStatusInfo.getInstanceStatus(), runtimeProps, runtimeProps,
                 // outputs);
-                response.getOutputs());
+                outputsVars, outputsVars);
         instancesInfo.put(a4cUuidDeployment, instanceInformation);
         topologyInfo.put(groupId, instancesInfo);
         callback.onSuccess(topologyInfo);
@@ -260,7 +265,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         log.error("Error getInstancesInformation", er);
       } catch (OrchestratorIamException er) {
         final InstanceInformation instanceInformation = new InstanceInformation("UNKNOWN",
-            InstanceStatus.FAILURE, runtimeProps, runtimeProps, new HashMap<>());
+            InstanceStatus.FAILURE, runtimeProps, runtimeProps, outputsVars, outputsVars);
         instancesInfo.put(a4cUuidDeployment, instanceInformation);
         topologyInfo.put(a4cUuidDeployment, instancesInfo);
         callback.onSuccess(topologyInfo);
@@ -280,7 +285,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       }
     } else {
       final InstanceInformation instanceInformation = new InstanceInformation("UNKNOWN",
-          InstanceStatus.FAILURE, runtimeProps, runtimeProps, new HashMap<>());
+          InstanceStatus.FAILURE, runtimeProps, runtimeProps, new HashMap<>(), outputsVars);
       instancesInfo.put(a4cUuidDeployment, instanceInformation);
       topologyInfo.put(a4cUuidDeployment, instancesInfo);
       callback.onSuccess(topologyInfo);
@@ -336,6 +341,27 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     } else {
       callback.onSuccess(DeploymentStatus.UNDEPLOYED);
     }
+  }
+  
+  protected Map<String, String> extractTopologyOutputs(DeploymentTopology topo) {
+    final Map<String, String> results = new HashMap<>();
+    if (topo.getOutputAttributes() != null) {
+      topo.getOutputAttributes().entrySet().stream()
+        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+    }
+    if (topo.getOutputCapabilityProperties() != null) {
+      topo.getOutputCapabilityProperties().entrySet().stream()
+        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+    }
+    if (topo.getOutputProperties() != null) { 
+      topo.getOutputProperties().entrySet().stream()
+        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+    }
+    if (topo.getOutputs() != null) { 
+      topo.getOutputs().entrySet().stream()
+        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+    }
+    return results;
   }
 
   @Override

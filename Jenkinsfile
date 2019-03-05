@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library']) _
+@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.0.0']) _
 
 pipeline {
     agent {
@@ -78,7 +78,10 @@ pipeline {
             post {
                 always {
                     OWASPDependencyCheckPublish()
-                    HTMLReport('indigodc-orchestrator-plugin/src', 'dependency-check-report.html', 'OWASP Dependency Report')
+                    HTMLReport(
+                        "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
+                        'dependency-check-report.html',
+                        'OWASP Dependency Report')
                     deleteDir()
                 }
             }
@@ -97,7 +100,8 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    dockerhub_image_id = DockerBuild(dockerhub_repo, env.BRANCH_NAME)
+                    dockerhub_image_id = DockerBuild(dockerhub_repo,
+                                                     tag: env.BRANCH_NAME)
                 }
             }
             post {
@@ -154,7 +158,13 @@ pipeline {
                     "Check new artifacts at:\n\t- Docker image: [${dockerhub_image_id}:${env.BRANCH_NAME}|https://hub.docker.com/r/${dockerhub_image_id}/tags/]\n",
                     ['wp3', 'preview-testbed', "alien4cloud-${env.BRANCH_NAME}"],
                     'Task',
-                    'mariojmdavid'
+                    'mariojmdavid',
+                    ['wgcastell',
+                     'vkozlov',
+                     'dlugo',
+                     'keiichiito',
+                     'laralloret',
+                     'ignacioheredia']
                 )
             }
         }
