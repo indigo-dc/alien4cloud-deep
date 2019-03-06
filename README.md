@@ -10,7 +10,7 @@ Each time the Docker image is created, the latest version of the normative TOSCA
 
 ## Documentation version
 
-1.1.0
+1.1.1
 
 ## Administration Guide
 
