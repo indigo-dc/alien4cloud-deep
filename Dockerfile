@@ -88,7 +88,6 @@ RUN \
   && rm TOSCA_normative_types_* \
   # Get and add the IndigoDC Tosca types
   && git clone -b devel_deep2 https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
-  && cat  ${a4c_install_path}/indigo-dc-tosca-types/custom_types.yaml \
   && python3 ${a4c_install_path}/custom_types-2-a4c.py  ${a4c_install_path}/indigo-dc-tosca-types/  ${tosca_indigo_version}  ${tosca_normative_name}:${tosca_normative_version} \
     < ${a4c_install_path}/indigo-dc-tosca-types/custom_types.yaml \
     > ${a4c_install_path}/indigo-dc-tosca-types/tosca_types_alien.yaml \
@@ -112,13 +111,13 @@ RUN \
   && chown -R ${a4c_user}:${a4c_user} "${a4c_install_path}" \
   && chown -R ${a4c_user}:${a4c_user} "/home/${a4c_user}" \
   # Clean up the installed packages, files, everything
-  && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g\
-  && rm -rf ${a4c_install_path}/indigodc-orchestrator-plugin\
+  && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g \
+  && rm -rf ${a4c_install_path}/indigodc-orchestrator-plugin \
     "${a4c_install_path}/alien4cloud-settings-manager/"\
     /usr/lib/ruby \
     "${a4c_install_path}/indigodc-2-a4c.py" \
   && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/* \
-  && apt-get remove --purge build-dependencies \
+  && apk del build-dependencies  \
   # Install the a4c runtime dependencies
   && apk --no-cache add openjdk8-jre-base bash su-exec
 
