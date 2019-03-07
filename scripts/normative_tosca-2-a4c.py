@@ -30,6 +30,11 @@ tosca = yaml.load(sys.stdin)
 
 tosca["artifact_types"]["tosca.artifacts.Root"].pop("properties", None)
 
+tosca["data_types"].pop("tosca.datatypes.network.PortDef", None)
+tosca["data_types"]["tosca.datatypes.network.PortSpec"]["properties"]["target"]["type"] = "integer"
+tosca["data_types"]["tosca.datatypes.network.PortSpec"]["properties"]["source"]["type"] = "integer"
+tosca["capability_types"]["tosca.capabilities.Endpoint"]["properties"]["port"]["type"] = "integer"
+
 tosca["metadata"] = {"template_name": toscaTemplateName,
 	"template_version": toscaTemplateVer,
 	"template_author": "OpenStack/GRyCAP"}
