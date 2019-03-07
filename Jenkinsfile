@@ -26,7 +26,7 @@ pipeline {
 
         stage('Build local A4C (UPV flavour)') {
           steps {
-            dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+            dir("alien4cloud") {
                 sh 'npm install bower'
                 sh 'npm install grunt-cli'
                 sh 'gem install compass'
