@@ -1,39 +1,22 @@
 #!/usr/bin/groovy
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.0.0']) _
+@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.3.0']) _
 
 pipeline {
     agent {
-       label 'java-a4c'
+        label 'java-a4c'
     }
-
+    
     environment {
         dockerhub_repo = "indigodatacloud/alien4cloud-deep"
         dockerhub_image_id = ''
-        docker_image_name = "automated_testing_alien4cloud-deep"
     }
 
     stages {
         stage('Code fetching') {
             steps {
-                checkout scm
-                git branch: '2.1.0-UPV-1.0.0', url: 'https://github.com/indigo-dc/alien4cloud'
-                dir('a-child-repo') {
-                   git branch: '2.1.0-UPV-1.0.0', url: 'https://github.com/indigo-dc/alien4cloud'
-                }
+                checkout scm 
             }
-        }
-
-        stage('Build local A4C (UPV flavour)') {
-          steps {
-            dir("$WORKSPACE/indigodc-orchestrator-plugin") {
-                sh 'npm install bower'
-                sh 'npm install grunt-cli'
-                sh 'gem install compass'
-                sh 'npm install grunt-contrib-compass --save-dev'
-                MavenRun('clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
-            }
-          }
         }
 
         stage('Style analysis') {
@@ -103,8 +86,8 @@ pipeline {
             }
         }
 
-        stage('Docker build') {
-          when {
+        stage('DockerHub delivery') {
+            when {
                 anyOf {
                     branch 'master'
                     buildingTag()
@@ -121,43 +104,12 @@ pipeline {
                 }
             }
             post {
-                failure {
-                    DockerClean()
+                success {
+                    DockerPush(dockerhub_image_id)
                 }
                 always {
                     cleanWs()
                 }
-            }
-        }
-
-        stage('Functional testing') {
-            steps {
-                dir("integration_testing") {
-                  sh 'npm install puppeteer commander'
-                  sh 'docker run -d --name ${docker_image_name} -p 8088:8088 dockerhub_image_id'
-                  sh 'while : ; do ; $c=`docker logs  --tail 2 alien4cloud-deep | grep -E "Started.*Bootstrap.*in"` ; if [[ ! -z ${c} ]] ; then ; break ; fi ; done ;'
-                  sh 'nodejs ui_a4c.js -h \'http://localhost:8088\' -u admin -p admin -t ./AutomatedApp.yml'
-                }
-            }
-            post {
-                always {
-                  sh 'docker kill ${docker_image_name}'
-                  sh 'docker rm ${docker_image_name}'
-                }
-
-            }
-
-        }
-
-        stage('DockerHub delivery') {
-            when {
-                anyOf {
-                    branch 'master'
-                    buildingTag()
-                }
-            }
-            steps {
-                DockerPush(dockerhub_image_id)
             }
         }
 
@@ -183,6 +135,12 @@ pipeline {
                      'ignacioheredia']
                 )
             }
+        }
+    }
+    post {
+        always {
+            DockerClean(dockerhub_image_id)
+            cleanWs()
         }
     }
 }
