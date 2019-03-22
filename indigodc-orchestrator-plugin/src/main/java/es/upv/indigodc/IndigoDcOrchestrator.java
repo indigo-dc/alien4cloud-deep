@@ -365,10 +365,10 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     }
     if (topo.getOutputProperties() != null) { 
       topo.getOutputProperties().entrySet().stream()
-        .forEach(outputPropertyEntry -> 
-            outputPropertyEntry.getValue().forEach(outputProperty ->
-              results.put(outputPropertyEntry.getKey()
-                  + "_" + outputProperty, DEFAULT_NOT_SET_OUTPUT_VALUE)));
+          .forEach(outputPropertyEntry -> 
+              outputPropertyEntry.getValue().forEach(outputProperty ->
+                results.put(outputPropertyEntry.getKey()
+                    + "_" + outputProperty, DEFAULT_NOT_SET_OUTPUT_VALUE)));
     }
     if (topo.getOutputs() != null) { 
       topo.getOutputs().entrySet().stream()
