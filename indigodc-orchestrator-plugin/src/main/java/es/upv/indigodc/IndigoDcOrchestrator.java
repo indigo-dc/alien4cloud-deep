@@ -347,15 +347,28 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     final Map<String, String> results = new HashMap<>();
     if (topo.getOutputAttributes() != null) {
       topo.getOutputAttributes().entrySet().stream()
-        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+          .forEach(outputAttributeEntry -> 
+            outputAttributeEntry.getValue().forEach(outputAttribute -> 
+              results.put(outputAttributeEntry.getKey() 
+                  + "_" + outputAttribute, 
+                        DEFAULT_NOT_SET_OUTPUT_VALUE)));
     }
     if (topo.getOutputCapabilityProperties() != null) {
       topo.getOutputCapabilityProperties().entrySet().stream()
-        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+          .forEach(outputCapaPropEntry -> 
+            outputCapaPropEntry.getValue().entrySet().stream()
+              .forEach(outputCapaPropSubEntry ->
+                outputCapaPropSubEntry.getValue().forEach(outputCapaProp ->  
+                  results.put(outputCapaPropEntry.getKey() 
+                      + "_" + outputCapaPropEntry.getKey()
+                      + "_" + outputCapaProp, DEFAULT_NOT_SET_OUTPUT_VALUE))));
     }
     if (topo.getOutputProperties() != null) { 
       topo.getOutputProperties().entrySet().stream()
-        .forEach(outputEntry -> results.put(outputEntry.getKey(), DEFAULT_NOT_SET_OUTPUT_VALUE));
+        .forEach(outputPropertyEntry -> 
+            outputPropertyEntry.getValue().forEach(outputProperty ->
+              results.put(outputPropertyEntry.getKey()
+                  + "_" + outputProperty, DEFAULT_NOT_SET_OUTPUT_VALUE)));
     }
     if (topo.getOutputs() != null) { 
       topo.getOutputs().entrySet().stream()
