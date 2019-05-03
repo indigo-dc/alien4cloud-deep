@@ -17,20 +17,12 @@ pipeline {
         stage('Code fetching') {
             steps {
                 checkout scm
-                git branch: '2.1.0-UPV-1.0.0', url: 'https://github.com/indigo-dc/alien4cloud'
-                dir('a-child-repo') {
-                   git branch: '2.1.0-UPV-1.0.0', url: 'https://github.com/indigo-dc/alien4cloud'
-                }
             }
         }
 
         stage('Build local A4C (UPV flavour)') {
           steps {
             dir("$WORKSPACE/indigodc-orchestrator-plugin") {
-                sh 'npm install bower'
-                sh 'npm install grunt-cli'
-                sh 'gem install compass'
-                sh 'npm install grunt-contrib-compass --save-dev'
                 MavenRun('clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
             }
           }
@@ -129,7 +121,7 @@ pipeline {
                 }
             }
         }
-
+        /*
         stage('Functional testing') {
             steps {
                 dir("integration_testing") {
@@ -147,7 +139,7 @@ pipeline {
 
             }
 
-        }
+        }*/
 
         stage('DockerHub delivery') {
             when {
