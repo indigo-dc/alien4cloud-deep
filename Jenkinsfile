@@ -148,6 +148,9 @@ pipeline {
                     buildingTag()
                 }
             }
+            agent {
+                label 'docker-build'
+            }
             steps {
                 DockerPush(dockerhub_image_id)
             }
