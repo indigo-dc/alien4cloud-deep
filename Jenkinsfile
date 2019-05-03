@@ -121,7 +121,7 @@ pipeline {
                 }
             }
         }
-        /*
+
         stage('Functional testing') {
             steps {
                 dir("integration_testing") {
@@ -139,7 +139,7 @@ pipeline {
 
             }
 
-        }*/
+        }
 
         stage('DockerHub delivery') {
             when {
