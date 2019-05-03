@@ -23,10 +23,6 @@ pipeline {
         stage('Build local A4C (UPV flavour)') {
           steps {
             dir("$WORKSPACE/indigodc-orchestrator-plugin") {
-                sh 'npm install bower'
-                sh 'npm install grunt-cli'
-                sh 'gem install compass'
-                sh 'npm install grunt-contrib-compass --save-dev'
                 MavenRun('clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
             }
           }
