@@ -17,10 +17,6 @@ pipeline {
         stage('Code fetching') {
             steps {
                 checkout scm
-                git branch: '2.1.0-UPV-1.0.0', url: 'https://github.com/indigo-dc/alien4cloud'
-                dir('a-child-repo') {
-                   git branch: '2.1.0-UPV-1.0.0', url: 'https://github.com/indigo-dc/alien4cloud'
-                }
             }
         }
 
