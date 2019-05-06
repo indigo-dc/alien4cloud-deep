@@ -117,7 +117,8 @@ public class OrchestratorConnector {
    *         and 299.
    */
   public OrchestratorResponse callGetDeployments(CloudConfiguration cloudConfiguration,
-      String userName, String userPassword)
+      //String userName, String userPassword
+        String token)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
@@ -127,11 +128,11 @@ public class OrchestratorConnector {
     // .append(URLEncoder.encode(cloudConfiguration.getIamHost(), "UTF-8"))
     ;
 
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
+    //AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
     headers.put("Content-Type", "application/json");
-    headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
+    headers.put("Authorization", "Bearer " + token);//accessToken.getAccessToken());
 
     URL requestUrl = new URL(sbuf.toString());
 
@@ -155,19 +156,20 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, String userName,
-      String userPassword, String yamlTopology)
+  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, 
+      //String userName, String userPassword, 
+      String token, String yamlTopology)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
 
     StringBuilder sbuf = new StringBuilder(cloudConfiguration.getOrchestratorEndpoint());
     sbuf.append(WS_PATH_DEPLOYMENTS);
 
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
+    //AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
     headers.put("Content-Type", "application/json");
-    headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
+    headers.put("Authorization", "Bearer " + token);//accessToken.getAccessToken());
 
     URL requestUrl = new URL(sbuf.toString());
 
@@ -190,7 +192,8 @@ public class OrchestratorConnector {
    *         and 299.
    */
   public OrchestratorResponse callDeploymentStatus(CloudConfiguration cloudConfiguration,
-      String userName, String userPassword, String deploymentId)
+      //String userName, String userPassword, 
+      String token, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call deployment status for UUID " + deploymentId);
 
@@ -198,10 +201,10 @@ public class OrchestratorConnector {
     sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
 
     Map<String, String> headers = new HashMap<>();
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
+    //AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
     headers.put("Accept", "application/json");
     headers.put("Content-Type", "application/json");
-    headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
+    headers.put("Authorization", "Bearer " + token);//accessToken.getAccessToken());
 
     URL requestUrl = new URL(sbuf.toString());
 
@@ -222,8 +225,9 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callUndeploy(CloudConfiguration cloudConfiguration, String userName,
-      String userPassword, String deploymentId)
+  public OrchestratorResponse callUndeploy(CloudConfiguration cloudConfiguration, 
+          //String userName, String userPassword, 
+          String token, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     log.info("call undeploy");
@@ -232,10 +236,10 @@ public class OrchestratorConnector {
     sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
 
     Map<String, String> headers = new HashMap<>();
-    AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
+    //AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);
     headers.put("Accept", "application/json");
     headers.put("Content-Type", "application/json");
-    headers.put("Authorization", "Bearer " + accessToken.getAccessToken());
+    headers.put("Authorization", "Bearer " + token);//accessToken.getAccessToken());
 
     URL requestUrl = new URL(sbuf.toString());
 

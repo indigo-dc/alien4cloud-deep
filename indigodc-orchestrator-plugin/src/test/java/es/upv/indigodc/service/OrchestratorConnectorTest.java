@@ -98,8 +98,8 @@ public class OrchestratorConnectorTest {
     // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
     // log.info("call to be sent to the orchestrator: \n" + callJson);
     CloudConfiguration cc = TestUtil.getRealConfiguration(null);
-    User user = TestUtil.getTestUser();
-    OrchestratorResponse or = oc.callDeploy(cc, user.getUsername(), user.getPassword(), callJson);
+    String token = TestUtil.getTestToken();
+    OrchestratorResponse or = oc.callDeploy(cc, token, callJson);
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
     JsonNode root = objectMapper.readTree(or.getResponse().toString());
@@ -113,15 +113,15 @@ public class OrchestratorConnectorTest {
     Assertions.assertEquals(true, vals.size() >= 1);
 
     // now let us see the status
-    or = oc.callDeploymentStatus(cc, user.getUsername(), user.getPassword(), uuid);
+    or = oc.callDeploymentStatus(cc, token, uuid);
     log.info("Deployment status is: " + or.getResponse().toString());
 
     // now let us undeploy
-    or = oc.callUndeploy(cc, user.getUsername(), user.getPassword(), uuid);
+    or = oc.callUndeploy(cc, token, uuid);
     Assertions.assertEquals(204, or.getCode());
 
     // now let us see the status
-    or = oc.callDeploymentStatus(cc, user.getUsername(), user.getPassword(), uuid);
+    or = oc.callDeploymentStatus(cc, token, uuid);
     log.info("Deployment status is: " + or.getResponse().toString());
   }
 
@@ -143,9 +143,10 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
+
+    String token = TestUtil.getTestToken();
     OrchestratorResponse or =
-        oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
+        oc.callDeploy(cc, token, "{\"response\": 1}");
     testServer.stop();
   }
   
@@ -167,8 +168,8 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
-    oc.callDeploy(cc, user.getUsername(), user.getPassword(), "{\"response\": 1}");
+    String token = TestUtil.getTestToken();
+    oc.callDeploy(cc, token, "{\"response\": 1}");
     testServer.stop();
   }
   
@@ -190,8 +191,8 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
-    OrchestratorResponse or  = oc.callDeploymentStatus(cc, user.getName(), user.getPassword(), "id");
+    String token = TestUtil.getTestToken();
+    OrchestratorResponse or  = oc.callDeploymentStatus(cc, token, "id");
     testServer.stop();
   }
   
@@ -213,8 +214,8 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
-    Executable callGetDeployments = () -> {oc.callGetDeployments(cc, user.getName(), user.getPassword());};
+    String token = TestUtil.getTestToken();
+    Executable callGetDeployments = () -> {oc.callGetDeployments(cc, token);};
     Assertions.assertThrows(OrchestratorIamException.class, callGetDeployments);
     testServer.stop();
   }
@@ -237,9 +238,9 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
+    String token = TestUtil.getTestToken();
     OrchestratorResponse or =
-        oc.callGetDeployments(cc, user.getName(), user.getPassword());
+        oc.callGetDeployments(cc, token);
     testServer.stop();
   }
   
@@ -261,9 +262,9 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
+    String token = TestUtil.getTestToken();
     OrchestratorResponse or =
-        oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
+        oc.callUndeploy(cc, token, "id");
     testServer.stop();
   }
   
@@ -285,9 +286,9 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
     OrchestratorConnector oc = new OrchestratorConnector();
-    User user = TestUtil.getTestUser();
+    String token = TestUtil.getTestToken();
     OrchestratorResponse or =
-        oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
+        oc.callUndeploy(cc, token, "id");
     testServer.stop();
   }
   
@@ -334,8 +335,8 @@ public class OrchestratorConnectorTest {
 	    testServer.start(servlets);
 	    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
 	    OrchestratorConnector oc = new OrchestratorConnector();
-	    User user = TestUtil.getTestUser();
-	    Executable callUndeploy = () -> oc.callUndeploy(cc, user.getName(), user.getPassword(), "id");
+	    String token = TestUtil.getTestToken();
+	    Executable callUndeploy = () -> oc.callUndeploy(cc, token, "id");
 	    Assertions.assertThrows(OrchestratorIamException.class, callUndeploy);
 	    testServer.stop();
   }

@@ -23,6 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TestUtil {
   
+  @Disabled("Not testing method")
+  public static String getTestToken() {
+    return "";
+  }
+  
 	@Disabled("Not testing method")
   public static CloudConfiguration getRealConfiguration(String fileNameResource)
       throws JsonParseException, JsonMappingException, IOException {

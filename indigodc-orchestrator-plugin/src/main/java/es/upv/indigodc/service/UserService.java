@@ -27,4 +27,9 @@ public class UserService {
     // log.info("Password plain is: " + u.getPlainPassword());
     return user;
   }
+  
+  
+  public String getToken() {
+      return "1111";
+  }
 }
