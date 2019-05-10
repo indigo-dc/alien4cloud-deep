@@ -25,7 +25,7 @@ public class TestUtil {
   
   @Disabled("Not testing method")
   public static String getTestToken() {
-    return "";
+    return "token";
   }
   
 	@Disabled("Not testing method")

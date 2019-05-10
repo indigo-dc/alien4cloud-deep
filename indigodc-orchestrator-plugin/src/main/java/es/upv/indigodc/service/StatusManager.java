@@ -13,8 +13,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
@@ -28,9 +31,14 @@ import es.upv.indigodc.service.model.DeploymentInfoPair;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import java.io.IOException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import lombok.Getter;
 
+@Service
+@Scope("prototype")
 public class StatusManager {
   
   protected final Map<String, DeploymentInfo> deploymentInfos = new HashMap<>();
@@ -38,9 +46,6 @@ public class StatusManager {
   
   @Autowired
   protected CloudConfigurationManager cloudConfigurationManager;
-  
-  @Autowired
-  protected UserService userService;
   
   
   
@@ -54,16 +59,13 @@ public class StatusManager {
     protected StatusManager statusManager;
     protected OrchestratorConnector orchestratorConnector;
     protected CloudConfigurationManager cloudConfigurationManager;
-    protected UserService userService;
 
     public StatusObtainer(StatusManager statusManager, 
             OrchestratorConnector orchestratorConnector,
-            CloudConfigurationManager cloudConfigurationManager,
-            UserService userService) {
+            CloudConfigurationManager cloudConfigurationManager) {
       this.statusManager = statusManager;
       this.orchestratorConnector = orchestratorConnector;
       this.cloudConfigurationManager = cloudConfigurationManager;
-      this.userService = userService;
     }
     
     @Override
@@ -76,7 +78,6 @@ public class StatusManager {
                 OrchestratorResponse response = 
                         orchestratorConnector.callDeploymentStatus(
                         this.cloudConfigurationManager.getCloudConfiguration(dip.getOrchestratorId()),
-                        userService.getToken(),
                         dip.getOrchestratorDeploymentId());
                 String statusTopologyDeployment = response.getStatusTopologyDeployment();
                 this.statusManager.updateStatus(
@@ -101,16 +102,30 @@ public class StatusManager {
     
   }
   
+  @PostConstruct
+  public void init() {
+    executor.scheduleWithFixedDelay(
+        new StatusObtainer(this, 
+            orchestratorConnector, cloudConfigurationManager), 
+        0, 10, TimeUnit.SECONDS);
+  }
+  
   
   public void initActiveDeployments(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
     for (Map.Entry<String, PaaSTopologyDeploymentContext> topoE: activeDeployments.entrySet()) {
       addStatus(topoE.getValue(), null);
     }
-    executor.scheduleWithFixedDelay(
-            new StatusObtainer(this, 
-                orchestratorConnector, cloudConfigurationManager,
-                userService), 
-            0, 10, TimeUnit.SECONDS);
+    
+  }
+  
+  public synchronized DeploymentInfo getDeploymentInfo(String deploymentPaasId) {
+    DeploymentInfo deploymentInfo = deploymentInfos.get(deploymentPaasId);
+    if (deploymentInfo != null) {
+      return SerializationUtils.<DeploymentInfo>clone(deploymentInfo);
+    } else {
+      return null;
+    }
+          
   }
   
   public synchronized void addStatus(PaaSTopologyDeploymentContext topo, 
@@ -130,6 +145,7 @@ public class StatusManager {
             .collect(Collectors.toList());
   }
   
+  @PreDestroy
   public void destroy() {
     executor.shutdown();
   }

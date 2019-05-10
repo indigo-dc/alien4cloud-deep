@@ -31,8 +31,6 @@ public class EventService {
 
   public static final int EVENT_QUEUE_MAX_SIZE = 1000;
 
-  @Autowired
-  private UserService userService;
 
   @Autowired
   @Qualifier("orchestrator-connector")

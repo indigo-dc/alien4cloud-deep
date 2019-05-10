@@ -23,7 +23,6 @@ import es.upv.indigodc.service.EventService;
 import es.upv.indigodc.service.MappingService;
 import es.upv.indigodc.service.OrchestratorConnector;
 import es.upv.indigodc.service.StatusManager;
-import es.upv.indigodc.service.UserService;
 import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
@@ -94,10 +93,6 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   @Inject
   private EventService eventService;
 
-  /** Manages the logged in user that executes this instance of service. */
-  @Autowired
-  private UserService userService;
-  
   @Autowired
   private StatusManager statusManager;
 
@@ -112,7 +107,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
    * Method called when this instance is scrapped.
    */
   public void destroy() {
-    statusManager.destroy();
+    //statusManager.destroy();
   }
 
   @Override
@@ -135,8 +130,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
           builderService.buildApp(deploymentContext, configuration.getImportIndigoCustomTypes());
       log.info("Deploying on: " + configuration.getOrchestratorEndpoint());
       log.info("Topology: " + yamlPaasTopology);
-      OrchestratorResponse response = orchestratorConnector.callDeploy(configuration,
-          userService.getToken(), yamlPaasTopology);
+      OrchestratorResponse response = orchestratorConnector.callDeploy(configuration, yamlPaasTopology);
       final String orchestratorUuidDeployment = response.getOrchestratorUuidDeployment();
       log.info("uuid a4c: " + a4cUuidDeployment);
       log.info("uuid orchestrator: " + orchestratorUuidDeployment);
@@ -180,7 +174,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         log.info("Deployment paas id: " + a4cUuidDeployment);
         log.info("uuid: " + orchestratorUuidDeployment);
         final OrchestratorResponse result = orchestratorConnector.callUndeploy(configuration,
-            userService.getToken(), orchestratorUuidDeployment);
+             orchestratorUuidDeployment);
         mappingService.registerDeploymentInfo(orchestratorUuidDeployment, a4cUuidDeployment,
             deploymentContext.getDeployment().getOrchestratorId(),
             DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
@@ -238,7 +232,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
           .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
       try {
         OrchestratorResponse response = orchestratorConnector.callDeploymentStatus(configuration,
-            userService.getToken(), orchestratorUuidDeployment);
+             orchestratorUuidDeployment);
 
         log.info(response.getResponse().toString());
         Util.InstanceStatusInfo instanceStatusInfo = Util
@@ -309,7 +303,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
         try {
           OrchestratorResponse response = orchestratorConnector.callDeploymentStatus(configuration,
-              userService.getToken(), orchestratorUuidDeployment);
+               orchestratorUuidDeployment);
           String statusTopologyDeployment = response.getStatusTopologyDeployment();
           callback.onSuccess(
               Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment.toUpperCase()));

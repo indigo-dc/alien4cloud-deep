@@ -1,14 +1,20 @@
 package es.upv.indigodc.service.model;
 
+import java.io.Serializable;
 import java.util.Map;
+
 import alien4cloud.paas.model.DeploymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class DeploymentInfo {  
+public class DeploymentInfo implements Serializable {  
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 8452877443031991069L;
   protected String a4cDeploymentPaasId;
   protected String orchestratorDeploymentId;
   

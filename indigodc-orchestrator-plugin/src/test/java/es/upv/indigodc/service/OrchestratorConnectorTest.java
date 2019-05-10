@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.Mockito;
 
 import alien4cloud.security.model.User;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -22,7 +23,6 @@ import es.upv.indigodc.TestServer;
 import es.upv.indigodc.TestUtil;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.BuilderService.Deployment;
-import es.upv.indigodc.service.OrchestratorConnector.AccessToken;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import java.io.FileInputStream;
@@ -39,6 +39,10 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.ConnectionData;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.oidc.api.Oidc;
 
 
 @Slf4j
@@ -48,6 +52,15 @@ public class OrchestratorConnectorTest {
   public static final String TOKEN_AUTH_RESPONSE =
       "{\"expires_in\": 1000000, \"access_token\": \"none\"}";
   public static final String ORCHESTRATOR_COMMON_PATH = "/orchestrator";
+  public static final String OIDC_PROVIDER_ID = "providerId";
+  public static final String OIDC_PROVIDER_USER_ID = "providerUserId";
+  public static final String OIDC_DISPLAY_NAME ="displayName";
+  public static final String OIDC_PROFILE_URL = "profileUrl";
+  public static final String OIDC_IMAGE_URL = "imageUrl";
+  public static final String OIDC_ACCESS_TOKEN = "accessToken";
+  public static final String OIDC_SECRET = "secret";
+  public static final String OIDC_REFRESH_TOKEN = "refreshToken";
+  public static final Long OIDC_EXPIRE_TIME = 360L;
 
   public TestServer getTestServer() throws Exception {
     return new TestServer(
@@ -61,69 +74,55 @@ public class OrchestratorConnectorTest {
     // testServer.start();
   }
 
-
-  @Disabled("Test is ignored because it overstretches the orchestrator")
-  @Test
-  public void testLoginWithProductionInfo()
-      throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
-          OrchestratorIamException {
-    OrchestratorConnector oc = new OrchestratorConnector();
-    CloudConfiguration cc = TestUtil.getRealConfiguration(null);
-
-    User user = TestUtil.getTestUser();
-    AccessToken at = oc.obtainAuthTokens(cc, user.getUsername(), user.getPassword());
-    Assertions.assertEquals(true, at.getAccessToken() != null);
-  }
-
-  @Disabled("Test is ignored because it overstretches the orchestrator")
-  @Test
-  public void deployUndeployProductionAuthSingleToscaCompute()
-      throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
-      OrchestratorIamException {
-    OrchestratorConnector oc = new OrchestratorConnector();
-
-    URL url =
-        OrchestratorConnectorTest.class.getClassLoader().getResource("test_compute_indigodc.yaml");
-    String yamlIndigoDC =
-        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    ObjectMapper mapper = new ObjectMapper();
-    Deployment d = new Deployment();
-    d.setParameters(new HashMap<String, Object>());
-    d.setCallback("http://localhost:8080/callback");
-    d.setTemplate(yamlIndigoDC);
-    String callJson =
-        mapper.writeValueAsString(d).replaceAll("\\\\n", "\\n").replace("\\\\\\", "\\");
-
-    // String callJson =
-    // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
-    // log.info("call to be sent to the orchestrator: \n" + callJson);
-    CloudConfiguration cc = TestUtil.getRealConfiguration(null);
-    String token = TestUtil.getTestToken();
-    OrchestratorResponse or = oc.callDeploy(cc, token, callJson);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
-    JsonNode root = objectMapper.readTree(or.getResponse().toString());
-    List<JsonNode> vals = root.findValues("uuid");
-    Assertions.assertEquals(true, vals.size() >= 1);
-    String uuid = vals.get(0).asText();
-    // log.info("UUID of the app: " + uuid);
-    vals = root.findValues("status");
-    Assertions.assertEquals(true, vals.size() >= 1);
-    vals = root.findValues("callback");
-    Assertions.assertEquals(true, vals.size() >= 1);
-
-    // now let us see the status
-    or = oc.callDeploymentStatus(cc, token, uuid);
-    log.info("Deployment status is: " + or.getResponse().toString());
-
-    // now let us undeploy
-    or = oc.callUndeploy(cc, token, uuid);
-    Assertions.assertEquals(204, or.getCode());
-
-    // now let us see the status
-    or = oc.callDeploymentStatus(cc, token, uuid);
-    log.info("Deployment status is: " + or.getResponse().toString());
-  }
+//  @Disabled("Test is ignored because it overstretches the orchestrator")
+//  @Test
+//  public void deployUndeployProductionAuthSingleToscaCompute()
+//      throws JsonParseException, JsonMappingException, IOException, NoSuchFieldException,
+//      OrchestratorIamException {
+//    OrchestratorConnector oc = new OrchestratorConnector();
+//
+//    URL url =
+//        OrchestratorConnectorTest.class.getClassLoader().getResource("test_compute_indigodc.yaml");
+//    String yamlIndigoDC =
+//        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+//    ObjectMapper mapper = new ObjectMapper();
+//    Deployment d = new Deployment();
+//    d.setParameters(new HashMap<String, Object>());
+//    d.setCallback("http://localhost:8080/callback");
+//    d.setTemplate(yamlIndigoDC);
+//    String callJson =
+//        mapper.writeValueAsString(d).replaceAll("\\\\n", "\\n").replace("\\\\\\", "\\");
+//
+//    // String callJson =
+//    // String.format("{\"template\":\"%s\",\"parameters\":{\"cpus\":1},\"callback\":\"http://localhost:8080/callback\"}", yamlIndigoDC);
+//    // log.info("call to be sent to the orchestrator: \n" + callJson);
+//    CloudConfiguration cc = TestUtil.getRealConfiguration(null);
+//    String token = TestUtil.getTestToken();
+//    OrchestratorResponse or = oc.callDeploy(cc, callJson);
+//    ObjectMapper objectMapper = new ObjectMapper();
+//    objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
+//    JsonNode root = objectMapper.readTree(or.getResponse().toString());
+//    List<JsonNode> vals = root.findValues("uuid");
+//    Assertions.assertEquals(true, vals.size() >= 1);
+//    String uuid = vals.get(0).asText();
+//    // log.info("UUID of the app: " + uuid);
+//    vals = root.findValues("status");
+//    Assertions.assertEquals(true, vals.size() >= 1);
+//    vals = root.findValues("callback");
+//    Assertions.assertEquals(true, vals.size() >= 1);
+//
+//    // now let us see the status
+//    or = oc.callDeploymentStatus(cc, uuid);
+//    log.info("Deployment status is: " + or.getResponse().toString());
+//
+//    // now let us undeploy
+//    or = oc.callUndeploy(cc, uuid);
+//    Assertions.assertEquals(204, or.getCode());
+//
+//    // now let us see the status
+//    or = oc.callDeploymentStatus(cc, uuid);
+//    log.info("Deployment status is: " + or.getResponse().toString());
+//  }
 
   @Test
   public void testLoginWithTestServer() throws Exception {
@@ -142,11 +141,9 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-
-    String token = TestUtil.getTestToken();
+    OrchestratorConnector oc = getTestOrchestratorConnector();
     OrchestratorResponse or =
-        oc.callDeploy(cc, token, "{\"response\": 1}");
+        oc.callDeploy(cc, "{\"response\": 1}");
     testServer.stop();
   }
   
@@ -167,9 +164,8 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-    String token = TestUtil.getTestToken();
-    oc.callDeploy(cc, token, "{\"response\": 1}");
+    OrchestratorConnector oc = getTestOrchestratorConnector();
+    oc.callDeploy(cc, "{\"response\": 1}");
     testServer.stop();
   }
   
@@ -190,9 +186,8 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-    String token = TestUtil.getTestToken();
-    OrchestratorResponse or  = oc.callDeploymentStatus(cc, token, "id");
+    OrchestratorConnector oc = getTestOrchestratorConnector();
+    OrchestratorResponse or  = oc.callDeploymentStatus(cc, "id");
     testServer.stop();
   }
   
@@ -213,9 +208,8 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-    String token = TestUtil.getTestToken();
-    Executable callGetDeployments = () -> {oc.callGetDeployments(cc, token);};
+    OrchestratorConnector oc = getTestOrchestratorConnector();
+    Executable callGetDeployments = () -> {oc.callGetDeployments(cc);};
     Assertions.assertThrows(OrchestratorIamException.class, callGetDeployments);
     testServer.stop();
   }
@@ -237,10 +231,9 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-    String token = TestUtil.getTestToken();
+    OrchestratorConnector oc = getTestOrchestratorConnector();
     OrchestratorResponse or =
-        oc.callGetDeployments(cc, token);
+        oc.callGetDeployments(cc);
     testServer.stop();
   }
   
@@ -261,10 +254,9 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-    String token = TestUtil.getTestToken();
+    OrchestratorConnector oc = getTestOrchestratorConnector();
     OrchestratorResponse or =
-        oc.callUndeploy(cc, token, "id");
+        oc.callUndeploy(cc, "id");
     testServer.stop();
   }
   
@@ -285,10 +277,9 @@ public class OrchestratorConnectorTest {
     TestServer testServer = getTestServer();
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
-    OrchestratorConnector oc = new OrchestratorConnector();
-    String token = TestUtil.getTestToken();
+    OrchestratorConnector oc = getTestOrchestratorConnector();
     OrchestratorResponse or =
-        oc.callUndeploy(cc, token, "id");
+        oc.callUndeploy(cc, "id");
     testServer.stop();
   }
   
@@ -334,11 +325,24 @@ public class OrchestratorConnectorTest {
 	    TestServer testServer = getTestServer();
 	    testServer.start(servlets);
 	    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test_unsecured.json");
-	    OrchestratorConnector oc = new OrchestratorConnector();
-	    String token = TestUtil.getTestToken();
-	    Executable callUndeploy = () -> oc.callUndeploy(cc, token, "id");
+	    OrchestratorConnector oc = getTestOrchestratorConnector();
+	    Executable callUndeploy = () -> oc.callUndeploy(cc, "id");
 	    Assertions.assertThrows(OrchestratorIamException.class, callUndeploy);
 	    testServer.stop();
+  }
+  
+  @Disabled
+  protected static OrchestratorConnector getTestOrchestratorConnector() {
+    OrchestratorConnector oc = new OrchestratorConnector();
+    ConnectionRepository conn = Mockito.mock(ConnectionRepository.class);
+    Connection c = Mockito.mock(Connection.class);
+    Mockito.when(conn.getPrimaryConnection(Oidc.class)).thenReturn(c);
+    ConnectionData cd = new ConnectionData(OIDC_PROVIDER_ID, OIDC_PROVIDER_USER_ID,
+        OIDC_DISPLAY_NAME, OIDC_PROFILE_URL, OIDC_IMAGE_URL,  
+        OIDC_ACCESS_TOKEN, OIDC_SECRET, OIDC_REFRESH_TOKEN, OIDC_EXPIRE_TIME);
+    Mockito.when(c.createData()).thenReturn(cd);
+    TestUtil.setPrivateField(oc, "connRepository", conn);
+    return oc;
   }
   
 }

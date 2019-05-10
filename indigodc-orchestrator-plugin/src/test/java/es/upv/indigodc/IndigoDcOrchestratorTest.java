@@ -43,10 +43,15 @@ import es.upv.indigodc.service.BuilderServiceTest;
 import es.upv.indigodc.service.MappingService;
 import es.upv.indigodc.service.OrchestratorConnector;
 import es.upv.indigodc.service.StatusManager;
-import es.upv.indigodc.service.UserService;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import es.upv.indigodc.service.model.StatusNotFoundException;
+
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.ConnectionData;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.oidc.api.Oidc;
+
 
 public class IndigoDcOrchestratorTest {
 	
@@ -56,6 +61,7 @@ public class IndigoDcOrchestratorTest {
 	public static final String ORCHESTRATOR_DEPLOYMENT_ID = "orchestratorDeploymentId";
 	public static final String ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS = "CREATE_IN_PROGRESS";
 	public static final String ORCHESTRATOR_STATUS_DEPLOYMENT_NOT_HANDLED = "NOT_HANDLED";
+
 	
 	@Test
 	public void initWithNoDeployments() throws JsonParseException, JsonMappingException, PluginConfigurationException, IOException, IllegalArgumentException, IllegalAccessException {
@@ -114,7 +120,7 @@ public class IndigoDcOrchestratorTest {
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
 				deploymentContext, callback, orchestratorConnector);
 		Mockito.when(orchestratorConnector.callDeploy(
-				Mockito.<CloudConfiguration>notNull(), Mockito.<String>any(), 
+				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenThrow(errorClass);
 		idco.deploy(deploymentContext, callback);	
     idco.destroy();
@@ -161,7 +167,6 @@ public class IndigoDcOrchestratorTest {
 				deploymentContext, callback, orchestratorConnector);
 		Mockito.when(orchestratorConnector.callUndeploy(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenThrow(errorClass);
 		idco.undeploy(deploymentContext, callback);			
     idco.destroy();
@@ -182,7 +187,6 @@ public class IndigoDcOrchestratorTest {
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));
 		Mockito.when(orchestratorConnector.callDeploymentStatus(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getInstancesInformation(deploymentContext, callback);	
     idco.destroy();
@@ -234,7 +238,6 @@ public class IndigoDcOrchestratorTest {
 								ORCHESTRATOR_STATUS_DEPLOYMENT_NOT_HANDLED)));
 		Mockito.when(orchestratorConnector.callDeploymentStatus(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getInstancesInformation(deploymentContext, callback);
     idco.destroy();
@@ -250,7 +253,6 @@ public class IndigoDcOrchestratorTest {
 				deploymentContext, callback, orchestratorConnector);
 		Mockito.when(orchestratorConnector.callDeploymentStatus(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenThrow(errorClass);
 		idco.getInstancesInformation(deploymentContext, callback);	
     idco.destroy();
@@ -273,7 +275,6 @@ public class IndigoDcOrchestratorTest {
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));
 		Mockito.when(orchestratorConnector.callDeploymentStatus(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getStatus(deploymentContext, callback);	
     idco.destroy();
@@ -311,7 +312,6 @@ public class IndigoDcOrchestratorTest {
 				deploymentContext, callback, orchestratorConnector);
 		Mockito.when(orchestratorConnector.callDeploymentStatus(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenThrow(errorClass);
 		idco.getStatus(deploymentContext, callback);	
     idco.destroy();
@@ -331,7 +331,6 @@ public class IndigoDcOrchestratorTest {
 		//Mockito.when(response.getOrchestratorUuidDeployment()).thenReturn("orchestratorUuidDeployment");
 		Mockito.when(orchestratorConnector.callDeploy(
 				Mockito.<CloudConfiguration>notNull(), 
-				Mockito.<String>any(), 
 				Mockito.<String>any())).thenReturn(response);
 
 		TestUtil.setPrivateField(idco, "orchestratorConnector", orchestratorConnector);	
@@ -364,12 +363,9 @@ public class IndigoDcOrchestratorTest {
 		TestUtil.setPrivateField(idco, "mappingService", mappingService);
     StatusManager statusManager = Mockito.mock(StatusManager.class);
     TestUtil.setPrivateField(idco, "statusManager", statusManager);
-    UserService userService = Mockito.mock(UserService.class);
-		User user = new User();
-		user.setPlainPassword("plainPassword");
-		user.setUsername("username");
-		Mockito.when(userService.getCurrentUser()).thenReturn(user);
-		TestUtil.setPrivateField(idco, "userService", userService);
+
+		//Mockito.when(c.createData().getAccessToken()).thenReturn(TestUtil.getTestToken());
+		//TestUtil.setPrivateField(idco, "connRepository", conn);
 		BuilderService builderService = new BuilderService() {
 			
 			@Override
