@@ -32,7 +32,7 @@
         <!-- Libraries versions section -->
         <!-- DEEP Libraries versions section -->
         <v.alien4cloud.alien4cloud-core>2.1.0-DEEP-1.0.0-SNAPSHOT</v.alien4cloud.alien4cloud-core>
-        <v.org.springframework.social.spring-social-oidc>1.0-SNAPSHOT</v.org.springframework.social.spring-social-oidc>
+        <!--v.org.springframework.social.spring-social-oidc>1.0-SNAPSHOT</v.org.springframework.social.spring-social-oidc-->
 		
 		    <!-- External Libraries versions section -->
         <v.org.eclipse.jetty>9.4.18.v20190429</v.org.eclipse.jetty>
@@ -62,11 +62,11 @@
 
     <dependencies>
     
-      <dependency>
+      <!--dependency>
 			    <groupId>org.springframework.social</groupId>
 			    <artifactId>spring-social-oidc</artifactId>
 			    <version>${v.org.springframework.social.spring-social-oidc}</version>
-			</dependency>
+			</dependency-->
     
         <dependency>
             <groupId>org.mockito</groupId>
