@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.9.4
 
 ARG user_uid=1000
 ARG user_gid=1000
@@ -6,15 +6,16 @@ ARG a4c_ver=2.1.0
 ARG a4c_install_path=/opt
 ARG a4c_src_dir=alien4cloud
 ARG a4c_install_dir=a4c
-ARG a4c_upv_ver=${a4c_ver}-UPV-1.0.0
+ARG a4c_deep_ver=${a4c_ver}-DEEP-1.0.0-SNAPSHOT
 ARG a4c_user=a4c
 ARG a4c_settings_manager_ver=1.0.2
 ARG tosca_normative_url=https://raw.githubusercontent.com/openstack/tosca-parser/master/toscaparser/elements/TOSCA_definition_1_0.yaml
 ARG tosca_normative_version=1.0.0
 ARG tosca_normative_name=normative-types
 ARG tosca_indigo_version=3.0.0
-ARG a4c_upv_gihub_url=https://github.com/indigo-dc/alien4cloud
-ARG a4c_upv_branch=${a4c_upv_ver}
+ARG a4c_deep_url=https://github.com/indigo-dc/alien4cloud
+ARG spring_social_oidc_url=https://github.com/indigo-dc/spring-social-oidc
+ARG a4c_deep_branch=deep-dev-UPV
 ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
 
 ENV A4C_INSTALL_PATH=${a4c_install_path}
@@ -25,6 +26,14 @@ ENV A4C_SETTINGS_MANAGER_VER=${a4c_settings_manager_ver}
 
 ENV A4C_PORT_HTTP=8088
 ENV A4C_PORT_HTTPS=8443
+
+ENV A4C_SPRING_OIDC_ISSUER=<none>
+ENV A4C_SPRING_OIDC_CLIENT_ID=<none>
+ENV A4C_SPRING_OIDC_CLIENT_SECRET=<none>
+# Use CSV style approach, that is list of elements with single quote, separated by one and only one comma
+# eg 'ADMIN','APPLICATION MANGER','DEV, OPS'
+# at least one element is necessary
+ENV A4C_SPRING_OIDC_ROLES=<none>
 
 ENV A4C_RUNTIME_DIR=/mnt/a4c_runtime_data
 # This variable triggers the wipping of the old A4C
@@ -63,9 +72,12 @@ RUN \
   && npm install grunt-contrib-compass --save-dev\
   && echo '{ "allow_root": true }' > /root/.bowerrc\
   && cat /root/.bowerrc \
+  # Compile and install locally the Spring Social OIDC plugin
+  && git clone --single-branch  --branch master ${spring_social_oidc_url} "${a4c_install_path}/spring_social_oidc" \
+  && cd "${a4c_install_path}/spring_social_oidc" \
+  && mvn clean install \
   # Compile the A4C source code
-  && git clone --single-branch  --branch ${a4c_upv_branch} ${a4c_upv_gihub_url} "${a4c_install_path}/${a4c_src_dir}" \
-  && cd "${a4c_install_path}/${a4c_src_dir}" \
+  && git clone --single-branch  --branch ${a4c_deep_branch} ${a4c_deep_url} "${a4c_install_path}/${a4c_src_dir}" \
   && cd "${a4c_install_path}/${a4c_src_dir}" \
   && mvn clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true \
   # Get the precompiled version to obtain the init and config files
@@ -75,7 +87,7 @@ RUN \
   && tar xvf alien4cloud-dist-${a4c_ver}-dist.tar.gz --strip 1 -C "${a4c_install_path}/${a4c_install_dir}" \
   && rm alien4cloud-dist-${a4c_ver}-dist.tar.gz \
   && rm ${a4c_install_path}/${a4c_install_dir}/init/archives/* ${a4c_install_path}/${a4c_install_dir}/init/plugins/* \
-  && mv "${a4c_install_path}/${a4c_src_dir}/alien4cloud-ui/target/alien4cloud-ui-${a4c_upv_ver}-standalone.war" \
+  && mv "${a4c_install_path}/${a4c_src_dir}/alien4cloud-ui/target/alien4cloud-ui-${a4c_deep_ver}-standalone.war" \
     "${a4c_install_path}/${a4c_install_dir}/alien4cloud-ui-${a4c_ver}.war" \
   && rm -rf "${a4c_install_path}/${a4c_src_dir}" \
   # Get and add the normative Tosca types
@@ -98,7 +110,7 @@ RUN \
   # Compile and install the plugin
   && cd "${a4c_install_path}/indigodc-orchestrator-plugin" \
   && mvn -e clean package \
-  && cp ${a4c_install_path}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider-*.zip \
+  && cp ${a4c_install_path}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider.zip \
     "${a4c_install_path}/${a4c_install_dir}/init/plugins/" \
   # Compile and install the a4c settings manager
   && cd "${a4c_install_path}/alien4cloud-settings-manager/" \
@@ -119,7 +131,7 @@ RUN \
   && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/* \
   && apk del build-dependencies  \
   # Install the a4c runtime dependencies
-  && apk --no-cache add openjdk8-jre-base bash su-exec
+  && apk --no-cache add openjdk8-jre-base bash su-exec nss
 
 EXPOSE ${A4C_PORT_HTTP}
 EXPOSE ${A4C_PORT_HTTPS}
