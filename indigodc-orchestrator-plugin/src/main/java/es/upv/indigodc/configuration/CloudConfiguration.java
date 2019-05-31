@@ -15,31 +15,33 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@FormProperties({"clientId", "clientSecret", "tokenEndpoint", "tokenEndpointCert", "clientScopes",
-    "orchestratorEndpoint", "orchestratorEndpointCert", "iamHost", "iamHostCert",
+@FormProperties({
+//"clientId", "clientSecret", "tokenEndpoint", "tokenEndpointCert", "clientScopes", "iamHost", "iamHostCert",
+    "orchestratorEndpoint", "orchestratorEndpointCert", 
     "orchestratorPollInterval", "importIndigoCustomTypes"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloudConfiguration {
 
-  @NotNull
-  private String clientId;
-  @NotNull
-  private String clientSecret;
-  @NotNull
-  private String tokenEndpoint;
-  @NotNull
-  private String tokenEndpointCert;
-  @NotNull
-  private String clientScopes;
+//  @NotNull
+//  private String clientId;
+//  @NotNull
+//  private String clientSecret;
+//  @NotNull
+//  private String tokenEndpoint;
+//  @NotNull
+//  private String tokenEndpointCert;
+//  @NotNull
+//  private String iamHost;
+//  @NotNull
+//  private String iamHostCert;
+//  @NotNull
+//  private String clientScopes;
+  
   @NotNull
   private String orchestratorEndpoint;
   @NotNull
   private String orchestratorEndpointCert;
-  @NotNull
-  private String iamHost;
-  @NotNull
-  private String iamHostCert;
   private int orchestratorPollInterval;
   @NotNull
   private String importIndigoCustomTypes;
