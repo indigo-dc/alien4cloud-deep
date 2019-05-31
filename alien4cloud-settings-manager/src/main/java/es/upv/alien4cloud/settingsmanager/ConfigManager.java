@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import okio.Buffer;
@@ -98,6 +99,24 @@ public class ConfigManager {
     } else 
       throw new ValueNotFoundException(
           String.format("Can't find the server node in the %s template", CONFIG_TEMPLATE_PATH));
+  }
+  
+  public void setSpringOIDCInfo(String issuer, String clientId, String clientSecret, List<String> userRoles)
+   throws ValueNotFoundException {
+      ObjectNode oidc = (ObjectNode) root.findValue("oidc");
+      if (oidc != null) {
+          ObjectNode iam = (ObjectNode) oidc.findValue("iam");
+          if (iam != null) {
+              iam.put("issuer", issuer);
+              iam.put("client-id", clientId);
+              iam.put("client-secret", clientSecret);
+          } else
+              throw new ValueNotFoundException(
+                String.format("Can't find the iam su-node of the oidc node in the %s template", CONFIG_TEMPLATE_PATH));
+          oidc.put("roles", userRoles.stream().collect(Collectors.joining(",")));
+      } else 
+          throw new ValueNotFoundException(
+            String.format("Can't find the oidc node in the %s template", CONFIG_TEMPLATE_PATH));
   }
   
   public void disableSsl() throws ValueNotFoundException {

@@ -1,3 +1,13 @@
+spring:
+  profiles:
+    active: oidc-auth
+
+oidc:
+  iam:
+    issuer: <issuer_url>
+    client-id: <client_id>
+    client-secret: <client_secret>
+  roles: <user_roles>    
 # server section allows configuration of the listening port of the embedded jetty server.
 server:
   port: 8088
