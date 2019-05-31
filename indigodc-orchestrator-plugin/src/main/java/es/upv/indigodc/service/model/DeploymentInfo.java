@@ -22,7 +22,7 @@ public class DeploymentInfo implements Serializable {
   
   protected DeploymentStatus status; 
   
-  protected Map<String, String> outputsValues;
+  protected Map<String, String> outputs;
   
   /** If an error occurred when trying to get the deployment **/
   protected Throwable errorDeployment;

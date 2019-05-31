@@ -277,15 +277,15 @@ public class IndigoDcOrchestratorTest {
 				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getStatus(deploymentContext, callback);	
-    idco.destroy();
+                idco.destroy();
 	}
 
-	@Test
-	public void getMockStatusIOException() 
-			throws JsonProcessingException, PluginConfigurationException, 
-		NoSuchFieldException, IllegalArgumentException, IllegalAccessException, IOException, OrchestratorIamException {
-		getMockStatusError(IOException.class, ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS);
-	}
+//	@Test
+//	public void getMockStatusIOException() 
+//			throws JsonProcessingException, PluginConfigurationException, 
+//		NoSuchFieldException, IllegalArgumentException, IllegalAccessException, IOException, OrchestratorIamException {
+//		getMockStatusError(IOException.class, ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS);
+//	}
 	
 	@Test
 	public void getMockStatusNoSuchFieldException() 
@@ -358,9 +358,9 @@ public class IndigoDcOrchestratorTest {
 		CloudConfigurationManager cfm = new CloudConfigurationManager();
 		IndigoDcOrchestrator idco = new IndigoDcOrchestrator();
 		TestUtil.setPrivateField(idco, "cloudConfigurationManager", cfm);
-		MappingService mappingService = new MappingService();
-		mappingService.registerDeploymentInfo(ORCHESTRATOR_DEPLOYMENT_ID,  ALIEN_DEPLOYMENT_ID, ORCHESTRATOR_ID, DeploymentStatus.DEPLOYED);
-		TestUtil.setPrivateField(idco, "mappingService", mappingService);
+		//MappingService mappingService = new MappingService();
+		//mappingService.registerDeploymentInfo(ORCHESTRATOR_DEPLOYMENT_ID,  ALIEN_DEPLOYMENT_ID, ORCHESTRATOR_ID, DeploymentStatus.DEPLOYED);
+		//TestUtil.setPrivateField(idco, "mappingService", mappingService);
     StatusManager statusManager = Mockito.mock(StatusManager.class);
     TestUtil.setPrivateField(idco, "statusManager", statusManager);
 

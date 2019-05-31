@@ -80,9 +80,11 @@ public class StatusManager {
                         this.cloudConfigurationManager.getCloudConfiguration(dip.getOrchestratorId()),
                         dip.getOrchestratorDeploymentId());
                 String statusTopologyDeployment = response.getStatusTopologyDeployment();
+                
                 this.statusManager.updateStatus(
                         dip.getA4cDeploymentPaasId(), 
                         Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment),
+                        response.getOutputs(),
                         null);
                
             } catch (IOException | NoSuchFieldException | OrchestratorIamException er) {
@@ -90,6 +92,7 @@ public class StatusManager {
               this.statusManager.updateStatus(
                         dip.getA4cDeploymentPaasId(), 
                         DeploymentStatus.UNKNOWN,
+                        null,
                         er);
             }
         }
@@ -113,7 +116,7 @@ public class StatusManager {
   
   public void initActiveDeployments(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
     for (Map.Entry<String, PaaSTopologyDeploymentContext> topoE: activeDeployments.entrySet()) {
-      addStatus(topoE.getValue(), null);
+      addStatus(topoE.getValue(), null, DeploymentStatus.UNKNOWN);
     }
     
   }
@@ -129,10 +132,10 @@ public class StatusManager {
   }
   
   public synchronized void addStatus(PaaSTopologyDeploymentContext topo, 
-          String orchestratorDeploymentId) {
+          String orchestratorDeploymentId, DeploymentStatus status) {
     DeploymentInfo deploymentInfo = new DeploymentInfo();
     deploymentInfo.setA4cDeploymentPaasId(topo.getDeploymentPaaSId());
-    deploymentInfo.setStatus(DeploymentStatus.UNKNOWN);
+    deploymentInfo.setStatus(status);
     deploymentInfo.setOrchestratorId(topo.getDeployment().getOrchestratorId());
     deploymentInfo.setOrchestratorDeploymentId(orchestratorDeploymentId);
     deploymentInfos.put(topo.getDeploymentPaaSId(), deploymentInfo);
@@ -155,12 +158,13 @@ public class StatusManager {
   }
   
   public synchronized void updateStatus(String a4cDeploymentPaasId, 
-          DeploymentStatus status, Throwable er) {
+          DeploymentStatus status,  Map<String, String> outputs, Throwable er) {
     DeploymentInfo di = deploymentInfos.get(a4cDeploymentPaasId);
     // Checked if it wasn't removed
     if (a4cDeploymentPaasId != null) {
       di.setStatus(status);
       di.setErrorDeployment(er);
+      di.setOutputs(outputs);
     }
   }
 }
