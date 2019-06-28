@@ -3,12 +3,18 @@ package es.upv.indigodc.service.model;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import alien4cloud.paas.model.DeploymentStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class DeploymentInfo implements Serializable {  
 
   /**
@@ -26,5 +32,8 @@ public class DeploymentInfo implements Serializable {
   
   /** If an error occurred when trying to get the deployment **/
   protected Throwable errorDeployment;
+  
+  @JsonIgnore
+  public boolean hasOutputs() {return outputs != null;}
 
 }

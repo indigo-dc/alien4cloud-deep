@@ -186,6 +186,7 @@ public class IndigoDcOrchestratorTest {
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));
 		Mockito.when(orchestratorConnector.callDeploymentStatus(
+                                Mockito.<String>any(),
 				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getInstancesInformation(deploymentContext, callback);	
@@ -236,7 +237,7 @@ public class IndigoDcOrchestratorTest {
 						new StringBuilder(String.format("{\"uuid\": \"%s\", \"status\": \"%s\"}", 
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_NOT_HANDLED)));
-		Mockito.when(orchestratorConnector.callDeploymentStatus(
+		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(),//org.mockito.Mockito.<String>eq("token"),
 				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getInstancesInformation(deploymentContext, callback);
@@ -251,7 +252,7 @@ public class IndigoDcOrchestratorTest {
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
 				deploymentContext, callback, orchestratorConnector);
-		Mockito.when(orchestratorConnector.callDeploymentStatus(
+		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(),
 				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenThrow(errorClass);
 		idco.getInstancesInformation(deploymentContext, callback);	
@@ -273,7 +274,7 @@ public class IndigoDcOrchestratorTest {
 						new StringBuilder(String.format("{\"uuid\": \"%s\", \"status\": \"%s\"}", 
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));
-		Mockito.when(orchestratorConnector.callDeploymentStatus(
+		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(),
 				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenReturn(response);
 		idco.getStatus(deploymentContext, callback);	
@@ -310,7 +311,7 @@ public class IndigoDcOrchestratorTest {
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
 				deploymentContext, callback, orchestratorConnector);
-		Mockito.when(orchestratorConnector.callDeploymentStatus(
+		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(),
 				Mockito.<CloudConfiguration>notNull(), 
 				Mockito.<String>any())).thenThrow(errorClass);
 		idco.getStatus(deploymentContext, callback);	

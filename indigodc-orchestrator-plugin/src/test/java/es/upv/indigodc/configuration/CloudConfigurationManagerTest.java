@@ -17,9 +17,7 @@ public class CloudConfigurationManagerTest {
 		ccm.addCloudConfiguration("1", cc);
 		ccm.addCloudConfiguration("2", cc);
 		CloudConfiguration cc3 = fact.getDefaultConfiguration();
-		cc3.setIamHost(IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		ccm.addCloudConfiguration("3", cc3);
-		assertEquals(ccm.getCloudConfiguration("3").getIamHost(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		assertEquals(ccm.getCloudConfiguration("2"), cc);
 		ccm.addCloudConfiguration("2", cc3);
 		assertNotSame(ccm.getCloudConfiguration("2"), cc);

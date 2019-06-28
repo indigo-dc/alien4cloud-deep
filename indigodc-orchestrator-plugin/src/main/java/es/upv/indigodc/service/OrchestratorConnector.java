@@ -194,7 +194,7 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploymentStatus(CloudConfiguration cloudConfiguration, 
+  public OrchestratorResponse callDeploymentStatus(String token, CloudConfiguration cloudConfiguration, 
       String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call deployment status for UUID " + deploymentId);
@@ -203,8 +203,7 @@ public class OrchestratorConnector {
     sbuf.append(WS_PATH_DEPLOYMENTS).append("/").append(deploymentId);
 
     Map<String, String> headers = new HashMap<>();
-    //AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword);    
-    String token = connRepository.getPrimaryConnection(Oidc.class).createData().getAccessToken();
+    //AccessToken accessToken = this.obtainAuthTokens(cloudConfiguration, userName, userPassword); 
     headers.put("Accept", "application/json");
     headers.put("Content-Type", "application/json");
     headers.put("Authorization", "Bearer " + token);//accessToken.getAccessToken());

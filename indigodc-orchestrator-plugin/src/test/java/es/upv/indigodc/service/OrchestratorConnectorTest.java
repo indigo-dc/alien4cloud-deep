@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
+import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import alien4cloud.security.model.User;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -38,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpMethod;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionData;
@@ -46,6 +50,8 @@ import org.springframework.social.oidc.api.Oidc;
 
 
 @Slf4j
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class OrchestratorConnectorTest {
 
 
@@ -64,8 +70,8 @@ public class OrchestratorConnectorTest {
 
   public TestServer getTestServer() throws Exception {
     return new TestServer(
-            18080,
-            18443,
+            28080,
+            28443,
             OrchestratorConnectorTest.class.getClassLoader().getResource("keystore").getPath(),
             "alien4cloud",
             "alien4cloud");
@@ -123,6 +129,7 @@ public class OrchestratorConnectorTest {
 //    or = oc.callDeploymentStatus(cc, uuid);
 //    log.info("Deployment status is: " + or.getResponse().toString());
 //  }
+
 
   @Test
   public void testLoginWithTestServer() throws Exception {
@@ -187,7 +194,7 @@ public class OrchestratorConnectorTest {
     testServer.start(servlets);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_test.json");
     OrchestratorConnector oc = getTestOrchestratorConnector();
-    OrchestratorResponse or  = oc.callDeploymentStatus(cc, "id");
+    OrchestratorResponse or  = oc.callDeploymentStatus("", cc, "id");
     testServer.stop();
   }
   

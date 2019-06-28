@@ -38,8 +38,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,10 +84,10 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   @Qualifier("builder-service")
   private BuilderService builderService;
 
-//  /** Maintain the IDs of the launched topologies. */
-//  @Autowired
-//  @Qualifier("mapping-service")
-//  private MappingService mappingService;
+  /** Maintain the IDs of the launched topologies. */
+  @Autowired
+  @Qualifier("mapping-service")
+  private MappingService mappingService;
 
   /**
    * Manages the instantiation of a new location configurator using a location
@@ -100,19 +102,24 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
   @Autowired
   private StatusManager statusManager;
+  
+  @Getter
+  protected String orchestratorId;
 
   @Override
   public void init(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
     if (activeDeployments != null) {
-      statusManager.initActiveDeployments(activeDeployments);
+      //statusManager.initActiveDeployments(activeDeployments);
     }
   }
 
   /**
    * Method called when this instance is scrapped.
    */
+//  @PreDestroy
   public void destroy() {
-    // statusManager.destroy();
+    log.info("IndigoDcOrchestrator destroy");
+   // statusManager.destroy();
   }
 
   @Override
@@ -121,6 +128,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     if (configuration == null) {
       throw new PluginConfigurationException("Configuration must not be null");
     }
+    this.orchestratorId = orchestratorId;
     cloudConfigurationManager.addCloudConfiguration(orchestratorId, configuration);
   }
 
@@ -128,7 +136,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   public void deploy(PaaSTopologyDeploymentContext deploymentContext, IPaaSCallback<?> callback) {
     CloudConfiguration configuration = cloudConfigurationManager
         .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
-    String a4cUuidDeployment = deploymentContext.getDeployment().getId();
+    String a4cUuidDeployment = deploymentContext.getDeploymentPaaSId();//.getDeployment().getId();
 
     try {
       final String yamlPaasTopology = builderService.buildApp(deploymentContext,
@@ -140,10 +148,10 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       log.info("uuid a4c: " + a4cUuidDeployment);
       log.info("uuid orchestrator: " + orchestratorUuidDeployment);
       
-//      mappingService.registerDeploymentInfo(orchestratorUuidDeployment, a4cUuidDeployment,
-//          deploymentContext.getDeployment().getOrchestratorId(), DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
+      mappingService.registerDeployment(new DeploymentInfo(a4cUuidDeployment, orchestratorUuidDeployment,
+          deploymentContext.getDeployment().getOrchestratorId(), DeploymentStatus.DEPLOYMENT_IN_PROGRESS, null, null));
       // eventService.subscribe(configuration);
-      statusManager.addStatus(deploymentContext, orchestratorUuidDeployment, DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
+      //statusManager.addStatus(deploymentContext, orchestratorUuidDeployment, DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
       callback.onSuccess(null);
     } catch (NoSuchFieldException er) {
       callback.onFailure(er);
@@ -169,10 +177,11 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   public void undeploy(PaaSDeploymentContext deploymentContext, IPaaSCallback<?> callback) {
     final CloudConfiguration configuration = cloudConfigurationManager
         .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
-    String a4cUuidDeployment = deploymentContext.getDeployment().getId();
+    String a4cUuidDeployment = deploymentContext.getDeploymentPaaSId();//.getDeployment().getId();
     try {
-      DeploymentInfo deploymentInfo = statusManager.
-          getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
+      DeploymentInfo deploymentInfo = mappingService.getByA4CDeploymentPaasId(a4cUuidDeployment);
+//          statusManager
+//          getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
       if (deploymentInfo != null) {
         final String orchestratorUuidDeployment = deploymentInfo.getOrchestratorDeploymentId();
         log.info("Deployment paas id: " + a4cUuidDeployment);
@@ -181,8 +190,9 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             orchestratorUuidDeployment);
 //        mappingService.registerDeploymentInfo(orchestratorUuidDeployment, a4cUuidDeployment,
 //            deploymentContext.getDeployment().getOrchestratorId(), DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
-        statusManager.updateStatus(deploymentContext.getDeploymentPaaSId(), 
-            DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS, deploymentInfo.getOutputs(), null);
+//        statusManager.updateStatus(deploymentContext.getDeploymentPaaSId(), 
+//            DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS, deploymentInfo.getOutputs(), null);
+        mappingService.unregisterDeployment(a4cUuidDeployment);
         callback.onSuccess(null);
         // eventService.unsubscribe();
       } else {
@@ -241,82 +251,85 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         // Map<String, String> outputs = new HashMap<>();
         // outputs.put("Compute_public_address", "none");
         // runtimeProps.put("Compute_public_address", "value");
-        DeploymentInfo deploymentInfo = statusManager.
-            getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
-       if (deploymentInfo != null) {
-         final String groupId = deploymentContext.getDeploymentPaaSId();
-         final Map<String, Map<String, InstanceInformation>> topologyInfo = new HashMap<>();
-         final Map<String, String> runtimeProps = new HashMap<>();
-         final Map<String, InstanceInformation> instancesInfo = new HashMap<>();
-         final Map<String, String> outputsVars = extractTopologyOutputs(deploymentContext.getDeploymentTopology());
-         Util.InstanceStatusInfo instanceStatusInfo;
-        try {
-          instanceStatusInfo = Util
-             .deploymentStatusToInstanceStatus(deploymentInfo.getStatus());
-       
-          deploymentInfo.getOutputs().entrySet().stream()
-              .forEach(outputE -> outputsVars.replace(outputE.getKey(), outputE.getValue()));
-          final InstanceInformation instanceInformation = new InstanceInformation(instanceStatusInfo.getState(),
-              instanceStatusInfo.getInstanceStatus(), runtimeProps, runtimeProps,
-              // outputs);
-              outputsVars, outputsVars);
-          instancesInfo.put(deploymentInfo.getA4cDeploymentPaasId(), instanceInformation);
-          topologyInfo.put(groupId, instancesInfo);
-          callback.onSuccess(topologyInfo);
-        } catch (StatusNotFoundException e) {
-          e.printStackTrace();
-          callback.onFailure(e);
-        }
-//      } catch (NoSuchFieldException er) {
-//        callback.onFailure(er);
-//        log.error("Error getInstancesInformation", er);
-//      } catch (IOException er) {
-//        callback.onFailure(er);
-//        log.error("Error getInstancesInformation", er);
-//      } catch (OrchestratorIamException er) {
-//        final InstanceInformation instanceInformation = new InstanceInformation("UNKNOWN", InstanceStatus.FAILURE,
-//            runtimeProps, runtimeProps, outputsVars, outputsVars);
-//        instancesInfo.put(a4cUuidDeployment, instanceInformation);
-//        topologyInfo.put(a4cUuidDeployment, instancesInfo);
-//        callback.onSuccess(topologyInfo);
-//        instancesInfo.put(a4cUuidDeployment, instanceInformation);
-//        topologyInfo.put(a4cUuidDeployment, instancesInfo);
-//        switch (er.getHttpCode()) {
-//        case 404:
+//        DeploymentInfo deploymentInfo = statusManager.
+//            getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
+//       if (deploymentInfo != null) {
+//         final String groupId = deploymentContext.getDeploymentPaaSId();
+//         final Map<String, Map<String, InstanceInformation>> topologyInfo = new HashMap<>();
+//         final Map<String, String> runtimeProps = new HashMap<>();
+//         final Map<String, InstanceInformation> instancesInfo = new HashMap<>();
+//         final Map<String, String> outputsVars = extractTopologyOutputs(deploymentContext.getDeploymentTopology());
+//         Util.InstanceStatusInfo instanceStatusInfo;
+//        try {
+//          instanceStatusInfo = Util
+//             .deploymentStatusToInstanceStatus(deploymentInfo.getStatus());
+//          if (deploymentInfo.hasOutputs()) {
+//            deploymentInfo.getOutputs().entrySet().stream()
+//                .forEach(outputE -> outputsVars.replace(outputE.getKey(), outputE.getValue()));
+//          }
+//          final InstanceInformation instanceInformation = new InstanceInformation(instanceStatusInfo.getState(),
+//              instanceStatusInfo.getInstanceStatus(), runtimeProps, runtimeProps,
+//              // outputs);
+//              outputsVars, outputsVars);
+//          instancesInfo.put(deploymentInfo.getA4cDeploymentPaasId(), instanceInformation);
+//          topologyInfo.put(groupId, instancesInfo);
 //          callback.onSuccess(topologyInfo);
-//          break;
-//        default:
-//          callback.onFailure(er);
+//        } catch (StatusNotFoundException e) {
+//          e.printStackTrace();
+//          callback.onFailure(e);
 //        }
-//        log.error("Error deployment ", er);
-//      } catch (StatusNotFoundException er) {
-//        callback.onFailure(er);
-//        log.error("Error deployment ", er);
-//      }
-    } else {
-      callback.onFailure(new NotFoundException(
-          String.format("Deployment with ID %s not found in the list of deployments", 
-              deploymentContext.getDeploymentPaaSId())));
-    }
+////      } catch (NoSuchFieldException er) {
+////        callback.onFailure(er);
+////        log.error("Error getInstancesInformation", er);
+////      } catch (IOException er) {
+////        callback.onFailure(er);
+////        log.error("Error getInstancesInformation", er);
+////      } catch (OrchestratorIamException er) {
+////        final InstanceInformation instanceInformation = new InstanceInformation("UNKNOWN", InstanceStatus.FAILURE,
+////            runtimeProps, runtimeProps, outputsVars, outputsVars);
+////        instancesInfo.put(a4cUuidDeployment, instanceInformation);
+////        topologyInfo.put(a4cUuidDeployment, instancesInfo);
+////        callback.onSuccess(topologyInfo);
+////        instancesInfo.put(a4cUuidDeployment, instanceInformation);
+////        topologyInfo.put(a4cUuidDeployment, instancesInfo);
+////        switch (er.getHttpCode()) {
+////        case 404:
+////          callback.onSuccess(topologyInfo);
+////          break;
+////        default:
+////          callback.onFailure(er);
+////        }
+////        log.error("Error deployment ", er);
+////      } catch (StatusNotFoundException er) {
+////        callback.onFailure(er);
+////        log.error("Error deployment ", er);
+////      }
+//    } else {
+//      callback.onFailure(new NotFoundException(
+//          String.format("Deployment with ID %s not found in the list of deployments", 
+//              deploymentContext.getDeploymentPaaSId())));
+//    }
   }
 
   @Override
   public void getStatus(PaaSDeploymentContext deploymentContext, 
       IPaaSCallback<DeploymentStatus> callback) {
     log.info("call get status");
-    DeploymentInfo deploymentInfo = statusManager.
-        getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
-    if (deploymentInfo != null) {
-      if (deploymentInfo.getErrorDeployment() != null) {
-        callback.onFailure(deploymentInfo.getErrorDeployment());
-      } else {
-        callback.onSuccess(deploymentInfo.getStatus());
-      }
-    } else {
-      callback.onFailure(new NotFoundException(
-          String.format("Deployment with PaaS ID %s not found", 
-              deploymentContext.getDeploymentPaaSId())));
-    }
+    statusManager.getStatus(deploymentContext, callback);
+    
+//    DeploymentInfo deploymentInfo = statusManager.
+//        getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
+//    if (deploymentInfo != null) {
+//      if (deploymentInfo.getErrorDeployment() != null) {
+//        callback.onFailure(deploymentInfo.getErrorDeployment());
+//      } else {
+//        callback.onSuccess(deploymentInfo.getStatus());
+//      }
+//    } else {
+//      callback.onFailure(new NotFoundException(
+//          String.format("Deployment with PaaS ID %s not found", 
+//              deploymentContext.getDeploymentPaaSId())));
+//    }
     // String a4cUuidDeployment = deploymentContext.getDeployment().getId();
     //
     // final OrchestratorDeploymentMapping orchestratorDeploymentMapping =
