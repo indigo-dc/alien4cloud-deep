@@ -5,21 +5,18 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.apache.logging.log4j.util.Strings;
 import org.xml.sax.SAXException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static java.lang.Math.log;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
