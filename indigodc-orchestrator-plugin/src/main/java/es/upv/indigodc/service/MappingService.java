@@ -44,7 +44,13 @@ public class MappingService {
     }
     
     public synchronized DeploymentInfo getByOrchestratorDeploymentId(String orchestratorDeploymentId) {
-      return deployments.values().stream().filter(di -> di.getOrchestratorDeploymentId().equals(orchestratorDeploymentId)).findFirst().get();
+        Optional<DeploymentInfo> diR = deployments.values().stream()
+                .filter(di -> di.getOrchestratorDeploymentId().equals(orchestratorDeploymentId))
+                .findFirst();
+        if (diR.isPresent())
+            return diR.get();
+        else
+            return null;
     }
     
     

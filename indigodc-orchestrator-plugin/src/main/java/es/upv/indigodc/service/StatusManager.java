@@ -211,7 +211,7 @@ public class StatusManager implements ApplicationContextAware {
   
   public void getStatus(PaaSDeploymentContext deploymentContext, 
       IPaaSCallback<DeploymentStatus> callback) {
-    final DeploymentInfo di =  mappingService.getByOrchestratorDeploymentId(deploymentContext.getDeploymentPaaSId());
+    final DeploymentInfo di =  mappingService.getByA4CDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
       String token = connRepository.getPrimaryConnection(Oidc.class).createData().getAccessToken();
       StatusObtainer so = ctx.getBean(StatusObtainer.class, token, callback, di);
       executor.execute(so);

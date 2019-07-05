@@ -1,6 +1,5 @@
 package es.upv.indigodc;
 
-import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.net.URL;
@@ -35,7 +34,6 @@ import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.InstanceInformation;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
-import alien4cloud.security.model.User;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import es.upv.indigodc.service.BuilderService;
@@ -43,14 +41,11 @@ import es.upv.indigodc.service.BuilderServiceTest;
 import es.upv.indigodc.service.MappingService;
 import es.upv.indigodc.service.OrchestratorConnector;
 import es.upv.indigodc.service.StatusManager;
+import es.upv.indigodc.service.model.DeploymentInfo;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import es.upv.indigodc.service.model.StatusNotFoundException;
 
-import org.springframework.social.connect.Connection;
-import org.springframework.social.connect.ConnectionData;
-import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
 
 
 public class IndigoDcOrchestratorTest {
@@ -83,6 +78,7 @@ public class IndigoDcOrchestratorTest {
 	public void deployMockWithNoError() 
 			throws PluginConfigurationException, JsonParseException, JsonMappingException, IOException, NoSuchFieldException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -115,6 +111,7 @@ public class IndigoDcOrchestratorTest {
 	protected void deployMockWithError(Class errorClass) 
 			throws PluginConfigurationException, JsonParseException, JsonMappingException, IOException, NoSuchFieldException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -130,6 +127,7 @@ public class IndigoDcOrchestratorTest {
 	public void undeployMockWithNoErrors() 
 			throws PluginConfigurationException, JsonParseException, JsonMappingException, IOException, NoSuchFieldException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -161,6 +159,7 @@ public class IndigoDcOrchestratorTest {
 	protected void undeployMockWithError(Class errorClass) 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -176,6 +175,7 @@ public class IndigoDcOrchestratorTest {
 	public void getMockInstancesInformationNoErrors() 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -197,6 +197,7 @@ public class IndigoDcOrchestratorTest {
 	public void getMockInstancesInformationNoErrorsInvalidA4CUuidDeployment() 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -228,6 +229,7 @@ public class IndigoDcOrchestratorTest {
 	public void getMockInstancesInformationStatusNotFoundException() 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, StatusNotFoundException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -248,6 +250,7 @@ public class IndigoDcOrchestratorTest {
 	protected void getMockInstancesInformationError(Class errorClass, String orchestratorStatus) 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -265,6 +268,7 @@ public class IndigoDcOrchestratorTest {
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, 
 			IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSDeploymentContext deploymentContext = Mockito.mock(PaaSDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<DeploymentStatus> callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -307,6 +311,7 @@ public class IndigoDcOrchestratorTest {
 	protected void getMockStatusError(Class errorClass, String orchestratorStatus) 
 			throws JsonProcessingException, PluginConfigurationException, NoSuchFieldException, IOException, OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		PaaSDeploymentContext deploymentContext = Mockito.mock(PaaSDeploymentContext.class);
+    Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<DeploymentStatus> callback = Mockito.mock(IPaaSCallback.class);
 		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
@@ -341,6 +346,19 @@ public class IndigoDcOrchestratorTest {
 		Mockito.when(deploymentContext.getDeployment()).thenReturn(deployment);
 		Mockito.when(deploymentContext.getDeployment().getOrchestratorId()).thenReturn(ORCHESTRATOR_ID);
 		Mockito.when(deploymentContext.getDeployment().getId()).thenReturn(ALIEN_DEPLOYMENT_ID);
+		
+
+    DeploymentInfo di = new DeploymentInfo();
+    di.setA4cDeploymentPaasId(ALIEN_DEPLOYMENT_ID);
+    di.setErrorDeployment(null);
+    di.setOrchestratorDeploymentId(ORCHESTRATOR_DEPLOYMENT_ID);
+    di.setOrchestratorId(ORCHESTRATOR_ID);
+    di.setOutputs(null);
+    di.setStatus(DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
+		MappingService mappingService =  new MappingService();
+		mappingService.init();
+		mappingService.registerDeployment(di);
+		TestUtil.setPrivateField(idco, "mappingService", mappingService); 
 		
 		Map<String, AbstractPropertyValue> vals = new HashMap<>();
 		AbstractPropertyValue abstractPropertyValue =  Mockito.mock(AbstractPropertyValue.class);

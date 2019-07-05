@@ -149,6 +149,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       log.info("uuid orchestrator: " + orchestratorUuidDeployment);
       
       mappingService.registerDeployment(new DeploymentInfo(a4cUuidDeployment, orchestratorUuidDeployment,
+              deploymentContext.getDeploymentId(),
           deploymentContext.getDeployment().getOrchestratorId(), DeploymentStatus.DEPLOYMENT_IN_PROGRESS, null, null));
       // eventService.subscribe(configuration);
       //statusManager.addStatus(deploymentContext, orchestratorUuidDeployment, DeploymentStatus.DEPLOYMENT_IN_PROGRESS);

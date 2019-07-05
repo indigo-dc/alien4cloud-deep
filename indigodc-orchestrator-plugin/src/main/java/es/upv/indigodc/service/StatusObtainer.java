@@ -87,6 +87,10 @@ public class StatusObtainer implements Runnable {
             this.callback.onFailure(e);
             e.printStackTrace();
           } catch (OrchestratorIamException e) {
+              int code = e.getHttpCode();
+              switch (code) {
+                  case 401:
+              }
             this.callback.onFailure(e);
             e.printStackTrace();
           } catch (StatusNotFoundException e) {

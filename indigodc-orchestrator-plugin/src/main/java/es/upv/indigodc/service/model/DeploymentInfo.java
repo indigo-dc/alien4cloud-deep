@@ -23,6 +23,7 @@ public class DeploymentInfo implements Serializable {
   private static final long serialVersionUID = 8452877443031991069L;
   protected String a4cDeploymentPaasId;
   protected String orchestratorDeploymentId;
+  protected String a4cDeploymentId;
   
   protected String orchestratorId;
   

@@ -18,7 +18,8 @@ public class MappingServiceTest {
 	public void addDeploymentRetrieveIt() {
 		MappingService ms = new MappingService();
 		ms.init();
-		ms.registerDeployment(new DeploymentInfo("alienDeploymentId", "orchestratorUuidDeployment",  
+		ms.registerDeployment(new DeploymentInfo("alienDeploymentPaasId", "orchestratorUuidDeployment",
+		    "alienDeploymentId",
 		    "orchestratorId", DeploymentStatus.DEPLOYED, null, null));
 		DeploymentInfo odm = ms.getByA4CDeploymentPaasId("alienDeploymentId");
 		Assertions.assertEquals(odm.getOrchestratorDeploymentId(), "orchestratorUuidDeployment");
