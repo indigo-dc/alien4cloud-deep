@@ -21,10 +21,10 @@ public class MappingServiceTest {
 		ms.registerDeployment(new DeploymentInfo("alienDeploymentPaasId", "orchestratorUuidDeployment",
 		    "alienDeploymentId",
 		    "orchestratorId", DeploymentStatus.DEPLOYED, null, null));
-		DeploymentInfo odm = ms.getByA4CDeploymentPaasId("alienDeploymentId");
+		DeploymentInfo odm = ms.getByA4CDeploymentPaasId("alienDeploymentPaasId");
 		Assertions.assertEquals(odm.getOrchestratorDeploymentId(), "orchestratorUuidDeployment");
 		DeploymentInfo adm = ms.getByOrchestratorDeploymentId("orchestratorUuidDeployment");
-		Assertions.assertEquals(adm.getA4cDeploymentPaasId(), "alienDeploymentId");
+		Assertions.assertEquals(adm.getA4cDeploymentPaasId(), "alienDeploymentPaasId");
 		Assertions.assertEquals(adm.getOrchestratorId(), "orchestratorId");
 	}
 }

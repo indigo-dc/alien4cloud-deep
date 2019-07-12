@@ -14,6 +14,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Holds the response received after a call to the Orchestrator.
@@ -31,6 +34,15 @@ public class OrchestratorResponse {
   @Setter(AccessLevel.NONE)
   private JsonNode rootResponse;
 
+
+  public OrchestratorResponse(HttpStatusCodeException e) throws OrchestratorIamException {
+    throw new OrchestratorIamException(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseBodyAsString());
+  }
+
+  public OrchestratorResponse(ResponseEntity<String> response) throws IOException, OrchestratorIamException {
+    this(response.getStatusCode().value(), new StringBuilder(response.getBody()));
+  }
+
   /**
    * Build a response object.
    *
@@ -40,10 +52,9 @@ public class OrchestratorResponse {
    * @throws JsonProcessingException when trying to parse the response that should be a valid JSON
    * @throws IOException when trying to parse the response that should be a valid JSON
    */
-  public OrchestratorResponse(int code, HttpMethod callMethod, StringBuilder response)
+  public OrchestratorResponse(int code, StringBuilder response)
       throws JsonProcessingException, IOException {
     this.code = code;
-    this.callMethod = callMethod;
     this.response = response;
     objectMapper = new ObjectMapper();
     objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
@@ -56,8 +67,7 @@ public class OrchestratorResponse {
 
   /** The return code of the call, e.g. 200 for OK */
   private int code;
-  /** One of the calls methods for HTTP, e.g. GET, POST etc. used to get this response */
-  private HttpMethod callMethod;
+
   /** The response itself with all its fields. */
   private StringBuilder response;
 

@@ -181,7 +181,7 @@ public class IndigoDcOrchestratorTest {
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
 				deploymentContext, callback, orchestratorConnector);
 		OrchestratorResponse response = 
-				new OrchestratorResponse(200, HttpMethod.POST, 
+				new OrchestratorResponse(200,
 						new StringBuilder(String.format("{\"uuid\": \"%s\", \"status\": \"%s\"}", 
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));
@@ -235,7 +235,7 @@ public class IndigoDcOrchestratorTest {
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
 				deploymentContext, callback, orchestratorConnector);
 		OrchestratorResponse response = 
-				new OrchestratorResponse(200, HttpMethod.POST, 
+				new OrchestratorResponse(200,
 						new StringBuilder(String.format("{\"uuid\": \"%s\", \"status\": \"%s\"}", 
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_NOT_HANDLED)));
@@ -274,7 +274,7 @@ public class IndigoDcOrchestratorTest {
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(
 				deploymentContext, callback, orchestratorConnector);
 		OrchestratorResponse response = 
-				new OrchestratorResponse(200, HttpMethod.POST, 
+				new OrchestratorResponse(200,
 						new StringBuilder(String.format("{\"uuid\": \"%s\", \"status\": \"%s\"}", 
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));
@@ -330,7 +330,7 @@ public class IndigoDcOrchestratorTest {
 			IllegalArgumentException, IllegalAccessException {
 		IndigoDcOrchestrator idco = getIndigoDcOrchestratorWithTestConfig();
 		OrchestratorResponse response = 
-				new OrchestratorResponse(200, HttpMethod.POST, 
+				new OrchestratorResponse(200,
 						new StringBuilder(String.format("{\"uuid\": \"%s\", \"status\": \"%s\"}", 
 								ORCHESTRATOR_DEPLOYMENT_ID, 
 								ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));//Mockito.mock(OrchestratorResponse.class);
