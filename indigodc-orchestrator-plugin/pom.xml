@@ -210,7 +210,7 @@
 
         <dependency>
             <groupId>org.springframework.social</groupId>
-            <artifactId>spring-social-oidc</artifactId>
+            <artifactId>spring-social-oidc-deep</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

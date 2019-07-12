@@ -1,61 +1,33 @@
 package es.upv.indigodc.service;
 
-import org.ietf.jgss.Oid;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.function.Executable;
-import org.mockito.Mockito;
-import org.mockito.quality.Strictness;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-
-import alien4cloud.security.model.User;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import es.upv.indigodc.IndigoDcOrchestratorFactory;
 import es.upv.indigodc.TestBlockingServlet;
 import es.upv.indigodc.TestServer;
 import es.upv.indigodc.TestUtil;
 import es.upv.indigodc.configuration.CloudConfiguration;
-import es.upv.indigodc.service.BuilderService.Deployment;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
-import java.io.FileInputStream;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.social.oidc.deep.api.DeepOrchestrator;
+import org.springframework.social.oidc.deep.api.OidcConfiguration;
+import org.springframework.social.oidc.deep.api.impl.DeepOrchestratorTemplate;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.http.HttpMethod;
-import org.springframework.social.connect.Connection;
-import org.springframework.social.connect.ConnectionData;
-import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
-import org.springframework.social.oidc.api.OidcConfiguration;
-import org.springframework.social.oidc.api.impl.OidcTemplate;
-import org.springframework.web.client.HttpClientErrorException;
 
 
 @Slf4j
@@ -350,7 +322,7 @@ public class OrchestratorConnectorTest {
     oidcConf.setAuthorizationEndpoint("http://localhost");
     KeyStore ks = KeyStore.getInstance("JKS");
     ks.load(OrchestratorConnectorTest.class.getClassLoader().getResourceAsStream("test_keystore"), null);
-    Oidc client = new OidcTemplate(cc.getOrchestratorEndpoint(), ks, oidcConf, OIDC_ACCESS_TOKEN);
+    DeepOrchestrator client = new DeepOrchestratorTemplate(cc.getOrchestratorEndpoint(), ks, oidcConf, OIDC_ACCESS_TOKEN);
     /*ConnectionRepository conn = Mockito.mock(ConnectionRepository.class);
     Connection c = Mockito.mock(Connection.class);
     Mockito.when(conn.getPrimaryConnection(Oidc.class)).thenReturn(c);

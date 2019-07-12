@@ -1,38 +1,18 @@
 package es.upv.indigodc.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.social.oidc.deep.api.DeepOrchestrator;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Manage and do the calls to the REST API exposed by the IndigoDC Orchestrator; Connect to the
@@ -50,7 +30,7 @@ public class OrchestratorConnector {
   private static final Logger LOGGER = Logger.getLogger(OrchestratorConnector.class.getName());
   
   @Autowired
-  private Oidc client;
+  private DeepOrchestrator client;
 
   /**
    * Obtain the list of deployments created by the the user with the client id stored in the cloud
