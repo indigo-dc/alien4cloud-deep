@@ -53,7 +53,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
+//import org.springframework.social.oidc.api.Oidc;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -62,8 +62,8 @@ import org.springframework.stereotype.Component;
 //@EnableAsync
 public class StatusManager implements ApplicationContextAware {
 
-      @Autowired
-  private ConnectionRepository connRepository;
+//      @Autowired
+//  private ConnectionRepository connRepository;
     @Autowired
   private ApplicationContext ctx;
   //protected StatusObtainer statusObtainer;
@@ -212,8 +212,8 @@ public class StatusManager implements ApplicationContextAware {
   public void getStatus(PaaSDeploymentContext deploymentContext, 
       IPaaSCallback<DeploymentStatus> callback) {
     final DeploymentInfo di =  mappingService.getByA4CDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
-      String token = connRepository.getPrimaryConnection(Oidc.class).createData().getAccessToken();
-      StatusObtainer so = ctx.getBean(StatusObtainer.class, token, callback, di);
+//      String token = connRepository.getPrimaryConnection(Oidc.class).createData().getAccessToken();
+      StatusObtainer so = ctx.getBean(StatusObtainer.class, callback, di);
       executor.execute(so);
     //so.run();
   }

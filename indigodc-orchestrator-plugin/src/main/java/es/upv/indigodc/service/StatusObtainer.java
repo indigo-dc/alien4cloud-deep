@@ -29,7 +29,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
+//import org.springframework.social.oidc.api.Oidc;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,9 +63,9 @@ public class StatusObtainer implements Runnable {
   
   protected DeploymentInfo deploymentInfo;
   
-  public StatusObtainer(String token, IPaaSCallback<DeploymentStatus> callback, final DeploymentInfo deploymentInfo) {
+  public StatusObtainer(IPaaSCallback<DeploymentStatus> callback, final DeploymentInfo deploymentInfo) {
       this.callback = callback;
-      this.token = token;
+      //this.token = token;
       this.deploymentInfo = deploymentInfo;
   }
 
@@ -75,7 +75,7 @@ public class StatusObtainer implements Runnable {
          
           OrchestratorResponse response;
           try {
-            response = orchestratorConnector.callDeploymentStatus(token, 
+            response = orchestratorConnector.callDeploymentStatus(null, 
                 cloudConfigurationManager.getCloudConfiguration(deploymentInfo.getOrchestratorId()),
                 deploymentInfo.getOrchestratorDeploymentId());
             String statusTopologyDeployment = response.getStatusTopologyDeployment();
