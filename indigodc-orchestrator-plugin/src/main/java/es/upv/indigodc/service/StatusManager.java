@@ -1,60 +1,23 @@
 package es.upv.indigodc.service;
 
-import alien4cloud.exception.NotFoundException;
 import alien4cloud.paas.IPaaSCallback;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.eclipse.jetty.util.log.Log;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-
 import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.InstanceInformation;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
-import es.upv.indigodc.IndigoDcDeploymentStatus;
-import es.upv.indigodc.Util;
-import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
-import es.upv.indigodc.location.LocationConfiguratorFactory;
 import es.upv.indigodc.service.model.DeploymentInfo;
-import es.upv.indigodc.service.model.DeploymentInfoPair;
-import es.upv.indigodc.service.model.OrchestratorIamException;
-import es.upv.indigodc.service.model.OrchestratorResponse;
-import java.io.IOException;
-import java.util.concurrent.Executor;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 @Component
 @Scope("prototype")
@@ -62,9 +25,7 @@ import org.springframework.stereotype.Component;
 //@EnableAsync
 public class StatusManager implements ApplicationContextAware {
 
-      @Autowired
-  private ConnectionRepository connRepository;
-    @Autowired
+  @Autowired
   private ApplicationContext ctx;
   //protected StatusObtainer statusObtainer;
 
@@ -212,8 +173,8 @@ public class StatusManager implements ApplicationContextAware {
   public void getStatus(PaaSDeploymentContext deploymentContext, 
       IPaaSCallback<DeploymentStatus> callback) {
     final DeploymentInfo di =  mappingService.getByA4CDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
-      String token = connRepository.getPrimaryConnection(Oidc.class).createData().getAccessToken();
-      StatusObtainer so = ctx.getBean(StatusObtainer.class, token, callback, di);
+      //String token = connRepository.getPrimaryConnection(Oidc.class).createData().getAccessToken();
+      StatusObtainer so = ctx.getBean(StatusObtainer.class, null, callback, di);
       executor.execute(so);
     //so.run();
   }

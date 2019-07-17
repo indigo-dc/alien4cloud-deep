@@ -13,9 +13,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.oidc.deep.api.DeepOrchestrator;
 import org.springframework.social.oidc.deep.api.OidcConfiguration;
 import org.springframework.social.oidc.deep.api.impl.DeepOrchestratorTemplate;
@@ -323,14 +327,11 @@ public class OrchestratorConnectorTest {
     KeyStore ks = KeyStore.getInstance("JKS");
     ks.load(OrchestratorConnectorTest.class.getClassLoader().getResourceAsStream("test_keystore"), null);
     DeepOrchestrator client = new DeepOrchestratorTemplate(cc.getOrchestratorEndpoint(), ks, oidcConf, OIDC_ACCESS_TOKEN);
-    /*ConnectionRepository conn = Mockito.mock(ConnectionRepository.class);
+    ConnectionRepository conn = Mockito.mock(ConnectionRepository.class);
     Connection c = Mockito.mock(Connection.class);
-    Mockito.when(conn.getPrimaryConnection(Oidc.class)).thenReturn(c);
-    ConnectionData cd = new ConnectionData(OIDC_PROVIDER_ID, OIDC_PROVIDER_USER_ID,
-        OIDC_DISPLAY_NAME, OIDC_PROFILE_URL, OIDC_IMAGE_URL,
-        OIDC_ACCESS_TOKEN, OIDC_SECRET, OIDC_REFRESH_TOKEN, OIDC_EXPIRE_TIME);
-    Mockito.when(c.createData()).thenReturn(cd);*/
-    TestUtil.setPrivateField(oc, "client", client);
+    Mockito.when(c.getApi()).thenReturn(client);
+    Mockito.when(conn.findPrimaryConnection(ArgumentMatchers.any())).thenReturn(c);
+    TestUtil.setPrivateField(oc, "repository", conn);
     return oc;
   }
   

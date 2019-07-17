@@ -2,35 +2,19 @@ package es.upv.indigodc.service;
 
 import alien4cloud.paas.IPaaSCallback;
 import alien4cloud.paas.model.DeploymentStatus;
-import alien4cloud.paas.model.PaaSDeploymentContext;
-import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
-import es.upv.indigodc.SpringContext;
 import es.upv.indigodc.Util;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import es.upv.indigodc.service.model.DeploymentInfo;
-import es.upv.indigodc.service.model.DeploymentInfoPair;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import es.upv.indigodc.service.model.StatusNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.util.List;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.social.connect.ConnectionRepository;
-import org.springframework.social.oidc.api.Oidc;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 /**
  *
@@ -65,7 +49,7 @@ public class StatusObtainer implements Runnable {
   
   public StatusObtainer(String token, IPaaSCallback<DeploymentStatus> callback, final DeploymentInfo deploymentInfo) {
       this.callback = callback;
-      this.token = token;
+      this.token = null;
       this.deploymentInfo = deploymentInfo;
   }
 
