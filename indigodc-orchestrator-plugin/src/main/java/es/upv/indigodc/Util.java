@@ -63,6 +63,8 @@ public class Util {
           return DeploymentStatus.DEPLOYMENT_IN_PROGRESS;
         case DELETE_COMPLETE:
           return DeploymentStatus.UNDEPLOYED;
+        case UNDEPLOYED:
+          return DeploymentStatus.UNDEPLOYED;
         case DELETE_FAILED:
           return DeploymentStatus.FAILURE;
         case DELETE_IN_PROGRESS:
@@ -123,6 +125,9 @@ public class Util {
         case UPDATE_IN_PROGRESS:
           return new InstanceStatusInfo(InstanceStatus.PROCESSING,
               IndigoDcDeploymentStatus.UPDATE_IN_PROGRESS.name());
+        case UNDEPLOYED:
+          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
+                  IndigoDcDeploymentStatus.UNDEPLOYED.name());
         default:
           throw new StatusNotFoundException(status);
       }
@@ -149,7 +154,7 @@ public class Util {
               IndigoDcDeploymentStatus.CREATE_IN_PROGRESS.name());
         case UNDEPLOYED:
           return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.DELETE_COMPLETE.name());
+              IndigoDcDeploymentStatus.UNDEPLOYED.name());
         case UNDEPLOYMENT_IN_PROGRESS:
           return new InstanceStatusInfo(InstanceStatus.PROCESSING,
               IndigoDcDeploymentStatus.DELETE_IN_PROGRESS.name());

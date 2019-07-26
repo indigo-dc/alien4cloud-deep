@@ -6,6 +6,8 @@ import es.upv.indigodc.service.model.OrchestratorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.oidc.deep.api.DeepOrchestrator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -28,9 +30,14 @@ public class OrchestratorConnector {
   public static final String WS_PATH_DEPLOYMENTS = "/deployments";
 
   private static final Logger LOGGER = Logger.getLogger(OrchestratorConnector.class.getName());
-  
+
   @Autowired
-  private DeepOrchestrator client;
+  protected ConnectionRepository repository;
+
+  private DeepOrchestrator getClient() {
+    Connection<DeepOrchestrator> connection = repository.findPrimaryConnection(DeepOrchestrator.class);
+    return connection != null ? connection.getApi() : null;
+  }
 
   /**
    * Obtain the list of deployments created by the the user with the client id stored in the cloud
@@ -46,7 +53,7 @@ public class OrchestratorConnector {
    */
   public OrchestratorResponse callGetDeployments(CloudConfiguration cloudConfiguration)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
-    return buildResponse(() -> client.callGetDeployments());
+    return buildResponse(() -> getClient().callGetDeployments());
   }
 
   /**
@@ -69,7 +76,7 @@ public class OrchestratorConnector {
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
 
-    return buildResponse(() -> client.callDeploy(yamlTopology));
+    return buildResponse(() -> getClient().callDeploy(yamlTopology));
   }
 
   /**
@@ -84,12 +91,11 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploymentStatus(String token, CloudConfiguration cloudConfiguration, 
-      String deploymentId)
+  public OrchestratorResponse callDeploymentStatus(String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call deployment status for UUID " + deploymentId);
 
-    return buildResponse(() -> client.callDeploymentStatus(deploymentId));
+    return buildResponse(() -> getClient().callDeploymentStatus(deploymentId));
   }
 
   /**
@@ -110,7 +116,7 @@ public class OrchestratorConnector {
 
     log.info("call undeploy");
 
-    return buildResponse(() -> client.callUndeploy(deploymentId));
+    return buildResponse(() -> getClient().callUndeploy(deploymentId));
   }
 
   private OrchestratorResponse buildResponse(Supplier<ResponseEntity<String>> func) throws OrchestratorIamException, IOException {
