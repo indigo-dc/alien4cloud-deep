@@ -7,12 +7,15 @@ import es.upv.indigodc.service.model.AlienDeploymentMapping;
 import es.upv.indigodc.service.model.DeploymentInfo;
 import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,14 +24,23 @@ import org.springframework.stereotype.Service;
  * @author asalic
  */
 @Service("mapping-service")
+@Scope("prototype")
 @Slf4j
 public class MappingService {
     
-    protected Map<String, DeploymentInfo> deployments;
+    protected Map<String, DeploymentInfo> deployments = Maps.newConcurrentMap();
     
-    @PostConstruct
-    public synchronized void init() {
-      deployments = Maps.newConcurrentMap();
+    
+    public void init(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
+        for (Map.Entry<String, PaaSTopologyDeploymentContext> ad: activeDeployments.entrySet()) {
+            deployments.put(ad.getValue().getDeploymentPaaSId(), 
+                    new DeploymentInfo(ad.getValue().getDeploymentPaaSId(), 
+                            null, 
+                            ad.getValue().getDeploymentId(),
+                            ad.getValue().getDeploymentTopology().getOrchestratorId(),
+                            DeploymentStatus.UNKNOWN, null, null));
+        }
+        
     }
     
     public synchronized void registerDeployment(DeploymentInfo di) {
@@ -37,6 +49,10 @@ public class MappingService {
     
     public synchronized void unregisterDeployment(String a4cDeploymentPaasId) {
       deployments.remove(a4cDeploymentPaasId);
+    }
+
+    public synchronized List<String> getA4cDeploymentPaasIds() {
+        return deployments.keySet().stream().collect(Collectors.toList());
     }
     
     public synchronized DeploymentInfo getByA4CDeploymentPaasId(String a4cDeploymentPaasId) {

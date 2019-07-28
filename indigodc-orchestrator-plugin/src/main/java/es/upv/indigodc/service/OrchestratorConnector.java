@@ -36,7 +36,8 @@ public class OrchestratorConnector {
 
   private DeepOrchestrator getClient() {
     Connection<DeepOrchestrator> connection = repository.findPrimaryConnection(DeepOrchestrator.class);
-    return connection != null ? connection.getApi() : null;
+    DeepOrchestrator deepOrchestrator = connection != null ? connection.getApi() : null;
+    return deepOrchestrator;
   }
 
   /**
@@ -51,7 +52,7 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callGetDeployments(CloudConfiguration cloudConfiguration)
+  public OrchestratorResponse callGetDeployments()
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     return buildResponse(() -> getClient().callGetDeployments());
   }
@@ -76,14 +77,16 @@ public class OrchestratorConnector {
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
 
-    return buildResponse(() -> getClient().callDeploy(yamlTopology));
+
+    return buildResponse(() ->
+            getClient().callDeploy(yamlTopology));
   }
 
   /**
    * Get the status of a deployment with a given deployment ID.
    *
    * @param cloudConfiguration The configuration used for the plugin instance
-   * @param deploymentId The id of the deployment we need the information for
+   * @param deploymentId The id of the deployment given by the orchestrator we need the information for
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
    *         data.
@@ -97,6 +100,24 @@ public class OrchestratorConnector {
 
     return buildResponse(() -> getClient().callDeploymentStatus(deploymentId));
   }
+
+  /**
+   *
+   * @param deploymentId The id of the deployment given by the orchestrator we need the information for
+   * @return The orchestrator REST response to this call
+   * @throws IOException when cannot read from the stream sent by the server or cannot send the
+   *    *         data.
+   * @throws NoSuchFieldException when cannot parse the JSOn response.
+   * @throws OrchestratorIamException when response code from the orchestrator is not between 200
+   *    *         and 299.
+   */
+  public OrchestratorResponse callGetTemplate(String deploymentId)
+          throws IOException, NoSuchFieldException, OrchestratorIamException {
+    log.info("call get template for UUID " + deploymentId);
+
+    return null;//buildResponse(() -> getClient().callGetTemplate(deploymentId));
+  }
+
 
   /**
    * Invoke the undeploy REST API for a given deployment ID.

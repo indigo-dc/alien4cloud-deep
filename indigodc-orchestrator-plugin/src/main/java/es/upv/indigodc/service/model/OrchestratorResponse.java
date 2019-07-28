@@ -139,4 +139,9 @@ public class OrchestratorResponse {
   protected List<JsonNode> getNodesByKey(String key) throws JsonProcessingException, IOException {
     return rootResponse.findValues(key);
   }
+
+  public  <T> T getResponse(Class<T> clazz) throws IOException {
+    return objectMapper.readValue(this.response.toString(), objectMapper.constructType(clazz));
+  }
+
 }

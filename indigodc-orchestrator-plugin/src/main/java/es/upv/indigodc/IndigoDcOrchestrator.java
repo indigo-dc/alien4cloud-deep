@@ -16,6 +16,9 @@ import alien4cloud.paas.model.InstanceStatus;
 import alien4cloud.paas.model.NodeOperationExecRequest;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import es.upv.indigodc.location.LocationConfiguratorFactory;
@@ -38,10 +41,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import es.upv.indigodc.service.model.response.DeploymentOrchestrator;
+import es.upv.indigodc.service.model.response.GetDeploymentsResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
@@ -62,6 +68,8 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
   public final static String DEFAULT_NOT_SET_OUTPUT_VALUE = "<not_set>";
   public final static String TYPE = "IndigoDC";
+
+  private ReentrantLock updateStatusLock;
 
   /**
    * The configuration manager used to obtain the
@@ -239,21 +247,23 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             .getDeploymentTopology());
     if (di != null) {
     	try {
-          OrchestratorResponse response = orchestratorConnector
-        		  .callDeploymentStatus(di.getOrchestratorDeploymentId());
-          
-          //log.info(response.getResponse().toString());
+          if (di.getOrchestratorDeploymentId() != null) {
+            OrchestratorResponse response = orchestratorConnector
+                    .callDeploymentStatus(di.getOrchestratorDeploymentId());
 
-          Util.InstanceStatusInfo instanceStatusInfo = Util
-              .indigoDcStatusToInstanceStatus(response.getStatusTopologyDeployment().toUpperCase());
-          final InstanceInformation instanceInformation = new InstanceInformation(
-        		  instanceStatusInfo.getState(),
-                instanceStatusInfo.getInstanceStatus(), runtimeProps, runtimeProps,
-                // outputs);
-                outputsVars, outputsVars);
+            //log.info(response.getResponse().toString());
+
+            Util.InstanceStatusInfo instanceStatusInfo = Util
+                    .indigoDcStatusToInstanceStatus(response.getStatusTopologyDeployment().toUpperCase());
+            final InstanceInformation instanceInformation = new InstanceInformation(
+                    instanceStatusInfo.getState(),
+                    instanceStatusInfo.getInstanceStatus(), runtimeProps, runtimeProps,
+                    // outputs);
+                    outputsVars, outputsVars);
             instancesInfo.put(di.getA4cDeploymentPaasId(), instanceInformation);
             topologyInfo.put(groupId, instancesInfo);
             callback.onSuccess(topologyInfo);
+          }
       } catch (StatusNotFoundException | NoSuchFieldException | IOException e) {
         e.printStackTrace();
         callback.onFailure(e);
@@ -437,11 +447,14 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     		deploymentContext.getDeploymentPaaSId());
     if (di != null) {
 	    try {
-	      final OrchestratorResponse response = orchestratorConnector.callDeploymentStatus(
-	          di.getOrchestratorDeploymentId());
-	      log.info(response.getResponse().toString());
-	      final String statusTopologyDeployment = response.getStatusTopologyDeployment();
-	      callback.onSuccess(Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment));
+	      if (di.getOrchestratorDeploymentId() != null) {
+            final OrchestratorResponse response = orchestratorConnector.callDeploymentStatus(
+                    di.getOrchestratorDeploymentId());
+            log.info(response.getResponse().toString());
+            final String statusTopologyDeployment = response.getStatusTopologyDeployment();
+            callback.onSuccess(Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment));
+          } else
+            updateStatusesDeploymentsUser(deploymentContext, callback, di);
 	    } catch (NoSuchFieldException e) {
 	      e.printStackTrace();
 	      callback.onFailure(e);
@@ -462,69 +475,57 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 	    }
     } else {
       log.warn("Deployment with DeploymentPaaSId " + deploymentContext.getDeploymentPaaSId() + " not registered in the plugin registry." );
-      
+
       callback.onSuccess(DeploymentStatus.UNDEPLOYED);
     }
 
-    
-//    DeploymentInfo deploymentInfo = statusManager.
-//        getDeploymentInfo(deploymentContext.getDeploymentPaaSId());
-//    if (deploymentInfo != null) {
-//      if (deploymentInfo.getErrorDeployment() != null) {
-//        callback.onFailure(deploymentInfo.getErrorDeployment());
-//      } else {
-//        callback.onSuccess(deploymentInfo.getStatus());
-//      }
-//    } else {
-//      callback.onFailure(new NotFoundException(
-//          String.format("Deployment with PaaS ID %s not found", 
-//              deploymentContext.getDeploymentPaaSId())));
-//    }
-    // String a4cUuidDeployment = deploymentContext.getDeployment().getId();
-    //
-    // final OrchestratorDeploymentMapping orchestratorDeploymentMapping =
-    // mappingService.getByAlienDeploymentId(a4cUuidDeployment);
-    // if (orchestratorDeploymentMapping != null) {
-    // final String orchestratorUuidDeployment =
-    // orchestratorDeploymentMapping.getOrchestratorUuidDeployment();
-    // if (orchestratorUuidDeployment != null) {
-    // final CloudConfiguration configuration = cloudConfigurationManager
-    // .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
-    // try {
-    // OrchestratorResponse response =
-    // orchestratorConnector.callDeploymentStatus(configuration,
-    // orchestratorUuidDeployment);
-    // String statusTopologyDeployment = response.getStatusTopologyDeployment();
-    // callback.onSuccess(
-    // Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment.toUpperCase()));
-    //
-    // } catch (NoSuchFieldException er) {
-    // log.error("Error getStatus", er);
-    // callback.onFailure(er);
-    // callback.onSuccess(DeploymentStatus.UNKNOWN);
-    // } catch (IOException er) {
-    // log.error("Error getStatus", er);
-    // callback.onFailure(er);
-    // callback.onSuccess(DeploymentStatus.UNKNOWN);
-    // } catch (OrchestratorIamException er) {
-    // switch (er.getHttpCode()) {
-    // case 404:
-    // callback.onSuccess(DeploymentStatus.UNDEPLOYED);
-    // break;
-    // default:
-    // callback.onFailure(er);
-    // }
-    // log.error("Error deployment ", er);
-    // } catch (StatusNotFoundException er) {
-    // callback.onFailure(er);
-    // er.printStackTrace();
-    // }
-    // } else {
-    // callback.onSuccess(DeploymentStatus.UNDEPLOYED);
-    // }
-    // } else {
-    // callback.onSuccess(DeploymentStatus.UNDEPLOYED);
-    // }
+  }
+
+  protected void updateStatusesDeploymentsUser(PaaSDeploymentContext deploymentContext,
+                                               IPaaSCallback<DeploymentStatus> callback,
+                                               final DeploymentInfo di) {
+
+    try {
+      updateStatusLock.tryLock();
+      log.info("Get the orchestrators UUIDs for all deployments managed by the currently logged in user");
+      OrchestratorResponse response = orchestratorConnector.callGetDeployments();
+      final GetDeploymentsResponse gdr = response.<GetDeploymentsResponse>getResponse(GetDeploymentsResponse.class);
+      final List<DeploymentOrchestrator> deployments = gdr.getContent();
+      final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+      for (DeploymentOrchestrator deployment: deployments) {
+        response = orchestratorConnector.callGetTemplate(deployment.getUuid());
+        JsonNode root = mapper.readTree(response.getResponse().toString());
+        JsonNode metadata = root.get("metadata");
+        if (metadata != null) {
+          JsonNode templateName = metadata.get("template_name");
+          if (templateName != null) {
+            DeploymentInfo tmpDi = mappingService.getByA4CDeploymentPaasId(templateName.asText());
+            if (tmpDi != null) {
+              tmpDi.setOrchestratorDeploymentIdIfNull(deployment.getUuid());
+            } else
+              log.warn("Update deployment statuses encountered a deployment with template name " + templateName.asText()
+                      + "that is not registered in the mapping service");
+          } else
+            log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have a metadata-template name field. It is needed to identify it in A4C");
+        } else {
+          log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have a metadata field");
+        }
+
+      }
+      this.getStatus(deploymentContext, callback);
+    } catch (NoSuchFieldException | IOException e) {
+      e.printStackTrace();
+    } catch (OrchestratorIamException e) {
+      e.printStackTrace();
+    } finally {
+      updateStatusLock.unlock();
+    }
+
+    // If another thread calls this method and we are in the process of updating the info
+    // return the status of the
+    if (updateStatusLock.isLocked())
+      callback.onSuccess(di.getStatus());
+
   }
 
   // @Override

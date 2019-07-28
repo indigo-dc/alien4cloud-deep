@@ -356,7 +356,7 @@ public class IndigoDcOrchestratorTest {
     di.setOutputs(null);
     di.setStatus(DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
 		MappingService mappingService =  new MappingService();
-		mappingService.init();
+		mappingService.init(new HashMap<String, PaaSTopologyDeploymentContext>());
 		mappingService.registerDeployment(di);
 		TestUtil.setPrivateField(idco, "mappingService", mappingService); 
 		
