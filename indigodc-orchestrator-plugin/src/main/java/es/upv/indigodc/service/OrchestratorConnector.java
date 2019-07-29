@@ -115,7 +115,7 @@ public class OrchestratorConnector {
           throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call get template for UUID " + deploymentId);
 
-    return null;//buildResponse(() -> getClient().callGetTemplate(deploymentId));
+    return buildResponse(() -> getClient().callGetTemplate(deploymentId));
   }
 
 

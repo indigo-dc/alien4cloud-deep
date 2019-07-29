@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -56,7 +58,7 @@ public class OrchestratorResponse {
       throws JsonProcessingException, IOException {
     this.code = code;
     this.response = response;
-    objectMapper = new ObjectMapper();
+    objectMapper = new ObjectMapper(new YAMLFactory());
     objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
     if (response.length() > 0) {
       rootResponse = objectMapper.readTree(response.toString());

@@ -27,12 +27,7 @@ import es.upv.indigodc.service.EventService;
 import es.upv.indigodc.service.MappingService;
 import es.upv.indigodc.service.OrchestratorConnector;
 import es.upv.indigodc.service.StatusManager;
-import es.upv.indigodc.service.model.DeploymentInfo;
-import es.upv.indigodc.service.model.DeploymentNotFoundException;
-import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
-import es.upv.indigodc.service.model.OrchestratorIamException;
-import es.upv.indigodc.service.model.OrchestratorResponse;
-import es.upv.indigodc.service.model.StatusNotFoundException;
+import es.upv.indigodc.service.model.*;
 
 import java.io.IOException;
 
@@ -69,7 +64,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   public final static String DEFAULT_NOT_SET_OUTPUT_VALUE = "<not_set>";
   public final static String TYPE = "IndigoDC";
 
-  private ReentrantLock updateStatusLock;
+  private ReentrantLock updateStatusLock = new ReentrantLock();
 
   /**
    * The configuration manager used to obtain the
@@ -119,6 +114,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
   public void init(Map<String, PaaSTopologyDeploymentContext> activeDeployments) {
     if (activeDeployments != null) {
       //statusManager.initActiveDeployments(activeDeployments);
+    	mappingService.init(activeDeployments);
     }
   }
 
@@ -487,6 +483,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
     try {
       updateStatusLock.tryLock();
+      callback.onSuccess(di.getStatus());
       log.info("Get the orchestrators UUIDs for all deployments managed by the currently logged in user");
       OrchestratorResponse response = orchestratorConnector.callGetDeployments();
       final GetDeploymentsResponse gdr = response.<GetDeploymentsResponse>getResponse(GetDeploymentsResponse.class);
@@ -494,25 +491,33 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       for (DeploymentOrchestrator deployment: deployments) {
         response = orchestratorConnector.callGetTemplate(deployment.getUuid());
+        log.info(response.getResponse().toString());
         JsonNode root = mapper.readTree(response.getResponse().toString());
-        JsonNode metadata = root.get("metadata");
-        if (metadata != null) {
-          JsonNode templateName = metadata.get("template_name");
-          if (templateName != null) {
-            DeploymentInfo tmpDi = mappingService.getByA4CDeploymentPaasId(templateName.asText());
-            if (tmpDi != null) {
-              tmpDi.setOrchestratorDeploymentIdIfNull(deployment.getUuid());
+//        JsonNode metadata = root.get("metadata");
+//        if (metadata != null) {
+          JsonNode description = root.get("description");
+          if (description != null) {
+            String a4cInfo = description.asText();
+            int pos = a4cInfo.lastIndexOf('{');
+            if (pos > -1) {
+              a4cInfo = a4cInfo.substring(pos);
+              A4cOrchestratorInfo info = mapper.readValue(a4cInfo, A4cOrchestratorInfo.class);
+              DeploymentInfo tmpDi = mappingService.getByA4CDeploymentPaasId(info.getDeploymentPaasId());
+
+              if (tmpDi != null) {
+                tmpDi.setOrchestratorDeploymentIdIfNull(deployment.getUuid());
+              } else
+                log.warn("Update deployment statuses encountered a deployment with template name " + description.asText()
+                        + "that is not registered in the mapping service");
             } else
-              log.warn("Update deployment statuses encountered a deployment with template name " + templateName.asText()
-                      + "that is not registered in the mapping service");
+              log.warn("Unable to find additional information needed to match the orchestrator deployment with what we have on A4C");
           } else
-            log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have a metadata-template name field. It is needed to identify it in A4C");
-        } else {
-          log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have a metadata field");
-        }
+            log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have A4C info in the description");
+//        } else {
+//          log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have a metadata field");
+//        }
 
       }
-      this.getStatus(deploymentContext, callback);
     } catch (NoSuchFieldException | IOException e) {
       e.printStackTrace();
     } catch (OrchestratorIamException e) {

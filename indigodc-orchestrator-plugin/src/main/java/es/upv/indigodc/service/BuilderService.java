@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
@@ -17,6 +18,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+
+import es.upv.indigodc.service.model.A4cOrchestratorInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -141,7 +144,8 @@ public class BuilderService {
    * @throws JsonProcessingException when parsing the YAML topology
    * @throws IOException when parsing the YAML topology
    */
-  public static String getIndigoDcTopologyYaml(String a4cTopologyYaml,
+  public static String getIndigoDcTopologyYaml(PaaSTopologyDeploymentContext deploymentContext,
+                                               String a4cTopologyYaml,
       String importIndigoCustomTypes) throws JsonProcessingException, IOException {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER)
         .disable(Feature.SPLIT_LINES).disable(Feature.CANONICAL_OUTPUT));
@@ -152,6 +156,27 @@ public class BuilderService {
     root.put("tosca_definitions_version", TOSCA_DEFINITIONS_VERSION);
     ((ObjectNode) root.get("topology_template")).remove("workflows");
     root.remove("metadata");
+//    ObjectNode metadata = (ObjectNode) root.get("metadata");
+//    if (metadata == null) {
+//      metadata = mapper.createObjectNode();
+//      root.set("metadata", metadata);
+//    }
+//    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
+//    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
+    TextNode description = (TextNode) root.get("description");
+    A4cOrchestratorInfo a4cOrchestratorInfo = new A4cOrchestratorInfo();
+    a4cOrchestratorInfo.setDeploymentId(deploymentContext.getDeploymentId());
+    a4cOrchestratorInfo.setDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
+    a4cOrchestratorInfo.setLocationIds(deploymentContext.getDeployment().getLocationIds());
+    a4cOrchestratorInfo.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+    a4cOrchestratorInfo.setVersionId(deploymentContext.getDeployment().getVersionId());
+
+    ObjectMapper mapperJson = new ObjectMapper();
+    if (description == null) {
+      root.put("description", mapperJson.writeValueAsString(a4cOrchestratorInfo));
+    } else {
+      root.put("description", description.asText() +  mapperJson.writeValueAsString(a4cOrchestratorInfo));
+    }
     root.remove("imports");
     ObjectNode imports = mapper.createObjectNode();
     imports.put("indigo_custom_types", importIndigoCustomTypes);
@@ -261,7 +286,7 @@ public class BuilderService {
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
         exportService.getYaml(getEditionContextManagerCsar(), getEditionContextManagerTopology());
-    String yamlIndigoD = getIndigoDcTopologyYaml(a4cTopologyYaml, importIndigoCustomTypes);
+    String yamlIndigoD = getIndigoDcTopologyYaml(deploymentContext, a4cTopologyYaml, importIndigoCustomTypes);
     deployment.setTemplate(yamlIndigoD);
     return deployment.toOrchestratorString();
   }

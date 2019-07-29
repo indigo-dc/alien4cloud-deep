@@ -1,4 +1,4 @@
-description: ""
+description: "{\"deploymentPaasId\":\"a4c-paas-id\",\"deploymentId\":\"a4c-id\",\"locationIds\":[],\"orchestratorId\":\"a4c-orchestrator-id\",\"versionId\":\"a4c-version-id\"}"
 topology_template:
   node_templates:
     Compute:

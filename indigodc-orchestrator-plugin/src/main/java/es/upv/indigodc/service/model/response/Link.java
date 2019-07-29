@@ -13,6 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Link {
 
-    protected String ref;
+    protected String rel;
     protected String href;
 }

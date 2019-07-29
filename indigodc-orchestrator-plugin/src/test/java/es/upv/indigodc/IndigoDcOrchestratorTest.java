@@ -61,7 +61,7 @@ public class IndigoDcOrchestratorTest {
 	@Test
 	public void initWithNoDeployments() throws JsonParseException, JsonMappingException, PluginConfigurationException, IOException, IllegalArgumentException, IllegalAccessException {
 		IndigoDcOrchestrator idco = getIndigoDcOrchestratorWithTestConfig();
-		idco.init(new HashMap<>());
+		idco.init(null);
 		idco.destroy();
 	}
 	

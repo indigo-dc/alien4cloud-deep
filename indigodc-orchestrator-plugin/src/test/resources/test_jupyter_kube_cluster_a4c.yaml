@@ -4,6 +4,8 @@ metadata:
   template_name: TestApp
   template_version: 0.1.0-SNAPSHOT
   template_author: admin
+  a4c_deployment_paas_id: a4c-paas-id
+  a4c_deployment_id: a4c-id
 
 description: ""
 
