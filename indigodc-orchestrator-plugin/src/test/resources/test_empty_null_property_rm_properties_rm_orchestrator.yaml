@@ -3,5 +3,6 @@ topology_template:
     mesos_master:
       type: "tosca.nodes.indigo.MesosMaster"
 tosca_definitions_version: "tosca_simple_yaml_1_0"
+description: "{\"deploymentPaasId\":\"a4c-paas-id\",\"deploymentId\":\"a4c-id\",\"locationIds\":[],\"orchestratorId\":\"a4c-orchestrator-id\",\"versionId\":\"a4c-version-id\"}"
 imports:
 - indigo_custom_types: "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml"

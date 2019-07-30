@@ -23,15 +23,9 @@ public class IndigoDcOrchestratorFactoryTest {
 	public void badPathToDefaultConf() throws NoSuchFieldException, SecurityException, Exception {		
 		IndigoDcOrchestratorFactory fact = new IndigoDcOrchestratorFactoryBadPath();
 		CloudConfiguration cc = fact.getDefaultConfiguration();
-		Assertions.assertEquals(cc.getClientId(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
-		Assertions.assertEquals(cc.getClientScopes(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
-		Assertions.assertEquals(cc.getClientSecret(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
-		Assertions.assertEquals(cc.getIamHost(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
-		Assertions.assertEquals(cc.getIamHostCert(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		Assertions.assertEquals(cc.getImportIndigoCustomTypes(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		Assertions.assertEquals(cc.getOrchestratorEndpoint(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		Assertions.assertEquals(cc.getOrchestratorEndpointCert(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
-		Assertions.assertEquals(cc.getTokenEndpoint(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		Assertions.assertEquals(cc.getOrchestratorEndpointCert(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE);
 		Assertions.assertEquals(cc.getOrchestratorPollInterval(), IndigoDcOrchestratorFactory.NO_DEFAULT_CONF_FILE_POLL);
 	}

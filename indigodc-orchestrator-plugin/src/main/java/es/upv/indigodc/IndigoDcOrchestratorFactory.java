@@ -63,10 +63,7 @@ public class IndigoDcOrchestratorFactory
       conf = mapper.readValue(is, CloudConfiguration.class);
     } catch (IOException er) {
       er.printStackTrace();
-      conf = new CloudConfiguration(NO_DEFAULT_CONF_FILE,
-          NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE,
-          NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE, 
-          NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE,
+      conf = new CloudConfiguration(
           NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE_POLL,
           NO_DEFAULT_CONF_FILE);
     }

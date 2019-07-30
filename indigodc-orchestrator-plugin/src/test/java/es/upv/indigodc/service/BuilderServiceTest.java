@@ -1,6 +1,8 @@
 package es.upv.indigodc.service;
 
 
+import alien4cloud.model.deployment.Deployment;
+import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
 import es.upv.indigodc.IndigoDcOrchestrator;
 import es.upv.indigodc.TestUtil;
 import es.upv.indigodc.configuration.CloudConfiguration;
@@ -19,10 +21,16 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import lombok.extern.slf4j.Slf4j;
+import org.mockito.Mockito;
 
 
 @Slf4j
 public class BuilderServiceTest {
+
+  public static final String A4C_PAAS_ID = "a4c-paas-id";
+  public static final String A4C_ID = "a4c-id";
+  public static final String A4C_ORCHESTRATOR_ID = "a4c-orchestrator-id";
+  public static final String A4C_VERSION_ID = "a4c-version-id";
 
 	@Disabled
   @Test
@@ -39,9 +47,17 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+      PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+      Deployment depl = Mockito.mock(Deployment.class);
+      Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+      Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+      Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+      Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+      Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+      Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
+        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -54,9 +70,17 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
+        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -70,9 +94,17 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
+        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -84,9 +116,17 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
+        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -104,9 +144,17 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
+        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test
@@ -125,9 +173,17 @@ public class BuilderServiceTest {
     String yamlIndigoDC =
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(yamlA4c, cc.getImportIndigoCustomTypes()));
+        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
   @Test

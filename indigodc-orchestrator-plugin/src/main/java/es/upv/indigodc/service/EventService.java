@@ -31,8 +31,6 @@ public class EventService {
 
   public static final int EVENT_QUEUE_MAX_SIZE = 1000;
 
-  @Autowired
-  private UserService userService;
 
   @Autowired
   @Qualifier("orchestrator-connector")
@@ -110,57 +108,57 @@ public class EventService {
 
     @Override
     public void run() {
-      log.info("Event Service get deployments");
-      try {
-        OrchestratorResponse response = orchestratorConnector.callGetDeployments(cc,
-            user.getUsername(), user.getPlainPassword());
-        if (response.isCodeOk()) {
-          ObjectMapper objectMapper = new ObjectMapper();
-          objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
-          JsonNode root = objectMapper.readTree(response.getResponse().toString());
-
-          List<JsonNode> deployments = root.findValues("content");
-          // For each deployment, add its status to the list
-          for (JsonNode jsonNode : deployments) {
-            PaaSDeploymentStatusMonitorEvent statusEv = new PaaSDeploymentStatusMonitorEvent();
-            statusEv.setDeploymentStatus(Util
-                .indigoDcStatusToDeploymentStatus(jsonNode.findValue("status").get(0).asText()));
-            String orchestratorDeploymentUuid = jsonNode.findValue("uuid").get(0).asText();
-            AlienDeploymentMapping alienDeploymentMapping =
-                mappingService.getByOrchestratorUuidDeployment(orchestratorDeploymentUuid);
-            if (alienDeploymentMapping != null) {
-              statusEv.setDeploymentId(alienDeploymentMapping.getDeploymentId());
-              statusEv.setOrchestratorId(alienDeploymentMapping.getOrchetratorId());
-              // Get date/time from ISO to long since 1.1.1970
-              statusEv.setDate(LocalDateTime.parse(jsonNode.findValue("updateTime").get(0).asText())
-                  .toInstant(ZoneOffset.ofTotalSeconds(0)).toEpochMilli());
-              if (eventQueue.size() < EVENT_QUEUE_MAX_SIZE) {
-                eventQueue.add(statusEv);
-              }
-            } else {
-              log.warn(String.format("Deployment with ID %s not found in the A4C DB",
-                  orchestratorDeploymentUuid));
-            }
-          }
-        } else {
-          log.error("Error calling deployments");
-        }
-        // if (vals.size() > 0)
-        // vals.get(0).asText();
-        // else
-        // throw new NoSuchElementException("The response for deployment doesn't contain an
-        // uuid field");
-
-        log.info("Event Service get deployments 2");
-      } catch (NoSuchFieldException ex) {
-        ex.printStackTrace();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      } catch (OrchestratorIamException ex) {
-        ex.printStackTrace();
-      } catch (Error | Exception ex) {
-        ex.printStackTrace();
-      }
+//      log.info("Event Service get deployments");
+//      try {
+//        OrchestratorResponse response = orchestratorConnector.callGetDeployments(cc,
+//            user.getUsername(), user.getPlainPassword());
+//        if (response.isCodeOk()) {
+//          ObjectMapper objectMapper = new ObjectMapper();
+//          objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
+//          JsonNode root = objectMapper.readTree(response.getResponse().toString());
+//
+//          List<JsonNode> deployments = root.findValues("content");
+//          // For each deployment, add its status to the list
+//          for (JsonNode jsonNode : deployments) {
+//            PaaSDeploymentStatusMonitorEvent statusEv = new PaaSDeploymentStatusMonitorEvent();
+//            statusEv.setDeploymentStatus(Util
+//                .indigoDcStatusToDeploymentStatus(jsonNode.findValue("status").get(0).asText()));
+//            String orchestratorDeploymentUuid = jsonNode.findValue("uuid").get(0).asText();
+//            AlienDeploymentMapping alienDeploymentMapping =
+//                mappingService.getByOrchestratorUuidDeployment(orchestratorDeploymentUuid);
+//            if (alienDeploymentMapping != null) {
+//              statusEv.setDeploymentId(alienDeploymentMapping.getDeploymentId());
+//              statusEv.setOrchestratorId(alienDeploymentMapping.getOrchetratorId());
+//              // Get date/time from ISO to long since 1.1.1970
+//              statusEv.setDate(LocalDateTime.parse(jsonNode.findValue("updateTime").get(0).asText())
+//                  .toInstant(ZoneOffset.ofTotalSeconds(0)).toEpochMilli());
+//              if (eventQueue.size() < EVENT_QUEUE_MAX_SIZE) {
+//                eventQueue.add(statusEv);
+//              }
+//            } else {
+//              log.warn(String.format("Deployment with ID %s not found in the A4C DB",
+//                  orchestratorDeploymentUuid));
+//            }
+//          }
+//        } else {
+//          log.error("Error calling deployments");
+//        }
+//        // if (vals.size() > 0)
+//        // vals.get(0).asText();
+//        // else
+//        // throw new NoSuchElementException("The response for deployment doesn't contain an
+//        // uuid field");
+//
+//        log.info("Event Service get deployments 2");
+//      } catch (NoSuchFieldException ex) {
+//        ex.printStackTrace();
+//      } catch (IOException ex) {
+//        ex.printStackTrace();
+//      } catch (OrchestratorIamException ex) {
+//        ex.printStackTrace();
+//      } catch (Error | Exception ex) {
+//        ex.printStackTrace();
+//      }
     }
   }
 }

@@ -3,7 +3,9 @@ tosca_definitions_version: alien_dsl_1_4_0
 metadata:
   template_name: TestApp
   template_version: 0.1.0-SNAPSHOT
-  template_author: asalic
+  template_author: admin
+  a4c_deployment_paas_id: a4c-paas-id
+  a4c_deployment_id: a4c-id
 
 description: ""
 

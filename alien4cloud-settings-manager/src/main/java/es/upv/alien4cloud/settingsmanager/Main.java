@@ -5,21 +5,21 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.apache.logging.log4j.util.Strings;
 import org.xml.sax.SAXException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static java.lang.Math.log;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,6 +34,13 @@ public class Main {
         String installPathDir = installPath + "/" + installDir;
         String configPathDir = installPathDir + "/" + "config";
         String a4cUser = getEnvValue("A4C_USER");
+        
+        
+        String oidcIssuer = getEnvValue("A4C_SPRING_OIDC_ISSUER");        
+        String oidcClientId = getEnvValue("A4C_SPRING_OIDC_CLIENT_ID");      
+        String oidcClientSecret = getEnvValue("A4C_SPRING_OIDC_CLIENT_SECRET");      
+        String oidcRoles = getEnvValue("A4C_SPRING_OIDC_ROLES");
+        
 
         Integer portHttp = Integer.parseInt(getEnvValue("A4C_PORT_HTTP"));
         Integer portHttps = Integer.parseInt(getEnvValue("A4C_PORT_HTTPS"));
@@ -67,6 +74,16 @@ public class Main {
           try {
             log.info("Try editing conf at " + configPathDir + "/alien4cloud-config.yml");
             configManager = new ConfigManager(volumeDir, installPathDir);
+            
+              List<String> userRoles = Stream.of(oidcRoles.split("','"))
+                      .map(role -> role.endsWith("'") ? 
+                            role.substring(0, role.length() - 1) :
+                              (role.startsWith("'") ? 
+                                      role.substring(1):
+                                      role))    
+                      .collect(Collectors.toList());
+            configManager.setSpringOIDCInfo(oidcIssuer, oidcClientId, oidcClientSecret, userRoles);
+            
             configManager.setAdminUserPassw(adminUser, adminPassw);
             configManager.setDirectoriesAlien(volumeDir);
             if (enableSsl) {
