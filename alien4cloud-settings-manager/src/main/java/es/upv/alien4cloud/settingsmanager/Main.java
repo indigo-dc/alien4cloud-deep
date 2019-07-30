@@ -41,6 +41,12 @@ public class Main {
         String oidcClientSecret = getEnvValue("A4C_SPRING_OIDC_CLIENT_SECRET");      
         String oidcRoles = getEnvValue("A4C_SPRING_OIDC_ROLES");
         
+        
+        String orchestratorUrl = getEnvValue("A4C_ORCHESTRATOR_URL");
+        boolean orchestratorEnableKeystore = Boolean.parseBoolean(getEnvValue("A4C_ORCHESTRATOR_ENABLE_KEYSTORE"));
+        String orchestratorKeyPassword = getEnvValue("A4C_ORCHESTRATOR_KEY_PASSWORD");
+        String orchestratorKeystorePassword = getEnvValue("A4C_ORCHESTRATOR_KEYSTORE_PASSWORD");
+        
 
         Integer portHttp = Integer.parseInt(getEnvValue("A4C_PORT_HTTP"));
         Integer portHttps = Integer.parseInt(getEnvValue("A4C_PORT_HTTPS"));
@@ -82,6 +88,9 @@ public class Main {
                                       role.substring(1):
                                       role))    
                       .collect(Collectors.toList());
+              
+              configManager.setOrchestratorProps(orchestratorUrl, orchestratorEnableKeystore, orchestratorKeystorePassword, orchestratorKeyPassword);
+              
             configManager.setSpringOIDCInfo(oidcIssuer, oidcClientId, oidcClientSecret, userRoles);
             
             configManager.setAdminUserPassw(adminUser, adminPassw);

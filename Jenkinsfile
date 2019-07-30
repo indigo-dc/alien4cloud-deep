@@ -23,7 +23,7 @@ pipeline {
         stage('Build local A4C (UPV flavour)') {
           steps {
             dir("$WORKSPACE/indigodc-orchestrator-plugin") {
-                MavenRun('clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
+                MavenRun('-U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
             }
           }
         }

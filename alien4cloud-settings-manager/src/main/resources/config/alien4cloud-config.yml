@@ -1,6 +1,13 @@
 spring:
   profiles:
     active: oidc-auth
+    
+deep:
+  orchestrator:
+    url:  <url>
+    keystore:
+      location: 
+      password: 
 
 oidc:
   iam:

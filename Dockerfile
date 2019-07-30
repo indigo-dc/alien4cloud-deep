@@ -8,15 +8,19 @@ ARG a4c_src_dir=alien4cloud
 ARG a4c_install_dir=a4c
 ARG a4c_deep_ver=${a4c_ver}-DEEP-1.0.0-SNAPSHOT
 ARG a4c_user=a4c
-ARG a4c_settings_manager_ver=1.0.2
+ARG a4c_settings_manager_ver=2.1.0
 ARG tosca_normative_url=https://raw.githubusercontent.com/openstack/tosca-parser/master/toscaparser/elements/TOSCA_definition_1_0.yaml
 ARG tosca_normative_version=1.0.0
 ARG tosca_normative_name=normative-types
 ARG tosca_indigo_version=3.0.0
 ARG a4c_deep_url=https://github.com/indigo-dc/alien4cloud
 ARG spring_social_oidc_url=https://github.com/indigo-dc/spring-social-oidc
-ARG a4c_deep_branch=deep-dev-UPV
+ARG spring_social_oidc_branch=master
+ARG a4c_deep_branch=deep-dev
 ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
+
+
+ENV A4C_CERTS_ROOT_PATH=/certs
 
 ENV A4C_INSTALL_PATH=${a4c_install_path}
 ENV A4C_SRC_DIR=${a4c_src_dir}
@@ -35,6 +39,13 @@ ENV A4C_SPRING_OIDC_CLIENT_SECRET=<none>
 # at least one element is necessary
 ENV A4C_SPRING_OIDC_ROLES=<none>
 
+ENV A4C_ORCHESTRATOR_URL=https://deep-paas.cloud.ba.infn.it/orchestrator
+ENV A4C_ORCHESTRATOR_ENABLE_KEYSTORE=false
+ENV A4C_ORCHESTRATOR_KEYSTORE_PASSWORD=default
+ENV A4C_ORCHESTRATOR_KEY_PASSWORD=default
+ENV A4C_ORCHESTRATOR_PEM_CERT_FILE=orchestrator_ca.pem
+ENV A4C_ORCHESTRATOR_PEM_KEY_FILE=orchestrator_ca-key.pem
+
 ENV A4C_RUNTIME_DIR=/mnt/a4c_runtime_data
 # This variable triggers the wipping of the old A4C
 # runtime data! be sure you know what you are doing!
@@ -47,8 +58,7 @@ ENV A4C_ENABLE_SSL=true
 ENV A4C_KEY_STORE_PASSWORD=default
 ENV A4C_KEY_PASSWORD=default
 ENV A4C_PEM_CERT_FILE=ca.pem
-ENV A4C_PEM_KEY_FILE=ca-key.pem
-ENV A4C_CERTS_ROOT_PATH=/certs
+ENV A4C_PEM_KEY_FILE=ca.key
 
 ADD indigodc-orchestrator-plugin "${a4c_install_path}/indigodc-orchestrator-plugin"
 # ADD a4c "${a4c_install_path}/${a4c_src_dir}"
@@ -73,13 +83,13 @@ RUN \
   && echo '{ "allow_root": true }' > /root/.bowerrc\
   && cat /root/.bowerrc \
   # Compile and install locally the Spring Social OIDC plugin
-  && git clone --single-branch  --branch master ${spring_social_oidc_url} "${a4c_install_path}/spring_social_oidc" \
+  && git clone --single-branch  --branch ${spring_social_oidc_branch} ${spring_social_oidc_url} "${a4c_install_path}/spring_social_oidc" \
   && cd "${a4c_install_path}/spring_social_oidc" \
-  && mvn clean install \
+  && mvn -U clean install \
   # Compile the A4C source code
   && git clone --single-branch  --branch ${a4c_deep_branch} ${a4c_deep_url} "${a4c_install_path}/${a4c_src_dir}" \
   && cd "${a4c_install_path}/${a4c_src_dir}" \
-  && mvn clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true \
+  && mvn -U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true \
   # Get the precompiled version to obtain the init and config files
   && cd ${a4c_install_path} \
   && curl -k -O ${a4c_binary_dist_url} \
@@ -109,7 +119,7 @@ RUN \
   && rm -R "${a4c_install_path}/indigo-dc-tosca-types" \
   # Compile and install the plugin
   && cd "${a4c_install_path}/indigodc-orchestrator-plugin" \
-  && mvn -e clean package \
+  && mvn -U -e clean package \
   && cp ${a4c_install_path}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider.zip \
     "${a4c_install_path}/${a4c_install_dir}/init/plugins/" \
   # Compile and install the a4c settings manager

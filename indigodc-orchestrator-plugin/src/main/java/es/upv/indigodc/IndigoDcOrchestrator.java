@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -63,6 +64,8 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
   public final static String DEFAULT_NOT_SET_OUTPUT_VALUE = "<not_set>";
   public final static String TYPE = "IndigoDC";
+
+  protected final static Pattern NOT_FOUND_MATCHER = Pattern.compile("(?=.*not)(?=.*found)");
 
   private ReentrantLock updateStatusLock = new ReentrantLock();
 
@@ -216,8 +219,21 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       callback.onFailure(er);
      // mappingService.registerDeploymentInfoAlienToIndigoDc(a4cUuidDeployment, DeploymentStatus.FAILURE);
     } catch (OrchestratorIamException er) {
-      callback.onFailure(er);
-      log.error("Error undeployment ", er);
+      switch (er.getHttpCode()) {
+        case 404:
+          if (NOT_FOUND_MATCHER.matcher(er.getTitle().toLowerCase()).find()) {
+            log.warn("Deployment not found ", er);
+            mappingService.unregisterDeployment(a4cUuidDeployment);
+            callback.onSuccess(null);
+          } else {
+            callback.onFailure(er);
+            log.error("Error undeployment ", er);
+          }
+          break;
+        default:
+          log.error("Error undeployment ", er);
+          callback.onFailure(er);
+      }
       //mappingService.registerDeploymentInfoAlienToIndigoDc(a4cUuidDeployment, DeploymentStatus.FAILURE);
     }
   }

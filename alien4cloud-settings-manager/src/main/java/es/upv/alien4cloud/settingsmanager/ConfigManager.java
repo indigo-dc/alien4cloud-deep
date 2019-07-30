@@ -119,6 +119,41 @@ public class ConfigManager {
             String.format("Can't find the oidc node in the %s template", CONFIG_TEMPLATE_PATH));
   }
   
+  public void setOrchestratorProps(String orchestratorUrl, 
+		  boolean orchestratorEnableKeystore, String orchestratorKeystorePassword, String orchestratorKeyPassword)
+		   throws ValueNotFoundException {
+		      ObjectNode deep = (ObjectNode) root.findValue("deep");
+		      if (deep != null) {
+		          ObjectNode orchestrator = (ObjectNode) deep.findValue("orchestrator");
+		          if (orchestrator != null) {
+		        	  orchestrator.put("url", orchestratorUrl);
+		        	  if (orchestratorEnableKeystore) {
+			        	  ObjectNode keystore = (ObjectNode) deep.findValue("keystore");
+//			        	  if (keystore != null) {
+//			        		  if (orchestratorKeystoreLocation == null && 
+//			        				  orchestratorKeystorePassword == null) {
+//			        			  orchestrator.remove("keystore");
+//			        		  } else {
+//				        		  if (orchestratorKeystoreLocation != null)
+//				        			  keystore.put("orchestratorKeystoreLocation", orchestratorKeystoreLocation);
+//				        		  if (orchestratorKeystorePassword != null)
+//				        			  keystore.put("orchestratorKeystorePassword", orchestratorKeystorePassword);
+//			        		  }
+//			        	  } else
+//			        		  throw new ValueNotFoundException(
+//			  		                String.format("Can't find the keystore sub-node of the orchestrator node in the %s template", CONFIG_TEMPLATE_PATH));
+		        	  } else {
+                          orchestrator.remove("keystore");
+                          log.info("Orchestrator keystore not enabled");
+                      }
+		          } else
+		              throw new ValueNotFoundException(
+		                String.format("Can't find the orchestrator sub-node of the deep node in the %s template", CONFIG_TEMPLATE_PATH));
+		      } else 
+		          throw new ValueNotFoundException(
+		            String.format("Can't find the oidc node in the %s template", CONFIG_TEMPLATE_PATH));
+		  }
+  
   public void disableSsl() throws ValueNotFoundException {
     ObjectNode server = (ObjectNode) root.findValue("server");
     if (server != null) {
