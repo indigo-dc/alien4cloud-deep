@@ -31,7 +31,7 @@ ENV A4C_SETTINGS_MANAGER_VER=${a4c_settings_manager_ver}
 ENV A4C_PORT_HTTP=8088
 ENV A4C_PORT_HTTPS=8443
 
-ENV A4C_SPRING_OIDC_ISSUER=<none>
+ENV A4C_SPRING_OIDC_ISSUER=https://iam.deep-hybrid-datacloud.eu
 ENV A4C_SPRING_OIDC_CLIENT_ID=<none>
 ENV A4C_SPRING_OIDC_CLIENT_SECRET=<none>
 # Use CSV style approach, that is list of elements with single quote, separated by one and only one comma
