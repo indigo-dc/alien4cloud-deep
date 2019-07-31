@@ -17,8 +17,8 @@ pipeline {
         stage('Code fetching') {
             steps {
                 checkout scm
-		checkout([$class: 'GitSCM', branches: [[name: master]], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
-		checkout([$class: 'GitSCM', branches: [[name: deep-dev]], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud-deep.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: ''*/master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: ''*/deep-dev']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud-deep.git']]])
             }
         }
 
