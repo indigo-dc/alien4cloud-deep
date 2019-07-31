@@ -35,7 +35,7 @@ ENV A4C_SPRING_OIDC_ISSUER=<none>
 ENV A4C_SPRING_OIDC_CLIENT_ID=<none>
 ENV A4C_SPRING_OIDC_CLIENT_SECRET=<none>
 # Use CSV style approach, that is list of elements with single quote, separated by one and only one comma
-# eg 'ADMIN','APPLICATION MANGER','DEV, OPS'
+# eg 'ADMIN','APPLICATION MANAGER','DEV, OPS'
 # at least one element is necessary
 ENV A4C_SPRING_OIDC_ROLES=<none>
 

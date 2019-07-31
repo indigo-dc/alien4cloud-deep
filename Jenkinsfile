@@ -17,13 +17,31 @@ pipeline {
         stage('Code fetching') {
             steps {
                 checkout scm
+		checkout([$class: 'GitSCM', branches: [[name: master]], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
+		checkout([$class: 'GitSCM', branches: [[name: deep-dev]], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud-deep.git']]])
             }
+        }
+
+	stage('Build Spring OIDC') {
+          steps {
+            dir("$WORKSPACE/spring-social-oidc") {
+                MavenRun('-U clean install')
+            }
+          }
         }
 
         stage('Build local A4C (UPV flavour)') {
           steps {
-            dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+            dir("$WORKSPACE/alien4cloud") {
                 MavenRun('-U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
+            }
+          }
+        }
+
+	stage('Build plugin') {
+          steps {
+            dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+                MavenRun('-U clean package')
             }
           }
         }
