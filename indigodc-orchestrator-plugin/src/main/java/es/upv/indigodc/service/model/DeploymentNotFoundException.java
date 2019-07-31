@@ -1,5 +1,8 @@
 package es.upv.indigodc.service.model;
 
+/**
+ * Exception thrown when a deployment has not been found in the list managed by the plugin.
+ */
 public class DeploymentNotFoundException extends RuntimeException {
 
 	/**

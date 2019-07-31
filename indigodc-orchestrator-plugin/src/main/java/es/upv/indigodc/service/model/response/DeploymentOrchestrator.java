@@ -18,6 +18,10 @@ import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+/**
+ * The information about a deployment returned when getting the list of deployments.
+ * For more information check the Indigo Orchestrator help
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +29,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 @JsonIgnoreProperties
 public class DeploymentOrchestrator {
 
+    /**
+     * Unique identifier of the deployment
+     */
     protected String uuid;
 
 //    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -35,16 +42,49 @@ public class DeploymentOrchestrator {
 //    @JsonSerialize(using = LocalDateTimeSerializer.class)
 //    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
 //    protected LocalDateTime updateTime;
+    /**
+     * When the deployment was created
+     */
     protected String creationTime;
+    /**
+     * When the deployment was updated
+     */
     protected String updateTime;
+    /**
+     * The deployment ID
+     */
     protected String physicalId;
+    /**
+     * The status of the deployment
+     */
     protected IndigoDcDeploymentStatus status;
+    /**
+     * The reason for the status (e.g. why it failed when status is FAILED)
+     */
     protected String statusReason;
+    /**
+     * The map bewteen the outputs names and their values obtained during deployment
+     */
     protected Map<String, Object> outputs;
+    /**
+     * The task
+     */
     protected String task;
+    /**
+     * A callback used by the orchestrator
+     */
     protected String callback;
+    /**
+     * The name of the cloud provider where the deployment has been made / has been attempted
+     */
     protected String cloudProviderName;
+    /**
+     * Information about the creator of the deployment
+     */
     protected DeploymentCreator createdBy;
+    /**
+     * Links
+     */
     protected List<Link> links;
 
 }
