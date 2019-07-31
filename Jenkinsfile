@@ -13,7 +13,17 @@ pipeline {
         docker_image_name = "automated_testing_alien4cloud-deep"
     }
 
+
     stages {
+        
+    	stage('Java info') {
+		dir("$WORKSPACE") {
+			sh 'java -version'
+			sh 'javac -version'
+			sh 'which javac'
+			sh 'cat /etc/*-release'
+		}
+	}
         stage('Code fetching') {
             steps {
                 checkout scm
