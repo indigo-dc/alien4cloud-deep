@@ -17,12 +17,15 @@ pipeline {
     stages {
         
     	stage('Java info') {
+	
+          steps {
 		dir("$WORKSPACE") {
 			sh 'java -version'
 			sh 'javac -version'
 			sh 'which javac'
 			sh 'cat /etc/*-release'
 		}
+	   }
 	}
         stage('Code fetching') {
             steps {
