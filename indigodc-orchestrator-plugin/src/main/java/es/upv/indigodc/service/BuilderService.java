@@ -80,7 +80,6 @@ public class BuilderService {
    * @author asalic
    */
   @Data
-  @AllArgsConstructor
   @NoArgsConstructor
   public static class Deployment {
 
@@ -151,9 +150,12 @@ public class BuilderService {
         .disable(Feature.SPLIT_LINES).disable(Feature.CANONICAL_OUTPUT));
 
     String a4cTopologyYamlIgnoreMethods = encodeToscaMethods(a4cTopologyYaml);
+    ObjectNode rootNode = mapper.createObjectNode();
     ObjectNode root = (ObjectNode) mapper.readTree(a4cTopologyYamlIgnoreMethods);
     root.remove("tosca_definitions_version");
-    root.put("tosca_definitions_version", TOSCA_DEFINITIONS_VERSION);
+    rootNode.put("tosca_definitions_version", TOSCA_DEFINITIONS_VERSION);
+    rootNode.setAll(root);
+    root = rootNode;
     ((ObjectNode) root.get("topology_template")).remove("workflows");
     root.remove("metadata");
 //    ObjectNode metadata = (ObjectNode) root.get("metadata");
