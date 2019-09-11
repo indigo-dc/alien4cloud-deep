@@ -52,9 +52,9 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callGetDeployments()
+  public OrchestratorResponse callGetDeployments(String orchestrarorUrl)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
-    return buildResponse(() -> getClient().callGetDeployments());
+    return buildResponse(() -> getClient().callGetDeployments(orchestrarorUrl));
   }
 
   /**
@@ -72,14 +72,14 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, 
+  public OrchestratorResponse callDeploy(String orchestrarorUrl,
       String yamlTopology)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
 
 
     return buildResponse(() ->
-            getClient().callDeploy(yamlTopology));
+            getClient().callDeploy(orchestrarorUrl, yamlTopology));
   }
 
   /**
@@ -94,11 +94,11 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploymentStatus(String deploymentId)
+  public OrchestratorResponse callDeploymentStatus(String orchestrarorUrl, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call deployment status for UUID " + deploymentId);
 
-    return buildResponse(() -> getClient().callDeploymentStatus(deploymentId));
+    return buildResponse(() -> getClient().callDeploymentStatus(orchestrarorUrl, deploymentId));
   }
 
   /**
@@ -111,11 +111,11 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *    *         and 299.
    */
-  public OrchestratorResponse callGetTemplate(String deploymentId)
+  public OrchestratorResponse callGetTemplate(String orchestrarorUrl, String deploymentId)
           throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call get template for UUID " + deploymentId);
 
-    return buildResponse(() -> getClient().callGetTemplate(deploymentId));
+    return buildResponse(() -> getClient().callGetTemplate(orchestrarorUrl, deploymentId));
   }
 
 
@@ -131,13 +131,13 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callUndeploy(CloudConfiguration cloudConfiguration, 
+  public OrchestratorResponse callUndeploy(String orchestrarorUrl,
       String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
 
     log.info("call undeploy");
 
-    return buildResponse(() -> getClient().callUndeploy(deploymentId));
+    return buildResponse(() -> getClient().callUndeploy(orchestrarorUrl, deploymentId));
   }
 
   private OrchestratorResponse buildResponse(Supplier<ResponseEntity<String>> func) throws OrchestratorIamException, IOException {

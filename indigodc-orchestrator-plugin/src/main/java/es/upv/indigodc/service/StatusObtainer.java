@@ -3,6 +3,7 @@ package es.upv.indigodc.service;
 import alien4cloud.paas.IPaaSCallback;
 import alien4cloud.paas.model.DeploymentStatus;
 import es.upv.indigodc.Util;
+import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import es.upv.indigodc.service.model.DeploymentInfo;
 import es.upv.indigodc.service.model.OrchestratorIamException;
@@ -28,14 +29,21 @@ public class StatusObtainer implements Runnable {
 //  @Autowired
 //  @Qualifier("statusObtainerScheduler")
 //  private ThreadPoolTaskScheduler executor;
-  
-  @Autowired
-  protected CloudConfigurationManager cloudConfigurationManager;
+
 
   /** The service that executes the HTTP(S) calls to the Orchestrator. */
   @Autowired
   @Qualifier("orchestrator-connector")
   private OrchestratorConnector orchestratorConnector;
+
+    /**
+     * The configuration manager used to obtain the
+     * {@link es.upv.indigodc.configuration.CloudConfiguration} instance that holds
+     * the parameters of the plugin.
+     */
+    @Autowired
+    @Qualifier("cloud-configuration-manager")
+    private CloudConfigurationManager cloudConfigurationManager;
   
   
 // // @Autowired
@@ -57,7 +65,9 @@ public class StatusObtainer implements Runnable {
          log.info("status obtainer");
           OrchestratorResponse response;
           try {
-            response = orchestratorConnector.callDeploymentStatus(
+              CloudConfiguration configuration = cloudConfigurationManager
+                      .getCloudConfiguration(deploymentInfo.getOrchestratorId());
+            response = orchestratorConnector.callDeploymentStatus(configuration.getOrchestratorEndpoint(),
                 deploymentInfo.getOrchestratorDeploymentId());
             log.info(response.getResponse().toString());
             String statusTopologyDeployment = response.getStatusTopologyDeployment();
