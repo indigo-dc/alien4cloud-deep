@@ -6,9 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import alien4cloud.paas.model.DeploymentStatus;
-import es.upv.indigodc.service.model.AlienDeploymentMapping;
 import es.upv.indigodc.service.model.DeploymentInfo;
-import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
 
 import java.util.HashMap;
 
