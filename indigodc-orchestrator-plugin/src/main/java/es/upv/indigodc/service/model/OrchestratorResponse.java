@@ -37,19 +37,32 @@ public class OrchestratorResponse {
   private JsonNode rootResponse;
 
 
+  /**
+   * Build a response object.
+   * @param e status code exception
+   * @throws OrchestratorIamException
+   */
   public OrchestratorResponse(HttpStatusCodeException e) throws OrchestratorIamException {
     throw new OrchestratorIamException(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseBodyAsString());
   }
 
+  /**
+   *
+   * Build a response object.
+   *
+   * @param response the response from the orchestrator
+   * @throws IOException
+   * @throws OrchestratorIamException
+   */
   public OrchestratorResponse(ResponseEntity<String> response) throws IOException, OrchestratorIamException {
-    this(response.getStatusCode().value(), new StringBuilder(response.getBody()));
+    this(response.getStatusCode().value(), response.getBody() == null ? new StringBuilder() :
+            new StringBuilder(response.getBody()));
   }
 
   /**
    * Build a response object.
    *
    * @param code The code returned by the server
-   * @param callMethod The type of the method (GET, POST, PUT, DELETE, etc)
    * @param response The actual response from the server
    * @throws JsonProcessingException when trying to parse the response that should be a valid JSON
    * @throws IOException when trying to parse the response that should be a valid JSON
@@ -142,8 +155,25 @@ public class OrchestratorResponse {
     return rootResponse.findValues(key);
   }
 
+  /**
+   * Convert a string response from the orchestrator to a Java class hierarchy
+   * @param clazz The root class that maps onto the orchestrator response as a Java class
+   * @param <T> The root class that maps onto the orchestrator response as a Java template
+   * @return the Java object representing the orchestrator response
+   * @throws IOException thrown by the JSON parser
+   */
   public  <T> T getResponse(Class<T> clazz) throws IOException {
     return objectMapper.readValue(this.response.toString(), objectMapper.constructType(clazz));
+  }
+
+  @Override
+  public String toString() {
+    try {
+      return objectMapper.writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
 }
