@@ -1,5 +1,6 @@
 package es.upv.indigodc.location;
 
+import alien4cloud.deployment.matching.services.nodes.MatchingConfigurations;
 import alien4cloud.deployment.matching.services.nodes.MatchingConfigurationsParser;
 import alien4cloud.model.deployment.matching.MatchingConfiguration;
 import alien4cloud.model.orchestrators.locations.LocationResourceTemplate;
@@ -8,8 +9,13 @@ import alien4cloud.orchestrators.plugin.ILocationResourceAccessor;
 import alien4cloud.orchestrators.plugin.model.PluginArchive;
 import alien4cloud.plugin.model.ManagedPlugin;
 import alien4cloud.tosca.parser.ParsingException;
+import alien4cloud.tosca.parser.ParsingResult;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +36,12 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
   public static final String LOCATION_TYPE = "Deep Orchestrator Location";
 
   @Inject
-  private ManagedPlugin selfContext;
+  protected ManagedPlugin selfContext;
 
   // @Inject private ArchiveParser archiveParser;
 
   @Inject
-  private MatchingConfigurationsParser matchingConfigurationsParser;
+  protected MatchingConfigurationsParser matchingConfigurationsParser;
 
   protected List<PluginArchive> archives;
   protected Map<String, MatchingConfiguration> matchingConfigurations;
@@ -67,9 +73,7 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
   
   @Override
   public Map<String, MatchingConfiguration> getMatchingConfigurations() {
-    // return getMatchingConfigurations("provider/common/matching/config.yml");
-    // Match all nodes defined in the Alien4Cloud list of components
-    return Maps.newHashMap();
+     return getMatchingConfigurations(getMatchingConfigurationsPath());
   }
 
   /**
@@ -80,21 +84,29 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
    * @return A list of locations resources templates that users can define or null if the plugin
    *         doesn't support auto-configuration of resources..
    */
-  public Map<String, MatchingConfiguration> getMatchingConfigurations(
+  protected Map<String, MatchingConfiguration> getMatchingConfigurations(
       String matchingConfigRelativePath) {
     if (matchingConfigurations == null) {
-      Path matchingConfigPath = selfContext.getPluginPath().resolve(matchingConfigRelativePath);
       try {
-        this.matchingConfigurations = matchingConfigurationsParser.parseFile(matchingConfigPath)
-            .getResult().getMatchingConfigurations();
-      } catch (ParsingException er) {
-        return Maps.newHashMap();
+        Path matchingConfigPath = selfContext.getPluginPath().resolve(matchingConfigRelativePath);
+        if (Files.exists(matchingConfigPath)) {
+          ParsingResult<MatchingConfigurations> pr = matchingConfigurationsParser.parseFile(matchingConfigPath);
+          this.matchingConfigurations = pr.getResult().getMatchingConfigurations();
+        } else
+          return null;
+      } catch (InvalidPathException | ParsingException er) {
+        er.printStackTrace();
+        return null;
       }
     }
     return matchingConfigurations;
   }
+  
+  protected String getMatchingConfigurationsPath() {
+	  return "provider/common/matching/config.yml";
+  }
 
-  private List<String> getAllResourcesTypes() {
+  protected List<String> getAllResourcesTypes() {
     List<String> resourcesTypes = Lists.newArrayList();
     for (PluginArchive pluginArchive : this.pluginArchives()) {
       for (String nodeType : pluginArchive.getArchive().getNodeTypes().keySet()) {

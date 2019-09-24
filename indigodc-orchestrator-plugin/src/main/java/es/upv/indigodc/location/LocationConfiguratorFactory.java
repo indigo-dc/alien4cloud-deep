@@ -37,8 +37,8 @@ public class LocationConfiguratorFactory {
   /**
    * Generates a new instance for a location.
    *
-   * @param locationType RThe type of location to be generated.
-   * @return The instance of the location.
+   * @param locationType The type of location to be generated.
+   * @return The instance of the location. Null if location not supported
    */
   public ILocationConfiguratorPlugin newInstance(String locationType) {
 
@@ -46,26 +46,27 @@ public class LocationConfiguratorFactory {
       LocationConfigurator configurator = applicationContext.getBean(LocationConfigurator.class);
       return configurator;
     }
-    return new ILocationConfiguratorPlugin() {
-      @Override
-      public List<PluginArchive> pluginArchives() {
-        return new ArrayList<>();
-      }
-
-      @Override
-      public List<String> getResourcesTypes() {
-        return new ArrayList<>();
-      }
-
-      @Override
-      public Map<String, MatchingConfiguration> getMatchingConfigurations() {
-        return new HashMap<>();
-      }
-
-      @Override
-      public List<LocationResourceTemplate> instances(ILocationResourceAccessor resourceAccessor) {
-        return null;
-      }
-    };
+    return null;
+//    new ILocationConfiguratorPlugin() {
+//      @Override
+//      public List<PluginArchive> pluginArchives() {
+//        return new ArrayList<>();
+//      }
+//
+//      @Override
+//      public List<String> getResourcesTypes() {
+//        return new ArrayList<>();
+//      }
+//
+//      @Override
+//      public Map<String, MatchingConfiguration> getMatchingConfigurations() {
+//        return new HashMap<>();
+//      }
+//
+//      @Override
+//      public List<LocationResourceTemplate> instances(ILocationResourceAccessor resourceAccessor) {
+//        return null;
+//      }
+//    };
   }
 }
