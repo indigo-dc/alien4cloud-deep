@@ -22,8 +22,6 @@ else
     fi
 fi
 
-#JAVA=/opt/jdk/jdk8u181-b13/bin/java
-
 if [ ! -x "$JAVA" ] ; then
   echo Cannot find java. Set JAVA_HOME or add java to path.
   exit 1
