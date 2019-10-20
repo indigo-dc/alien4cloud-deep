@@ -2,10 +2,7 @@ package es.upv.alien4cloud.settingsmanager;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.KeyStoreException;
@@ -25,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Main {
 
+    public static final String A4C_SH_TEMPLATE_PATH = "alien4cloud.sh";
+
   public static void main(String[] args) {
 
       try {
@@ -34,6 +33,7 @@ public class Main {
         String installPathDir = installPath + "/" + installDir;
         String configPathDir = installPathDir + "/" + "config";
         String a4cUser = getEnvValue("A4C_USER");
+        String a4cShName = getEnvValue("A4C_SH_NAME");
         
         
         String oidcIssuer = getEnvValue("A4C_SPRING_OIDC_ISSUER");        
@@ -143,6 +143,9 @@ public class Main {
           } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
             e.printStackTrace();
           }
+
+          Files.copy(Main.getClass().getClassLoader().getResourceAsStream(A4C_SH_TEMPLATE_PATH),
+            Paths.get(installPathDir + "/" + a4cShName), StandardCopyOption.REPLACE_EXISTING);
 	      
 	      UserPrincipalLookupService lookupService = FileSystems.getDefault()
 	    	        .getUserPrincipalLookupService();

@@ -19,6 +19,7 @@ ARG spring_social_oidc_branch=master
 ARG a4c_deep_branch=deep-dev
 ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
 
+ENV A4C_SH_NAME=alien4cloud.sh
 
 ENV A4C_CERTS_ROOT_PATH=/certs
 
@@ -59,6 +60,8 @@ ENV A4C_KEY_STORE_PASSWORD=default
 ENV A4C_KEY_PASSWORD=default
 ENV A4C_PEM_CERT_FILE=ca.pem
 ENV A4C_PEM_KEY_FILE=ca.key
+
+ENV A4C_JAVA_XMX_MEMO=4g
 
 ADD indigodc-orchestrator-plugin "${a4c_install_path}/indigodc-orchestrator-plugin"
 # ADD a4c "${a4c_install_path}/${a4c_src_dir}"
@@ -153,4 +156,4 @@ ENTRYPOINT \
   && java -jar "alien4cloud-settings-manager-${A4C_SETTINGS_MANAGER_VER}-jar-with-dependencies.jar"\
   # And flush the buffers to avoid /usr/bin/env: bad interpreter: Text file busy
   && sync \
-  && su ${A4C_USER} -s /bin/bash -c '"${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/alien4cloud.sh"'
+  && su ${A4C_USER} -s /bin/bash -c '"${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/${A4C_SH_NAME} ${A4C_JAVA_XMX_MEMO}"'
