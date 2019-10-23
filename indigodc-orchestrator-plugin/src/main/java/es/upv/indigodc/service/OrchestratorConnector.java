@@ -44,7 +44,6 @@ public class OrchestratorConnector {
    * Obtain the list of deployments created by the the user with the client id stored in the cloud
    * configuration for the plugin.
    *
-   * @param cloudConfiguration The configuration used for the plugin instance
    * @return The response from the orchestrator
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
    *         data.
@@ -52,16 +51,15 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callGetDeployments()
+  public OrchestratorResponse callGetDeployments(String orchestrarorUrl)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
-    return buildResponse(() -> getClient().callGetDeployments());
+    return buildResponse(() -> getClient().callGetDeployments(orchestrarorUrl));
   }
 
   /**
    * Deploy an alien 4 cloud topology It is already adapted to the normative TOSCA supported by the
    * Orchestrator.
    *
-   * @param cloudConfiguration The configuration used for the plugin instance
    * @param yamlTopology The actual topology accepted by the orchestrator. It is a string formated
    *        and packed for the orchestrator e.g. new lines are replaced with their representation of
    *        '\n'.
@@ -72,20 +70,18 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploy(CloudConfiguration cloudConfiguration, 
+  public OrchestratorResponse callDeploy(String orchestratorUrl,
       String yamlTopology)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
-
-
+    log.info("Topology to be sent to the orchestrator: \n" + yamlTopology);
     return buildResponse(() ->
-            getClient().callDeploy(yamlTopology));
+            getClient().callDeploy(orchestratorUrl, yamlTopology));
   }
 
   /**
    * Get the status of a deployment with a given deployment ID.
    *
-   * @param cloudConfiguration The configuration used for the plugin instance
    * @param deploymentId The id of the deployment given by the orchestrator we need the information for
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
@@ -94,11 +90,10 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callDeploymentStatus(String deploymentId)
+  public OrchestratorResponse callDeploymentStatus(String orchestrarorUrl, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call deployment status for UUID " + deploymentId);
-
-    return buildResponse(() -> getClient().callDeploymentStatus(deploymentId));
+    return buildResponse(() -> getClient().callDeploymentStatus(orchestrarorUrl, deploymentId));
   }
 
   /**
@@ -111,18 +106,16 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *    *         and 299.
    */
-  public OrchestratorResponse callGetTemplate(String deploymentId)
+  public OrchestratorResponse callGetTemplate(String orchestrarorUrl, String deploymentId)
           throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call get template for UUID " + deploymentId);
-
-    return buildResponse(() -> getClient().callGetTemplate(deploymentId));
+    return buildResponse(() -> getClient().callGetTemplate(orchestrarorUrl, deploymentId));
   }
 
 
   /**
    * Invoke the undeploy REST API for a given deployment ID.
    *
-   * @param cloudConfiguration The configuration used for the plugin instance
    * @param deploymentId The id of the deployment we need to undeploy
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
@@ -131,13 +124,11 @@ public class OrchestratorConnector {
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
    *         and 299.
    */
-  public OrchestratorResponse callUndeploy(CloudConfiguration cloudConfiguration, 
+  public OrchestratorResponse callUndeploy(String orchestrarorUrl,
       String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
-
     log.info("call undeploy");
-
-    return buildResponse(() -> getClient().callUndeploy(deploymentId));
+    return buildResponse(() -> getClient().callUndeploy(orchestrarorUrl, deploymentId));
   }
 
   private OrchestratorResponse buildResponse(Supplier<ResponseEntity<String>> func) throws OrchestratorIamException, IOException {

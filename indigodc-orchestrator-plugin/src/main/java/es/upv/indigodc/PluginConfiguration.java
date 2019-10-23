@@ -26,15 +26,15 @@ public class PluginConfiguration {
 //        return sched;
 //    }
     
-    @Bean(name = "statusObtainerScheduler")
-   // @Scope("prototype")
-    public Executor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(2);
-        executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("IndigoDCOrchestrator-");
-        executor.initialize();
-        return executor;
-    }
+//    @Bean(name = "statusObtainerScheduler")
+//   // @Scope("prototype")
+//    public Executor taskExecutor() {
+//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//        executor.setCorePoolSize(2);
+//        executor.setMaxPoolSize(2);
+//        executor.setQueueCapacity(500);
+//        executor.setThreadNamePrefix("IndigoDCOrchestrator-");
+//        executor.initialize();
+//        return executor;
+//    }
 }

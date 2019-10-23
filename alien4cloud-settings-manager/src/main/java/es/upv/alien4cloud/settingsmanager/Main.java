@@ -2,10 +2,7 @@ package es.upv.alien4cloud.settingsmanager;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.KeyStoreException;
@@ -25,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Main {
 
+    public static final String A4C_SH_TEMPLATE_PATH = "alien4cloud.sh";
+
   public static void main(String[] args) {
 
       try {
@@ -34,19 +33,20 @@ public class Main {
         String installPathDir = installPath + "/" + installDir;
         String configPathDir = installPathDir + "/" + "config";
         String a4cUser = getEnvValue("A4C_USER");
-        
-        
-        String oidcIssuer = getEnvValue("A4C_SPRING_OIDC_ISSUER");        
-        String oidcClientId = getEnvValue("A4C_SPRING_OIDC_CLIENT_ID");      
-        String oidcClientSecret = getEnvValue("A4C_SPRING_OIDC_CLIENT_SECRET");      
+        String a4cShName = getEnvValue("A4C_SH_NAME");
+
+
+        String oidcIssuer = getEnvValue("A4C_SPRING_OIDC_ISSUER");
+        String oidcClientId = getEnvValue("A4C_SPRING_OIDC_CLIENT_ID");
+        String oidcClientSecret = getEnvValue("A4C_SPRING_OIDC_CLIENT_SECRET");
         String oidcRoles = getEnvValue("A4C_SPRING_OIDC_ROLES");
-        
-        
+
+
         String orchestratorUrl = getEnvValue("A4C_ORCHESTRATOR_URL");
         boolean orchestratorEnableKeystore = Boolean.parseBoolean(getEnvValue("A4C_ORCHESTRATOR_ENABLE_KEYSTORE"));
         String orchestratorKeyPassword = getEnvValue("A4C_ORCHESTRATOR_KEY_PASSWORD");
         String orchestratorKeystorePassword = getEnvValue("A4C_ORCHESTRATOR_KEYSTORE_PASSWORD");
-        
+
 
         Integer portHttp = Integer.parseInt(getEnvValue("A4C_PORT_HTTP"));
         Integer portHttps = Integer.parseInt(getEnvValue("A4C_PORT_HTTPS"));
@@ -59,13 +59,13 @@ public class Main {
         String caKeyFile = getEnvValue("A4C_PEM_KEY_FILE");
         boolean enableSsl = Boolean.parseBoolean(getEnvValue("A4C_ENABLE_SSL"));
         boolean resetConfig = Boolean.parseBoolean(getEnvValue("A4C_RESET_CONFIG"));
-        boolean executeMethod = true;    
-      
+        boolean executeMethod = true;
+
         File volumeDirFile = new File(volumeDir);
         if (Files.notExists(volumeDirFile.toPath(), LinkOption.NOFOLLOW_LINKS)) {
       	  log.info("Creating A4C_RUNTIME_DIR dir on " + volumeDir);
       	  volumeDirFile.mkdirs();
-        } /*else {    	  
+        } /*else {
       	  if (volumeDirFile.list().length > 0) {
       		 if (resetConfig) {
       			 volumeDirFile.delete();
@@ -74,25 +74,25 @@ public class Main {
       			 executeMethod = false;
       	  }
         }*/
-      
+
       if (executeMethod) {
 	      ConfigManager configManager;
           try {
             log.info("Try editing conf at " + configPathDir + "/alien4cloud-config.yml");
             configManager = new ConfigManager(volumeDir, installPathDir);
-            
+
               List<String> userRoles = Stream.of(oidcRoles.split("','"))
-                      .map(role -> role.endsWith("'") ? 
+                      .map(role -> role.endsWith("'") ?
                             role.substring(0, role.length() - 1) :
-                              (role.startsWith("'") ? 
+                              (role.startsWith("'") ?
                                       role.substring(1):
-                                      role))    
+                                      role))
                       .collect(Collectors.toList());
-              
+
               configManager.setOrchestratorProps(orchestratorUrl, orchestratorEnableKeystore, orchestratorKeystorePassword, orchestratorKeyPassword);
-              
+
             configManager.setSpringOIDCInfo(oidcIssuer, oidcClientId, oidcClientSecret, userRoles);
-            
+
             configManager.setAdminUserPassw(adminUser, adminPassw);
             configManager.setDirectoriesAlien(volumeDir);
             if (enableSsl) {
@@ -113,14 +113,14 @@ public class Main {
             } else {
                 configManager.disableSsl();
                 configManager.setPort(portHttp);
-                
+
             }
             configManager.writeConfig(configPathDir + "/alien4cloud-config.yml");
             log.info("Successfully wrote a4c conf at " + configPathDir + "/alien4cloud-config.yml");
           } catch (IOException e1) {
             e1.printStackTrace();
           }
-	
+
 	      ElasticSearchManager esm;
           try {
             log.info("Try editing elastic search conf at " + configPathDir + "/elasticsearch.yml");
@@ -131,8 +131,8 @@ public class Main {
           } catch (IOException e) {
             e.printStackTrace();
           }
-	
-	
+
+
 	      Log4jManager logm;
           try {
             log.info("Try editing log4j conf at " + configPathDir + "/log4j2.yml");
@@ -143,7 +143,14 @@ public class Main {
           } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
             e.printStackTrace();
           }
-	      
+          try {
+            Files.copy(Main.class.getClassLoader().getResourceAsStream(A4C_SH_TEMPLATE_PATH),
+              Paths.get(installPathDir + "/" + a4cShName), StandardCopyOption.REPLACE_EXISTING);
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+
+
 	      UserPrincipalLookupService lookupService = FileSystems.getDefault()
 	    	        .getUserPrincipalLookupService();
 		  UserPrincipal a4cUserP;
@@ -156,14 +163,14 @@ public class Main {
           } catch (IOException e) {
             e.printStackTrace();
           }
-	    		 
+
       } else
     	  log.info("App not executed because the volume dir already exists");
 
       } catch (ValueNotFoundException e) {
         e.printStackTrace();
       }
-      
+
   }
 
   private static String getEnvValue(String envName) throws ValueNotFoundException {

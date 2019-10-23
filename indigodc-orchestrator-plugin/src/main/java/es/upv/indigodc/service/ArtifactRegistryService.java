@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class ArtifactRegistryService {
 
   /** The list of supported TOSCA types. */
-  private static String[] SUPPORTED_TOSCA_TYPES = {
+  public static String[] SUPPORTED_TOSCA_TYPES = {
       // "alien.nodes.LinuxFileSystem",
       // "tosca.nodes.BlockStorage",
       // "tosca.nodes.Container.Application",

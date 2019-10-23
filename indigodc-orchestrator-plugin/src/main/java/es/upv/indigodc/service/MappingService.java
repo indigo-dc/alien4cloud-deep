@@ -3,16 +3,12 @@ package es.upv.indigodc.service;
 import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
 import com.google.common.collect.Maps;
-import es.upv.indigodc.service.model.AlienDeploymentMapping;
 import es.upv.indigodc.service.model.DeploymentInfo;
-import es.upv.indigodc.service.model.OrchestratorDeploymentMapping;
-import java.util.Collection;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;

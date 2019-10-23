@@ -198,5 +198,18 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     Assertions.assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
   }
+
+  @Test
+  public void getEditionContextManagerCsar_null_when_not_executed_by_a4c() {
+	  BuilderService bs = new BuilderService();
+	  Assertions.assertThrows(NullPointerException.class, () ->{
+              bs.getEditionContextManagerCsar();});
+  }
+
+  @Test
+  public void getEditionContextManagerTopology_null_when_not_executed_by_a4c() {
+    BuilderService bs = new BuilderService();
+    Assertions.assertThrows(NullPointerException.class, () ->{bs.getEditionContextManagerTopology();});
+  }
   
 }
