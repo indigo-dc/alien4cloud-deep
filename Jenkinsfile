@@ -28,11 +28,11 @@ pipeline {
             post {
                 always {
                     OWASPDependencyCheckPublish()
-                    HTMLReport(
-                        "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
-                        'dependency-check-report.html',
-                        'OWASP Dependency Report')
-                    deleteDir()
+                    //HTMLReport(
+                    //    "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
+                    //    'dependency-check-report.html',
+                    //    'OWASP Dependency Report')
+                    //deleteDir()
                 }
             }
         }
