@@ -13,10 +13,11 @@ ARG tosca_normative_url=https://raw.githubusercontent.com/openstack/tosca-parser
 ARG tosca_normative_version=1.0.0
 ARG tosca_normative_name=normative-types
 ARG tosca_indigo_version=3.0.0
+ARG tosca_indigo_types_branch=v4.0.0
 ARG a4c_deep_url=https://github.com/indigo-dc/alien4cloud
 ARG spring_social_oidc_url=https://github.com/indigo-dc/spring-social-oidc
-ARG spring_social_oidc_branch=master
-ARG a4c_deep_branch=deep-dev
+ARG spring_social_oidc_branch=features/issue-4
+ARG a4c_deep_branch=deep-dev-UPV
 ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
 
 ENV A4C_SH_NAME=alien4cloud.sh
@@ -101,7 +102,7 @@ RUN \
   && rm alien4cloud-dist-${a4c_ver}-dist.tar.gz \
   && rm ${a4c_install_path}/${a4c_install_dir}/init/archives/* ${a4c_install_path}/${a4c_install_dir}/init/plugins/* \
   && mv "${a4c_install_path}/${a4c_src_dir}/alien4cloud-ui/target/alien4cloud-ui-${a4c_deep_ver}-standalone.war" \
-    "${a4c_install_path}/${a4c_install_dir}/alien4cloud-ui-${a4c_ver}.war" \
+    "${a4c_install_path}/${a4c_install_dir}/alien4cloud-standalone.war" \
   && rm -rf "${a4c_install_path}/${a4c_src_dir}" \
   # Get and add the normative Tosca types
   && curl -k -o ${a4c_install_path}/TOSCA_normative_types_orig.yaml ${tosca_normative_url}  \
@@ -112,7 +113,7 @@ RUN \
   && zip -9 -r "${a4c_install_path}/${a4c_install_dir}/init/archives/TOSCA_normative_types_a4c.zip" TOSCA_normative_types_a4c.yaml \
   && rm TOSCA_normative_types_* \
   # Get and add the IndigoDC Tosca types
-  && git clone -b devel_deep2 https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
+  && git clone -b ${tosca_indigo_types_branch} https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
   && python3 ${a4c_install_path}/custom_types-2-a4c.py  ${a4c_install_path}/indigo-dc-tosca-types/  ${tosca_indigo_version}  ${tosca_normative_name}:${tosca_normative_version} \
     < ${a4c_install_path}/indigo-dc-tosca-types/custom_types.yaml \
     > ${a4c_install_path}/indigo-dc-tosca-types/tosca_types_alien.yaml \
@@ -135,6 +136,7 @@ RUN \
   && adduser -D -g "" -u ${user_uid} -G ${a4c_user} ${a4c_user} \
   && chown -R ${a4c_user}:${a4c_user} "${a4c_install_path}" \
   && chown -R ${a4c_user}:${a4c_user} "/home/${a4c_user}" \
+  && chmod +x "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/${A4C_SH_NAME}" \
   # Clean up the installed packages, files, everything
   && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g \
   && rm -rf ${a4c_install_path}/indigodc-orchestrator-plugin \
@@ -156,4 +158,5 @@ ENTRYPOINT \
   && java -jar "alien4cloud-settings-manager-${A4C_SETTINGS_MANAGER_VER}-jar-with-dependencies.jar"\
   # And flush the buffers to avoid /usr/bin/env: bad interpreter: Text file busy
   && sync \
-  && su ${A4C_USER} -s /bin/bash -c '"${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/${A4C_SH_NAME} ${A4C_JAVA_XMX_MEMO}"'
+  && chmod +x "${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/${A4C_SH_NAME}" \
+  && su ${A4C_USER} -s /bin/bash -c '"${A4C_INSTALL_PATH}/${A4C_INSTALL_DIR}/${A4C_SH_NAME}" "${A4C_JAVA_XMX_MEMO}"'

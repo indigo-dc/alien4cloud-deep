@@ -40,34 +40,34 @@ tosca = yaml.load(sys.stdin)
 #   REPO_GRYCAP: {"url": "https://github.com/grycap/",
 #                     "type": "a4c_ignore"}
 #  }
-
-if not os.path.exists(pathDummyArtifacts):
-    os.makedirs(pathDummyArtifacts)
-
-for i, (key, value) in enumerate(tosca["node_types"].items()):
-  if "artifacts" in value:
-    artifacts = value["artifacts"]
-    #artifactsArray = []
-    for artifactName, artifactVal in artifacts.items():
-      #artifactsArray.append({artifactName: artifactVal});
-      #print(artifactName, file=sys.stderr,  flush=True)
-      #artifactVal = next(iter(artifact.values()))
-      if "indigo-dc" in artifactVal["file"]:
-        Path(os.path.join(os.path.sep, pathDummyArtifacts, artifactVal["file"])).touch()
-        #artifactVal["file"] = get_artifact_name(artifactVal["file"], "https://github.com/indigo-dc/")
-        #artifactVal["repository"] = REPO_INDIGODC
-      elif "grycap" in artifactVal["file"]:
-        Path(os.path.join(os.path.sep, pathDummyArtifacts, artifactVal["file"])).touch()
-        #artifactVal["file"] = get_artifact_name(artifactVal["file"], "https://github.com/grycap/")
-        #artifactVal["repository"] = REPO_GRYCAP
-      else:
-        raise ValueError("Repository containing roles " + artifactVal["file"] + " not handled")
-    #value["artifacts"] = artifactsArray
-
-tosca["metadata"] = {"template_name": "indigo_custom_types",
-	"template_version": toscaTemplateVer,
-	"template_author": "Indigo"}
-tosca["description"] = "Contains the types definition as currently supported by the IndigoDC Orchestrator"
+# 
+# if not os.path.exists(pathDummyArtifacts):
+#     os.makedirs(pathDummyArtifacts)
+#
+# for i, (key, value) in enumerate(tosca["node_types"].items()):
+#   if "artifacts" in value:
+#     artifacts = value["artifacts"]
+#     #artifactsArray = []
+#     for artifactName, artifactVal in artifacts.items():
+#       #artifactsArray.append({artifactName: artifactVal});
+#       #print(artifactName, file=sys.stderr,  flush=True)
+#       #artifactVal = next(iter(artifact.values()))
+#       if "indigo-dc" in artifactVal["file"]:
+#         Path(os.path.join(os.path.sep, pathDummyArtifacts, artifactVal["file"])).touch()
+#         #artifactVal["file"] = get_artifact_name(artifactVal["file"], "https://github.com/indigo-dc/")
+#         #artifactVal["repository"] = REPO_INDIGODC
+#       elif "grycap" in artifactVal["file"]:
+#         Path(os.path.join(os.path.sep, pathDummyArtifacts, artifactVal["file"])).touch()
+#         #artifactVal["file"] = get_artifact_name(artifactVal["file"], "https://github.com/grycap/")
+#         #artifactVal["repository"] = REPO_GRYCAP
+#       else:
+#         raise ValueError("Repository containing roles " + artifactVal["file"] + " not handled")
+#     #value["artifacts"] = artifactsArray
+#
+# tosca["metadata"] = {"template_name": "indigo_custom_types",
+# 	"template_version": toscaTemplateVer,
+# 	"template_author": "Indigo"}
+# tosca["description"] = "Contains the types definition as currently supported by the IndigoDC Orchestrator"
 importNormativeNameVerLst = importNormativeNameVer.split(":")
 tosca["imports"] = [{importNormativeNameVerLst[0].strip(" "):
   importNormativeNameVerLst[1].strip(" ")}]
