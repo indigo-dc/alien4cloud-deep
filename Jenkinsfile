@@ -29,7 +29,7 @@ pipeline {
                 always {
                     sh "ls ${env.WORKSPACE}/indigodc-orchestrator-plugin/src"
                     sh "cat ${env.WORKSPACE}/indigodc-orchestrator-plugin/src/dependency-check-report.xml"
-                    OWASPDependencyCheckPublish("${env.WORKSPACE}/indigodc-orchestrator-plugin/src/dependency-check-report.xml")
+                    OWASPDependencyCheckPublish(report="${env.WORKSPACE}/indigodc-orchestrator-plugin/src/dependency-check-report.xml")
                     HTMLReport(
                         "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
                         'dependency-check-report.html',
