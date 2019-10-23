@@ -11,8 +11,8 @@
     <name>alien4cloud-indigodc-provider</name>
     <url>http://maven.apache.org</url>
 
-    <!--repositories> <repository> <id>fastconnect</id> <name>your custom repo</name> 
-    <url>https://fastconnect.org/maven/content/repositories/opensource/</url> 
+    <!--repositories> <repository> <id>fastconnect</id> <name>your custom repo</name>
+    <url>https://fastconnect.org/maven/content/repositories/opensource/</url>
     </repository> </repositories -->
 
     <properties>
@@ -32,7 +32,7 @@
         <!-- Libraries versions section -->
         <!-- DEEP Libraries versions section -->
         <v.alien4cloud.alien4cloud-core>2.1.0-DEEP-1.0.0-SNAPSHOT</v.alien4cloud.alien4cloud-core>
-        <v.org.springframework.social.spring-social-oidc-deep>1.4-SNAPSHOT
+        <v.org.springframework.social.spring-social-oidc-deep>1.4
         </v.org.springframework.social.spring-social-oidc-deep>
 
         <!-- External Libraries versions section -->
@@ -116,7 +116,7 @@
             <version>${v.org.eclipse.jetty}</version>
         </dependency>
 
-        <!--dependency> <groupId>alien4cloud</groupId> <artifactId>alien4cloud-core</artifactId> 
+        <!--dependency> <groupId>alien4cloud</groupId> <artifactId>alien4cloud-core</artifactId>
         <version>2.0.0</version> <scope>provided</scope> </dependency -->
 
         <dependency>
@@ -246,7 +246,7 @@
         </dependency>
 
 
-        <!--dependency> 
+        <!--dependency>
                 <groupId>com.puppycrawl.tools</groupId>
                 <artifactId>checkstyle</artifactId>
                 <version>8.11</version>
@@ -417,7 +417,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${v.org.apache.maven.plugins.maven-failsafe-plugin}</version>
                 <executions>
-                    <!-- Ensures that both integration-test and verify goals of the Failsafe 
+                    <!-- Ensures that both integration-test and verify goals of the Failsafe
                     Maven plugin are executed. -->
                     <execution>
                         <id>integration-tests</id>
@@ -428,7 +428,7 @@
                         <configuration>
                             <!-- Sets the VM argument line used when integration tests are run. -->
                             <argLine>${failsafeArgLine}</argLine>
-                            <!-- Skips integration tests if the value of skip.integration.tests 
+                            <!-- Skips integration tests if the value of skip.integration.tests
                             property is true -->
                             <skipTests>${skip.integration.tests}</skipTests>
                         </configuration>
@@ -476,7 +476,7 @@
                 </executions>
             </plugin>
 
-            <!--plugin> <groupId>external.atlassian.jgitflow</groupId> <artifactId>jgitflow-maven-plugin</artifactId> 
+            <!--plugin> <groupId>external.atlassian.jgitflow</groupId> <artifactId>jgitflow-maven-plugin</artifactId>
             <version>1.0-m5.1-alien</version> </plugin -->
 
             <!--plugin>
