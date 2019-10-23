@@ -16,7 +16,7 @@ ARG tosca_indigo_version=3.0.0
 ARG tosca_indigo_types_branch=v4.0.0
 ARG a4c_deep_url=https://github.com/indigo-dc/alien4cloud
 ARG spring_social_oidc_url=https://github.com/indigo-dc/spring-social-oidc
-ARG spring_social_oidc_branch=features/issue-4
+ARG spring_social_oidc_branch=master
 ARG a4c_deep_branch=deep-dev-UPV
 ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
 
