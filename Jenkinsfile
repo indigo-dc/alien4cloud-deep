@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.3.5']) _
+@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.3.6']) _
 
 pipeline {
     agent {
@@ -29,7 +29,7 @@ pipeline {
                 always {
                     sh "ls ${env.WORKSPACE}/indigodc-orchestrator-plugin/src"
                     sh "cat ${env.WORKSPACE}/indigodc-orchestrator-plugin/src/dependency-check-report.xml"
-                    OWASPDependencyCheckPublish(report="/jenkins/workspace/ode_alien4cloud-deep_jenkins-dev/indigodc-orchestrator-plugin/src/dependency-check-junit.xml")
+                    OWASPDependencyCheckPublish()
                     HTMLReport(
                         "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
                         'dependency-check-report.html',
