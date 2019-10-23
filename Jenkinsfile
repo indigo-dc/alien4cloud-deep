@@ -31,10 +31,10 @@ pipeline {
             steps {
                 checkout scm
 		dir("$WORKSPACE/spring-social-oidc") {
-                     checkout([$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
+                     checkout([$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/features/issues-4']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
 		}
 		dir("$WORKSPACE/alien4cloud") {
-                     checkout([$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/deep-dev']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
+                     checkout([$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/deep-dev-UPV']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
                 }
             }
         }
