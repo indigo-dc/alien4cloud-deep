@@ -14,7 +14,7 @@ if len(sys.argv) != 3:
 #
 # def dict_constructor(loader, node):
 #   return collections.OrderedDict(loader.construct_pairs(node))
-# 
+#
 # def get_artifact_name(origName, serverPath):
 #   return serverPath + "ansible-role-" + origName.split(".")[1] + "/archive/master.zip"
 #
@@ -38,5 +38,5 @@ tosca = yaml.load(sys.stdin)
 tosca["metadata"] = {"template_name": toscaTemplateName,
 	"template_version": toscaTemplateVer,
 	"template_author": "OpenStack"}
-tosca["description"] = "Contains the types definition as defined by the TOSCA committee"
+tosca["description"] = "Contains the normative types definition as defined by the OpenStack distro"
 print(yaml.dump(tosca, default_flow_style=False))
