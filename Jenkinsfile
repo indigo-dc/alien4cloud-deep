@@ -27,7 +27,7 @@ pipeline {
             }
             post {
                 always {
-                    OWASPDependencyCheckPublish()
+                    //OWASPDependencyCheckPublish()
                     //HTMLReport(
                     //    "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
                     //    'dependency-check-report.html',
