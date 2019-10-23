@@ -15,9 +15,9 @@ pipeline {
 
 
     stages {
-        
+
     	stage('Java info') {
-	
+
           steps {
 		dir("$WORKSPACE") {
 			sh 'java -version'
@@ -31,7 +31,7 @@ pipeline {
             steps {
                 checkout scm
 		dir("$WORKSPACE/spring-social-oidc") {
-                     checkout([$class: 'GitSCM', branches: [[name: 'features/issue-4']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
+                     checkout([$class: 'GitSCM', branches: [[name: 'master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
 		}
 		dir("$WORKSPACE/alien4cloud") {
                      checkout([$class: 'GitSCM', branches: [[name: 'deep-dev-UPV']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
