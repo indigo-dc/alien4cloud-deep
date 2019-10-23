@@ -15,7 +15,7 @@ pipeline {
 
 
     stages {
-
+/*
     	stage('Java info') {
 
           steps {
@@ -76,8 +76,8 @@ pipeline {
                     CheckstyleReport('**/checkstyle-result.xml')
                 }
             }
-        }
-
+        }*/
+/*
         stage('Unit testing coverage') {
             steps {
                 dir("$WORKSPACE/indigodc-orchestrator-plugin") {
@@ -108,7 +108,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
 
         stage('Dependency check') {
             agent {
