@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.3.5']) _
+@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.3.6']) _
 
 pipeline {
     agent {
@@ -13,12 +13,29 @@ pipeline {
         docker_image_name = "automated_testing_alien4cloud-deep"
     }
 
+
     stages {
+
+    	/*stage('Java info') {
+
+          steps {
+		dir("$WORKSPACE") {
+			sh 'java -version'
+			sh 'javac -version'
+			sh 'which javac'
+			sh 'cat /etc/*-release'
+		}
+	   }
+	}*/
         stage('Code fetching') {
             steps {
                 checkout scm
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
-                checkout([$class: 'GitSCM', branches: [[name: '*/deep-dev']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud-deep.git']]])
+		dir("$WORKSPACE/spring-social-oidc") {
+                     checkout([$class: 'GitSCM', branches: [[name: 'master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
+		}
+		dir("$WORKSPACE/alien4cloud") {
+                     checkout([$class: 'GitSCM', branches: [[name: 'deep-dev-UPV']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
+                }
             }
         }
 
@@ -50,8 +67,8 @@ pipeline {
             steps {
                 dir("indigodc-orchestrator-plugin") {
                     sh 'wget https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml'
-                    sh 'wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.13/checkstyle-8.13-all.jar'
-                    sh 'java -jar checkstyle-8.13-all.jar -c google_checks.xml src/ -e src/test/ -e src/main/assembly/ -f xml -o checkstyle-result.xml'
+                    sh 'wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.25/checkstyle-8.25-all.jar'
+                    sh 'java -jar checkstyle-8.25-all.jar -c google_checks.xml src/ -e src/test/ -e src/main/assembly/ -f xml -o checkstyle-result.xml'
                 }
             }
             post {
@@ -103,7 +120,7 @@ pipeline {
             }
             post {
                 always {
-                    OWASPDependencyCheckPublish()
+                    //OWASPDependencyCheckPublish()
                     HTMLReport(
                         "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
                         'dependency-check-report.html',
