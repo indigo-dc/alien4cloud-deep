@@ -28,6 +28,88 @@ pipeline {
 	   }
 	}*/
 
+	            stage('Code fetching') {
+            steps {
+                checkout scm
+		dir("$WORKSPACE/spring-social-oidc") {
+                     checkout([$class: 'GitSCM', branches: [[name: 'master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
+		}
+		dir("$WORKSPACE/alien4cloud") {
+                     checkout([$class: 'GitSCM', branches: [[name: 'deep-dev-UPV']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
+                }
+            }
+        }
+
+	stage('Build Spring OIDC') {
+          steps {
+            dir("$WORKSPACE/spring-social-oidc") {
+                MavenRun('-U clean install')
+            }
+          }
+        }
+
+        stage('Build local A4C (UPV flavour)') {
+          steps {
+            dir("$WORKSPACE/alien4cloud") {
+                MavenRun('-U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
+            }
+          }
+        }
+
+	stage('Build plugin') {
+          steps {
+            dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+                MavenRun('-U clean package')
+            }
+          }
+        }
+
+        stage('Style analysis') {
+            steps {
+                dir("indigodc-orchestrator-plugin") {
+                    sh 'wget https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml'
+                    sh 'wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.25/checkstyle-8.25-all.jar'
+                    sh 'java -jar checkstyle-8.25-all.jar -c google_checks.xml src/ -e src/test/ -e src/main/assembly/ -f xml -o checkstyle-result.xml'
+                }
+            }
+            post {
+                always {
+                    CheckstyleReport('**/checkstyle-result.xml')
+                }
+            }
+        }
+
+        stage('Unit testing coverage') {
+            steps {
+                dir("$WORKSPACE/indigodc-orchestrator-plugin") {
+                    MavenRun('clean test')
+                }
+            }
+            post {
+                always {
+                    jacoco()
+                }
+            }
+        }
+
+        stage('Metrics gathering') {
+            agent {
+                label 'sloc'
+            }
+            steps {
+                checkout scm
+                dir("indigodc-orchestrator-plugin") {
+                    SLOCRun()
+                }
+            }
+            post {
+                success {
+                    dir("indigodc-orchestrator-plugin") {
+                        SLOCPublish()
+                    }
+                }
+            }
+        }
 
         stage('Dependency check') {
             agent {
