@@ -16,17 +16,6 @@ pipeline {
 
     stages {
 
-    	/*stage('Java info') {
-
-          steps {
-		dir("$WORKSPACE") {
-			sh 'java -version'
-			sh 'javac -version'
-			sh 'which javac'
-			sh 'cat /etc/*-release'
-		}
-	   }
-	}*/
         stage('Code fetching') {
             steps {
                 checkout scm
@@ -120,7 +109,7 @@ pipeline {
             }
             post {
                 always {
-                    //OWASPDependencyCheckPublish()
+                    OWASPDependencyCheckPublish(report='**/dependency-check-report.xml')
                     HTMLReport(
                         "${env.WORKSPACE}/indigodc-orchestrator-plugin/src",
                         'dependency-check-report.html',
