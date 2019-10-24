@@ -12,10 +12,7 @@ ARG a4c_settings_manager_ver=2.1.0
 ARG tosca_normative_url=https://raw.githubusercontent.com/openstack/tosca-parser/master/toscaparser/elements/TOSCA_definition_1_0.yaml
 ARG tosca_normative_version=1.0.0
 ARG tosca_normative_name=normative-types
-ARG tosca_indigo_version=3.0.0
 ARG tosca_indigo_types_branch=v4.0.0
-ARG a4c_deep_url=https://github.com/indigo-dc/alien4cloud
-ARG spring_social_oidc_url=https://github.com/indigo-dc/spring-social-oidc
 ARG spring_social_oidc_branch=master
 ARG a4c_deep_branch=deep-dev-UPV
 ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
@@ -87,11 +84,11 @@ RUN \
   && echo '{ "allow_root": true }' > /root/.bowerrc\
   && cat /root/.bowerrc \
   # Compile and install locally the Spring Social OIDC plugin
-  && git clone --single-branch  --branch ${spring_social_oidc_branch} ${spring_social_oidc_url} "${a4c_install_path}/spring_social_oidc" \
+  && git clone --single-branch  --branch ${spring_social_oidc_branch} https://github.com/indigo-dc/spring-social-oidc "${a4c_install_path}/spring_social_oidc" \
   && cd "${a4c_install_path}/spring_social_oidc" \
   && mvn -U clean install \
   # Compile the A4C source code
-  && git clone --single-branch  --branch ${a4c_deep_branch} ${a4c_deep_url} "${a4c_install_path}/${a4c_src_dir}" \
+  && git clone --single-branch  --branch ${a4c_deep_branch} https://github.com/indigo-dc/alien4cloud "${a4c_install_path}/${a4c_src_dir}" \
   && cd "${a4c_install_path}/${a4c_src_dir}" \
   && mvn -U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true \
   # Get the precompiled version to obtain the init and config files
@@ -114,7 +111,7 @@ RUN \
   && rm TOSCA_normative_types_* \
   # Get and add the IndigoDC Tosca types
   && git clone -b ${tosca_indigo_types_branch} https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
-  && python3 ${a4c_install_path}/custom_types-2-a4c.py  ${a4c_install_path}/indigo-dc-tosca-types/  ${tosca_indigo_version}  ${tosca_normative_name}:${tosca_normative_version} \
+  && python3 ${a4c_install_path}/custom_types-2-a4c.py ${tosca_normative_name}:${tosca_normative_version} \
     < ${a4c_install_path}/indigo-dc-tosca-types/custom_types.yaml \
     > ${a4c_install_path}/indigo-dc-tosca-types/tosca_types_alien.yaml \
   && rm -rf ${a4c_install_path}/indigo-dc-tosca-types/custom_types.yaml \
