@@ -2,12 +2,13 @@ version: '3'
 services:
   a4c:
     container_name: a4c
-    image: indigodatacloud/alien4cloud-deep:1.1-r0
+    image: indigodatacloud/alien4cloud-deep:2.0-r0
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - '443:8443'
+            - '443:8443'
     volumes:
-      - ${A4C_VOLUME_DIR}:${A4C_VOLUME_DIR}
+      - ${A4C_RUNTIME_DIR}:${A4C_RUNTIME_DIR}
       - /etc/ssl:/certs:ro
+
