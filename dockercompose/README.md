@@ -4,12 +4,18 @@
 
 In case of existing X.509 certificate for the service:
 
-* Certificate file: a4c.ncg.ingrid.pt.crt
-* Key file: a4c.ncg.ingrid.pt.key
-* Intermediate CA file: DigiCertCA.crt
+* Certificate file plus any intermediate CA chain: <a4c_host_chain>.crt
+* Key file: <a4c_host>.key
 
-The `docker-compose.yml` use the `.env` file containing the necessary variables to instantiate the container a4c. Ensure to set the variable
+The `docker-compose.yml` use the `.env` file containing the necessary variables to instantiate the container a4c.
+Ensure to set the variable
 `A4C_ADMIN_PASSWORD` in the `.env`, you can add more envirnment variables according to the documentation.
+
+The following variables should also be set, they are taken from the registration of the alien4cloud
+client in the IAM OpenIDConnect management service:
+
+* A4C_SPRING_OIDC_CLIENT_ID
+* A4C_SPRING_OIDC_CLIENT_SECRET
 
 ## Instantiate the container
 
