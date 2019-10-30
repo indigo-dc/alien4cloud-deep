@@ -36,6 +36,8 @@ public class OrchestratorConnector {
 
   private DeepOrchestrator getClient() {
     Connection<DeepOrchestrator> connection = repository.findPrimaryConnection(DeepOrchestrator.class);
+    if (connection.hasExpired())
+      connection.refresh();
     DeepOrchestrator deepOrchestrator = connection != null ? connection.getApi() : null;
     return deepOrchestrator;
   }
