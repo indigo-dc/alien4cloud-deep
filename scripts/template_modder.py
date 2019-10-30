@@ -95,7 +95,6 @@ def processIndigoCustomTypes(count, rootPath, zipOutputFolder):
             customTypesYamlLst.append(file)
         else:
             resourcesLst.append(file)
-    print(customTypesYamlLst)
     for file in customTypesYamlLst:
         customsP = os.fsdecode(file)
         with open(os.path.join(rootPath, customsP), 'r') as streamC:
@@ -120,7 +119,6 @@ yaml.add_representer(collections.OrderedDict, dict_representer)
 yaml.add_constructor(_mapping_tag, dict_constructor)
 
 def processTemplates(rootTemplateDir, zipOutputFolder, importTypes, count):
-        print(importTypes)
         list = os.listdir(rootTemplateDir)
         for file in list:
             filename = os.fsdecode(file)
