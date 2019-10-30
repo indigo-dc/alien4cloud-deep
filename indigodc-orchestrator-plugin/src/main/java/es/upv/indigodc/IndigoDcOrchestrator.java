@@ -277,6 +277,12 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
             Util.InstanceStatusInfo instanceStatusInfo = Util
                     .indigoDcStatusToInstanceStatus(response.getStatusTopologyDeployment().toUpperCase());
+            Map<String, String> outputsOrchestrator = response.getOutputs();
+            if (outputsOrchestrator != null) {
+              outputsOrchestrator.entrySet().stream()
+                  .forEach(outputE -> outputsVars.replace(outputE.getKey(), outputE.getValue()));
+              di.setOutputs(outputsVars);
+            }
             final InstanceInformation instanceInformation = new InstanceInformation(
                     instanceStatusInfo.getState(),
                     instanceStatusInfo.getInstanceStatus(), runtimeProps, runtimeProps,

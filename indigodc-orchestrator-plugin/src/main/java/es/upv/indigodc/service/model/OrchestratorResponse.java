@@ -111,7 +111,7 @@ public class OrchestratorResponse {
       while (outputFields.hasNext()) {
         Entry<String, JsonNode> field = outputFields.next();
         result.put(field.getKey(),
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(field.getValue()));
+            objectMapper.writeValueAsString(field.getValue()));
       }
       // return objectMapper.convertValue(outputs.get(0), new TypeReference<Map<String, String>>()
       // {});
