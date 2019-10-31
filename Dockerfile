@@ -106,11 +106,12 @@ RUN \
   && git clone --single-branch  --branch ${a4c_deep_branch} https://github.com/indigo-dc/alien4cloud "${a4c_install_path}/${a4c_src_dir}" \
   && cd "${a4c_install_path}/${a4c_src_dir}" \
   && mvn -U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true \
+  && cp ${a4c_install_path}/${a4c_src_dir}/alien4cloud-ui/target/alien4cloud-*standalone.war ${a4c_install_path}/${a4c_install_dir}/alien4cloud-standalone.war \
   && rm -rf "${a4c_install_path}/${a4c_src_dir}" \
   # Compile and install the plugin
   && cd "${a4c_install_path}/indigodc-orchestrator-plugin" \
   && mvn -U -e clean package \
-  && cp ${a4c_install_path}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider.zip \
+  && cp ${a4c_install_path}/indigodc-orchestrator-plugin/target/alien4cloud-indigodc-provider*.zip \
     "${a4c_install_path}/${a4c_install_dir}/init/plugins/" \
   # Compile and install the a4c settings manager
   && cd "${a4c_install_path}/alien4cloud-settings-manager/" \
@@ -122,7 +123,6 @@ RUN \
   && adduser -D -g "" -u ${user_uid} -G ${a4c_user} ${a4c_user} \
   && chown -R ${a4c_user}:${a4c_user} "${a4c_install_path}" \
   && chown -R ${a4c_user}:${a4c_user} "/home/${a4c_user}" \
-  && chmod +x "${a4c_install_path}/${a4c_install_dir}/${a4c_sh_name}" \
   # Clean up the installed packages, files, everything
   && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g \
   && rm -rf ${a4c_install_path}/indigodc-orchestrator-plugin \
