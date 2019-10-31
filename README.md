@@ -10,7 +10,7 @@ Each time the Docker image is created, the latest version of the normative TOSCA
 
 ## Documentation version
 
-2.0.1
+2.0.2
 
 ## Administration Guide
 
@@ -41,8 +41,16 @@ We defined a number of constants to allow easy parametrisation of the container.
 * **a4c_install_path** - the path to the instalation root directory of A4C
 * **a4c_src_dir** - the relative path used to store the source of A4C
 * **a4c_install_dir** - the relative path denoting the root where the A4C war is stored
-* **a4c_upv_ver** - the version of A4C modified and released by us; It uses the **a4c_ver** as prefix to which an suffix is added, e.g. *-UPV-1.0.0*
+* **a4c_deep_ver** - the version of A4C modified and released by the DEEP team; It uses the **a4c_ver** as prefix to which an suffix is added, e.g. *-DEEP-1.0.0*
 * **a4c_user** - the user name of the non-priviledged user that executes the A4C server
+* **a4c_settings_manager_ver** - The version of the settings manager that imports various settings from the environment into the A4C conf
+* **tosca_normative_url** - The URL to the TOSCA normative types ram YAML file as implemented by OpenStack; It must be respect the version set by **tosca_normative_version**
+* **tosca_normative_version** - The version of TOSCA currently supported by this bundle
+* **tosca_normative_name** - The name set in the TOSCA normative types file obtained from **tosca_normative_url**; This name is set in the *metadata*->*template_name* tag
+* **tosca_indigo_types_branch** - The branch of the Indigo custom types
+* **spring_social_oidc_branch** - The branch of the Spring OIDC Social plugin  used in this build
+* **a4c_deep_branch** -  The branch of the DEEP A4C fork used in this build
+* **a4c_binary_dist_url** - The binary distribution of the original A4C
 
 ### Docker Variables
 
@@ -420,7 +428,3 @@ Spring social OIDC A4C plugin repository for OAuth2 authentication: https://gith
 
 #### [Res8]
 Java Xmx and Xms nomenclature: https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html#BABDJJFI
-
-
-
-

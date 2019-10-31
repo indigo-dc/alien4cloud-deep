@@ -148,7 +148,7 @@ public class BuilderService {
       String importIndigoCustomTypes) throws JsonProcessingException, IOException {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER)
         .disable(Feature.SPLIT_LINES).disable(Feature.CANONICAL_OUTPUT));
-
+    a4cTopologyYaml = a4cTopologyYaml.replaceAll("\"", "\'");
     String a4cTopologyYamlIgnoreMethods = encodeToscaMethods(a4cTopologyYaml);
     ObjectNode rootNode = mapper.createObjectNode();
     ObjectNode root = (ObjectNode) mapper.readTree(a4cTopologyYamlIgnoreMethods);

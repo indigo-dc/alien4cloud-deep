@@ -4,33 +4,29 @@ import collections
 import os
 from pathlib import Path
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 2:
     raise Exception("Required parameters:\n \
-    (1) the path to the folder the the dummy artifact files are created\n \
-    followed by \n \
-    (2) this TOSCA template version\n \
-    followed by\n \
-    (3) the TOSCA normative types name and version imported by these custom types, separated by colon")
+    the TOSCA normative types name and version imported by these custom types, separated by colon")
 
-_mapping_tag = yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG
-
-def dict_representer(dumper, data):
-  return dumper.represent_dict(data.items())
-
-def dict_constructor(loader, node):
-  return collections.OrderedDict(loader.construct_pairs(node))
-
-def get_artifact_name(origName, serverPath):
-  return serverPath + "ansible-role-" + origName.split(".")[1] + "/archive/master.zip"
-
-yaml.add_representer(collections.OrderedDict, dict_representer)
-yaml.add_constructor(_mapping_tag, dict_constructor)
-
-REPO_INDIGODC = "GitHub-IndigoDC"
-REPO_GRYCAP = "GitHub-GRyCAP"
-pathDummyArtifacts = sys.argv[1]#os.path.join(os.path.sep, sys.argv[1], "dummy_artifacts")
-toscaTemplateVer = sys.argv[2]#os.path.join(os.path.sep, sys.argv[1], "dummy_artifacts")
-importNormativeNameVer = sys.argv[3]
+# _mapping_tag = yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG
+#
+# def dict_representer(dumper, data):
+#   return dumper.represent_dict(data.items())
+#
+# def dict_constructor(loader, node):
+#   return collections.OrderedDict(loader.construct_pairs(node))
+#
+# def get_artifact_name(origName, serverPath):
+#   return serverPath + "ansible-role-" + origName.split(".")[1] + "/archive/master.zip"
+#
+# yaml.add_representer(collections.OrderedDict, dict_representer)
+# yaml.add_constructor(_mapping_tag, dict_constructor)
+#
+# REPO_INDIGODC = "GitHub-IndigoDC"
+# REPO_GRYCAP = "GitHub-GRyCAP"
+#pathDummyArtifacts = sys.argv[1]#os.path.join(os.path.sep, sys.argv[1], "dummy_artifacts")
+#toscaTemplateVer = sys.argv[2]#os.path.join(os.path.sep, sys.argv[1], "dummy_artifacts")
+importNormativeNameVer = sys.argv[1]
 
 tosca = yaml.load(sys.stdin)
 #tosca["tosca_definitions_version"] = "alien_dsl_2_0_0"
@@ -40,7 +36,7 @@ tosca = yaml.load(sys.stdin)
 #   REPO_GRYCAP: {"url": "https://github.com/grycap/",
 #                     "type": "a4c_ignore"}
 #  }
-# 
+#
 # if not os.path.exists(pathDummyArtifacts):
 #     os.makedirs(pathDummyArtifacts)
 #
