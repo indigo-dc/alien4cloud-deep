@@ -5,18 +5,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import es.upv.indigodc.service.model.A4cOrchestratorInfo;
@@ -24,6 +28,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alien4cloud.tosca.catalog.index.CsarService;
 import org.alien4cloud.tosca.editor.EditionContextManager;
 import org.alien4cloud.tosca.exporter.ArchiveExportService;
 import org.alien4cloud.tosca.model.Csar;
@@ -157,7 +162,24 @@ public class BuilderService {
     rootNode.setAll(root);
     root = rootNode;
     ((ObjectNode) root.get("topology_template")).remove("workflows");
+    ObjectNode metadata = null;
+    if (root.has("metadata")) {
+      metadata = (ObjectNode) root.get("metadata");
+    } else {
+      metadata = mapper.createObjectNode();
+    }
     root.remove("metadata");
+    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
+    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
+    metadata.put("a4c_deployment_orchestrator_id", deploymentContext.getDeployment().getOrchestratorId());
+    metadata.putArray("a4c_deployment_location_ids").addAll(
+            Stream.of(deploymentContext.getDeployment().getLocationIds())
+                    .map(el -> JsonNodeFactory.instance.textNode(el))
+                    .collect(Collectors.toList()));
+    metadata.put("a4c_deployment_version_id", deploymentContext.getDeployment().getVersionId());
+    root.put("metadata", metadata);
+
+
 //    ObjectNode metadata = (ObjectNode) root.get("metadata");
 //    if (metadata == null) {
 //      metadata = mapper.createObjectNode();
@@ -165,20 +187,20 @@ public class BuilderService {
 //    }
 //    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
 //    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
-    TextNode description = (TextNode) root.get("description");
-    A4cOrchestratorInfo a4cOrchestratorInfo = new A4cOrchestratorInfo();
-    a4cOrchestratorInfo.setDeploymentId(deploymentContext.getDeploymentId());
-    a4cOrchestratorInfo.setDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
-    a4cOrchestratorInfo.setLocationIds(deploymentContext.getDeployment().getLocationIds());
-    a4cOrchestratorInfo.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
-    a4cOrchestratorInfo.setVersionId(deploymentContext.getDeployment().getVersionId());
+    //TextNode description = (TextNode) root.get("description");
+//    A4cOrchestratorInfo a4cOrchestratorInfo = new A4cOrchestratorInfo();
+//    a4cOrchestratorInfo.setDeploymentId(deploymentContext.getDeploymentId());
+//    a4cOrchestratorInfo.setDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
+//    a4cOrchestratorInfo.setLocationIds(deploymentContext.getDeployment().getLocationIds());
+//    a4cOrchestratorInfo.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+//    a4cOrchestratorInfo.setVersionId(deploymentContext.getDeployment().getVersionId());
 
-    ObjectMapper mapperJson = new ObjectMapper();
-    if (description == null) {
-      root.put("description", mapperJson.writeValueAsString(a4cOrchestratorInfo));
-    } else {
-      root.put("description", description.asText() +  mapperJson.writeValueAsString(a4cOrchestratorInfo));
-    }
+//    ObjectMapper mapperJson = new ObjectMapper();
+//    if (description == null) {
+//      root.put("description", mapperJson.writeValueAsString(a4cOrchestratorInfo));
+//    } else {
+//      root.put("description", description.asText() +  mapperJson.writeValueAsString(a4cOrchestratorInfo));
+//    }
     root.remove("imports");
     ObjectNode imports = mapper.createObjectNode();
     imports.put("indigo_custom_types", importIndigoCustomTypes);
@@ -277,17 +299,20 @@ public class BuilderService {
    *        including the TOSCA topology represented as A4C Java classes
    * @param importIndigoCustomTypes The path to the repository (file) containing the TOSCA types
    *        used by the Orchestrator
+   * @param callbackUrl The url used by the orchestrator for the callback when a deployment is made
    * @return The textual representation of the topology that will be sent to the Orchestrator
    * @throws IOException when parsing the YAML topology
    */
   public String buildApp(PaaSTopologyDeploymentContext deploymentContext,
-      String importIndigoCustomTypes) throws IOException {
+      String importIndigoCustomTypes, String callbackUrl) throws IOException {
     Deployment deployment = new Deployment();
     deployment.setParameters(getParameters(deploymentContext));
-    deployment.setCallback("http://localhost:8080/callback");
+    deployment.setCallback(callbackUrl);
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
         exportService.getYaml(getEditionContextManagerCsar(), getEditionContextManagerTopology());
+//    Csar csar = csarService.get(deploymentContext.getDeploymentTopology().getArchiveName(),
+//            deploymentContext.getDeploymentTopology().getArchiveVersion());
     String yamlIndigoD = getIndigoDcTopologyYaml(deploymentContext, a4cTopologyYaml, importIndigoCustomTypes);
     deployment.setTemplate(yamlIndigoD);
     return deployment.toOrchestratorString();
