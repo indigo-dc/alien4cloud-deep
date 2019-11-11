@@ -18,7 +18,9 @@ import lombok.Setter;
 @FormProperties({
 //"clientId", "clientSecret", "tokenEndpoint", "tokenEndpointCert", "clientScopes", "iamHost", "iamHostCert",
     "orchestratorEndpoint", "orchestratorEndpointCert", 
-    "orchestratorPollInterval", "importIndigoCustomTypes"})
+    "orchestratorPollInterval", "importIndigoCustomTypes",
+        "callbackUrl"
+})
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloudConfiguration {
@@ -45,4 +47,6 @@ public class CloudConfiguration {
   private int orchestratorPollInterval;
   @NotNull
   private String importIndigoCustomTypes;
+  @NotNull
+  private String callbackUrl;
 }

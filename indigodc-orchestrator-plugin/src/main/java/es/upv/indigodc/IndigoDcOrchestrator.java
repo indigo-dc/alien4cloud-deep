@@ -45,6 +45,7 @@ import es.upv.indigodc.service.model.response.DeploymentOrchestrator;
 import es.upv.indigodc.service.model.response.GetDeploymentsResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.alien4cloud.tosca.catalog.index.CsarService;
 import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -149,7 +150,8 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 
     try {
       final String yamlPaasTopology = builderService.buildApp(deploymentContext,
-          configuration.getImportIndigoCustomTypes());
+          configuration.getImportIndigoCustomTypes(),
+              configuration.getCallbackUrl());
       log.info("Deploying on: " + configuration.getOrchestratorEndpoint());
       log.info("Topology: " + yamlPaasTopology);
       OrchestratorResponse response = orchestratorConnector.callDeploy(configuration.getOrchestratorEndpoint(),
