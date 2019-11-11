@@ -12,10 +12,13 @@ import org.apache.commons.collections.BufferUtils;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class EventService {
 
   public static final int EVENT_QUEUE_MAX_SIZE = 1000;
@@ -29,41 +32,41 @@ public class EventService {
   @Qualifier("mapping-service")
   private MappingService mappingService;
 
-  private final Buffer eventQueue;
+  protected final Buffer eventQueue = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(EVENT_QUEUE_MAX_SIZE));
   //private ScheduledExecutorService executor;
 
-  public EventService() {
-    eventQueue = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(EVENT_QUEUE_MAX_SIZE));
-  }
+//  public EventService() {
+//    eventQueue = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(EVENT_QUEUE_MAX_SIZE));
+//  }
 
-  /**
-   * Subscribe to the event service that loads the events from the orchestrator by polling it every
-   * X seconds.
-   *
-   * @param cc the cloud configuration used for the orchestrator instance
-   * @param orchestratorId The ID of the orchestrator that will be traced
-   */
-  public void subscribe(CloudConfiguration cc, String orchestratorId) {
-    // if (executor != null)
-    // executor.shutdown();
-    // executor = Executors.newScheduledThreadPool(1);
-    //
-    // executor.scheduleWithFixedDelay(
-    // new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue,
-    // userService.getCurrentUser()),
-    // 0,
-    // cc.getOrchestratorPollInterval(),
-    // TimeUnit.SECONDS);
-  }
-
-  /**
-   * Stop adding events froman orchestrator instance
-   * @param orchestratorId The ID of the orchestrator that won't be traced anymore
-   */
-  public void unsubscribe(String orchestratorId) {
-    //executor.shutdown();
-    //eventQueue.clear();
-  }
+//  /**
+//   * Subscribe to the event service that loads the events from the orchestrator by polling it every
+//   * X seconds.
+//   *
+//   * @param cc the cloud configuration used for the orchestrator instance
+//   * @param orchestratorId The ID of the orchestrator that will be traced
+//   */
+//  public void subscribe(CloudConfiguration cc, String orchestratorId) {
+//    // if (executor != null)
+//    // executor.shutdown();
+//    // executor = Executors.newScheduledThreadPool(1);
+//    //
+//    // executor.scheduleWithFixedDelay(
+//    // new OrchestratorPollRunnable(orchestratorConnector, cc, eventQueue,
+//    // userService.getCurrentUser()),
+//    // 0,
+//    // cc.getOrchestratorPollInterval(),
+//    // TimeUnit.SECONDS);
+//  }
+//
+//  /**
+//   * Stop adding events froman orchestrator instance
+//   * @param orchestratorId The ID of the orchestrator that won't be traced anymore
+//   */
+//  public void unsubscribe(String orchestratorId) {
+//    //executor.shutdown();
+//    //eventQueue.clear();
+//  }
 
   /**
    * Add a monitor event to the list of existing events

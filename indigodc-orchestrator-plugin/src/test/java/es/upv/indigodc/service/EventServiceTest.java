@@ -21,7 +21,7 @@ public class EventServiceTest {
     @Test
     public void addEvent_bellow_limit_check_order() throws ParseException {
         EventService es = new EventService();
-        es.subscribe(Mockito.mock(CloudConfiguration.class), ORCHESTRATOR_ID);
+        //es.subscribe(Mockito.mock(CloudConfiguration.class), ORCHESTRATOR_ID);
         DateFormat inputFormat = new SimpleDateFormat("yyyy.MM.dd HH");
         List<AbstractMonitorEvent> ameArr = createTestEvents(EventService.EVENT_QUEUE_MAX_SIZE - 2,
         		inputFormat.parse("1969.07.04 12"),
@@ -41,7 +41,7 @@ public class EventServiceTest {
                     ameArr.get(cnt).getOrchestratorId());
         }
 
-        es.unsubscribe(ORCHESTRATOR_ID);
+        //es.unsubscribe(ORCHESTRATOR_ID);
 
     }
 
