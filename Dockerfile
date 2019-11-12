@@ -83,7 +83,7 @@ RUN \
   # Get and add the normative Tosca types
   && curl -k -o ${a4c_install_path}/TOSCA_normative_types_orig.yaml ${tosca_normative_url}  \
   # Get the IndigoDC Tosca types
-  && git clone -b ${tosca_indigo_types_branch} https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
+  && git clone --single-branch  --branch ${tosca_indigo_types_branch} https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
   # Get the templates from DEEP-OC
   && git clone --single-branch  --branch ${templates_deep_oc_branch} https://github.com/indigo-dc/tosca-templates "${a4c_install_path}/tosca-templates" \
   # Create the CSARs that a4c loads during startup

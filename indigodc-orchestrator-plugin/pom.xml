@@ -31,9 +31,8 @@
 
         <!-- Libraries versions section -->
         <!-- DEEP Libraries versions section -->
-        <v.alien4cloud.alien4cloud-core>2.1.0-DEEP-1.0.1</v.alien4cloud.alien4cloud-core>
-        <v.org.springframework.social.spring-social-oidc-deep>1.4
-        </v.org.springframework.social.spring-social-oidc-deep>
+        <v.alien4cloud.alien4cloud-core>2.1.0-DEEP-1.1.0</v.alien4cloud.alien4cloud-core>
+        <v.org.springframework.social.spring-social-oidc-deep>1.4</v.org.springframework.social.spring-social-oidc-deep>
 
         <!-- External Libraries versions section -->
         <v.org.eclipse.jetty>9.4.18.v20190429</v.org.eclipse.jetty>
