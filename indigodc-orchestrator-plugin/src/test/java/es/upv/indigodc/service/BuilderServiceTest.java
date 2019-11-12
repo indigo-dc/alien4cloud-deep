@@ -2,6 +2,7 @@ package es.upv.indigodc.service;
 
 
 import alien4cloud.model.deployment.Deployment;
+import alien4cloud.model.deployment.DeploymentTopology;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
 import es.upv.indigodc.IndigoDcOrchestrator;
 import es.upv.indigodc.TestUtil;
@@ -27,10 +28,14 @@ import org.mockito.Mockito;
 @Slf4j
 public class BuilderServiceTest {
 
+
+  public static final String A4C_DEPLOYMENT_TOPOLOGY_ID = "a4c-deployment-topology-id";
   public static final String A4C_PAAS_ID = "a4c-paas-id";
   public static final String A4C_ID = "a4c-id";
   public static final String A4C_ORCHESTRATOR_ID = "a4c-orchestrator-id";
+  public static final String A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID = "a4c-deployment-orchestrator-deployment-id";
   public static final String A4C_VERSION_ID = "a4c-version-id";
+  public static final String[] A4C_LOCATIONS_IDS = {"a4c-location-id1", "a4c-location-id2"};
 
 	@Disabled
   @Test
@@ -48,12 +53,16 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
       PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+      DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+      Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
       Deployment depl = Mockito.mock(Deployment.class);
+      Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
       Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
       Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
       Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-      Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+      Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
       Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+      Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
       Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
@@ -71,12 +80,16 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
     PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
     Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
     Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
     Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
     Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
     Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
     Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
@@ -95,12 +108,16 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
     PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
     Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
     Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
     Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
     Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
     Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
     Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
@@ -117,12 +134,16 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
     PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
     Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
     Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
     Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
     Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
     Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
     Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
@@ -145,12 +166,16 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
     PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
     Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
     Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
     Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
     Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
     Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
     Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,
@@ -174,12 +199,16 @@ public class BuilderServiceTest {
         new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
     CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
     PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
     Deployment depl = Mockito.mock(Deployment.class);
+    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
     Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
     Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
     Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-    Mockito.when(depl.getLocationIds()).thenReturn(new String[0]);
+    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
     Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
     Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
     Assertions.assertEquals(
         yamlIndigoDC,

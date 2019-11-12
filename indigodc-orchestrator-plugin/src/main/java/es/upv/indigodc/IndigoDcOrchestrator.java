@@ -9,13 +9,7 @@ import alien4cloud.paas.IPaaSCallback;
 import alien4cloud.paas.exception.MaintenanceModeException;
 import alien4cloud.paas.exception.OperationExecutionException;
 import alien4cloud.paas.exception.PluginConfigurationException;
-import alien4cloud.paas.model.AbstractMonitorEvent;
-import alien4cloud.paas.model.DeploymentStatus;
-import alien4cloud.paas.model.InstanceInformation;
-import alien4cloud.paas.model.InstanceStatus;
-import alien4cloud.paas.model.NodeOperationExecRequest;
-import alien4cloud.paas.model.PaaSDeploymentContext;
-import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
+import alien4cloud.paas.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -30,6 +24,9 @@ import es.upv.indigodc.service.model.*;
 
 import java.io.IOException;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.TemporalField;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -127,7 +124,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 //  @PreDestroy
   public void destroy() {
     log.info("IndigoDcOrchestrator destroy");
-    eventService.unsubscribe(orchestratorId);
+    //eventService.unsubscribe(orchestratorId);
    // statusManager.destroy();
   }
 
@@ -139,7 +136,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     }
     this.orchestratorId = orchestratorId;
     cloudConfigurationManager.addCloudConfiguration(orchestratorId, configuration);
-    eventService.subscribe(configuration, orchestratorId);
+    //eventService.subscribe(configuration, orchestratorId);
   }
 
   @Override
@@ -147,6 +144,11 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     CloudConfiguration configuration = cloudConfigurationManager
         .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
     String a4cUuidDeployment = deploymentContext.getDeploymentPaaSId();//.getDeployment().getId();
+    PaaSDeploymentStatusMonitorEvent event = new PaaSDeploymentStatusMonitorEvent();
+    Date date = new Date();
+    event.setDate(date.getTime());
+    event.setDeploymentId(deploymentContext.getDeployment().getId());
+    event.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
 
     try {
       final String yamlPaasTopology = builderService.buildApp(deploymentContext,
@@ -168,7 +170,9 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       // eventService.subscribe(configuration);
       //statusManager.addStatus(deploymentContext, orchestratorUuidDeployment, DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
       callback.onSuccess(null);
+      event.setDeploymentStatus(DeploymentStatus.DEPLOYMENT_IN_PROGRESS);
     } catch (NoSuchFieldException | IOException | OrchestratorIamException er) {
+      event.setDeploymentStatus(DeploymentStatus.FAILURE);
       callback.onFailure(er);
       log.error("Error deployment", er);
 //      mappingService.registerDeployment(new DeploymentInfo(a4cUuidDeployment,
@@ -177,6 +181,8 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 //          deploymentContext.getDeployment().getOrchestratorId(),
 //          DeploymentStatus.FAILURE, null, null));
       //mappingService.registerDeploymentInfoAlienToIndigoDc(a4cUuidDeployment, DeploymentStatus.FAILURE);
+    } finally {
+      eventService.addEvent(event);
     }
   }
 
@@ -190,6 +196,12 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     final CloudConfiguration configuration = cloudConfigurationManager
         .getCloudConfiguration(deploymentContext.getDeployment().getOrchestratorId());
     String a4cUuidDeployment = deploymentContext.getDeploymentPaaSId();//.getDeployment().getId();
+    PaaSDeploymentStatusMonitorEvent event = new PaaSDeploymentStatusMonitorEvent();
+    Date date = new Date();
+    event.setDate(date.getTime());
+    event.setDeploymentId(deploymentContext.getDeployment().getId());
+    event.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+
     try {
       DeploymentInfo deploymentInfo = mappingService.getByA4CDeploymentPaasId(a4cUuidDeployment);
 //          statusManager
@@ -215,12 +227,14 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
             callback.onSuccess(null);
           //));
       }
-        
+       event.setDeploymentStatus(DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
     } catch (IOException er) {
+      event.setDeploymentStatus(DeploymentStatus.FAILURE);
       log.error("Error undeployment", er);
       callback.onFailure(er);
       //mappingService.registerDeploymentInfoAlienToIndigoDc(a4cUuidDeployment, DeploymentStatus.FAILURE);
     } catch (NoSuchFieldException er) {
+      event.setDeploymentStatus(DeploymentStatus.FAILURE);
       log.error("Error undeployment", er);
       callback.onFailure(er);
      // mappingService.registerDeploymentInfoAlienToIndigoDc(a4cUuidDeployment, DeploymentStatus.FAILURE);
@@ -228,19 +242,24 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       switch (er.getHttpCode()) {
         case 404:
           if (NOT_FOUND_MATCHER.matcher(er.getTitle().toLowerCase()).find()) {
+            event.setDeploymentStatus(DeploymentStatus.UNDEPLOYED);
             log.warn("Deployment not found ", er);
             mappingService.unregisterDeployment(a4cUuidDeployment);
             callback.onSuccess(null);
           } else {
+            event.setDeploymentStatus(DeploymentStatus.FAILURE);
             callback.onFailure(er);
             log.error("Error undeployment ", er);
           }
           break;
         default:
+          event.setDeploymentStatus(DeploymentStatus.FAILURE);
           log.error("Error undeployment ", er);
           callback.onFailure(er);
       }
       //mappingService.registerDeploymentInfoAlienToIndigoDc(a4cUuidDeployment, DeploymentStatus.FAILURE);
+    } finally {
+      eventService.addEvent(event);
     }
   }
 
@@ -475,6 +494,12 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     //statusManager.getStatus(deploymentContext, callback);
     final DeploymentInfo di =  mappingService.getByA4CDeploymentPaasId(
     		deploymentContext.getDeploymentPaaSId());
+    PaaSDeploymentStatusMonitorEvent event = new PaaSDeploymentStatusMonitorEvent();
+    Date date = new Date();
+    event.setDate(date.getTime());
+    event.setDeploymentId(deploymentContext.getDeployment().getId());
+    event.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+
     if (di != null) {
 	    try {
 	      if (di.getOrchestratorDeploymentId() != null) {
@@ -486,13 +511,16 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
                     di.getOrchestratorDeploymentId());
             log.info(response.toString());
             final String statusTopologyDeployment = response.getStatusTopologyDeployment();
+            event.setDeploymentStatus(Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment));
             callback.onSuccess(Util.indigoDcStatusToDeploymentStatus(statusTopologyDeployment));
           } else
             updateStatusesDeploymentsUser(deploymentContext, callback, di);
 	    } catch (NoSuchFieldException | IOException | StatusNotFoundException e) {
+          event.setDeploymentStatus(DeploymentStatus.FAILURE);
 	      e.printStackTrace();
 	      callback.onFailure(e);
 	    } catch (OrchestratorIamException e) {
+          event.setDeploymentStatus(DeploymentStatus.FAILURE);
 	        int code = e.getHttpCode();
 	        switch (code) {
 	            case 401: break;
@@ -500,10 +528,15 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
 	        }
 	      callback.onFailure(e);
 	      e.printStackTrace();
-	    }
+	    } finally {
+          eventService.addEvent(event);
+        }
     } else {
       log.warn("Deployment with DeploymentPaaSId " + deploymentContext.getDeploymentPaaSId() +
               " not registered in the plugin registry." );
+
+      event.setDeploymentStatus(DeploymentStatus.UNKNOWN);
+      eventService.addEvent(event);
       callback.onSuccess(DeploymentStatus.UNDEPLOYED);
     }
 
@@ -531,24 +564,21 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         JsonNode root = mapper.readTree(response.getResponse().toString());
 //        JsonNode metadata = root.get("metadata");
 //        if (metadata != null) {
-          JsonNode description = root.get("description");
-          if (description != null) {
-            String a4cInfo = description.asText();
-            int pos = a4cInfo.lastIndexOf('{');
-            if (pos > -1) {
-              a4cInfo = a4cInfo.substring(pos);
-              A4cOrchestratorInfo info = mapper.readValue(a4cInfo, A4cOrchestratorInfo.class);
-              DeploymentInfo tmpDi = mappingService.getByA4CDeploymentPaasId(info.getDeploymentPaasId());
+          JsonNode metadata = root.get("metadata");
+          if (metadata != null) {
+            JsonNode deploymentPaasId = metadata.get(BuilderService.METADATA_A4C_DEPLOYMENT_PAAS_ID);
+            if (deploymentPaasId != null) {
+              DeploymentInfo tmpDi = mappingService.getByA4CDeploymentPaasId(deploymentPaasId.asText());
 
               if (tmpDi != null) {
                 tmpDi.setOrchestratorDeploymentIdIfNull(deployment.getUuid());
               } else
-                log.warn("Update deployment statuses encountered a deployment with template name " + description.asText()
+                log.warn("Update deployment statuses encountered a deployment with template name " + deploymentPaasId.asText()
                         + "that is not registered in the mapping service");
             } else
               log.warn("Unable to find additional information needed to match the orchestrator deployment with what we have on A4C");
           } else
-            log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have A4C info in the description");
+            log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have A4C info in the metadata");
 //        } else {
 //          log.warn("Deployment with UUID " + deployment.getUuid() + " doesn't have a metadata field");
 //        }

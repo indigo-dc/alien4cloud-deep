@@ -6,23 +6,20 @@ ARG a4c_ver=2.1.0
 ARG a4c_install_path=/opt
 ARG a4c_src_dir=alien4cloud
 ARG a4c_install_dir=a4c
-ARG a4c_deep_ver=${a4c_ver}-DEEP-1.0.1
+ARG a4c_deep_ver=${a4c_ver}-DEEP-1.1.0
 ARG a4c_user=a4c
 ARG a4c_settings_manager_ver=2.1.0
-ARG tosca_normative_url=https://raw.githubusercontent.com/indigo-dc/orchestrator/releases/2-1-stable/src/main/resources/tosca-definitions/normative-types.yml
+ARG tosca_normative_url=https://raw.githubusercontent.com/indigo-dc/orchestrator/master/src/main/resources/tosca-definitions/normative-types.yml
 ARG tosca_normative_version=1.0.0
 ARG tosca_normative_name=normative-types
 ARG tosca_indigo_types_branch=v4.0.0
 ARG spring_social_oidc_branch=master
 ARG a4c_deep_branch=deep-dev-UPV
 ARG templates_deep_oc_branch=v4.0.0
-ARG a4c_binary_dist_url=https://fastconnect.org/maven/service/local/repositories/opensource/content/alien4cloud/alien4cloud-dist/${a4c_ver}/alien4cloud-dist-${a4c_ver}-dist.tar.gz
 ARG a4c_sh_name=alien4cloud.sh
 
 ENV A4C_SH_NAME=${a4c_sh_name}
-
 ENV A4C_CERTS_ROOT_PATH=/certs
-
 ENV A4C_INSTALL_PATH=${a4c_install_path}
 ENV A4C_SRC_DIR=${a4c_src_dir}
 ENV A4C_INSTALL_DIR=${a4c_install_dir}
@@ -86,7 +83,7 @@ RUN \
   # Get and add the normative Tosca types
   && curl -k -o ${a4c_install_path}/TOSCA_normative_types_orig.yaml ${tosca_normative_url}  \
   # Get the IndigoDC Tosca types
-  && git clone -b ${tosca_indigo_types_branch} https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
+  && git clone --single-branch  --branch ${tosca_indigo_types_branch} https://github.com/indigo-dc/tosca-types  ${a4c_install_path}/indigo-dc-tosca-types \
   # Get the templates from DEEP-OC
   && git clone --single-branch  --branch ${templates_deep_oc_branch} https://github.com/indigo-dc/tosca-templates "${a4c_install_path}/tosca-templates" \
   # Create the CSARs that a4c loads during startup
@@ -107,7 +104,6 @@ RUN \
   && cd "${a4c_install_path}/${a4c_src_dir}" \
   && mvn -U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true \
   && cp ${a4c_install_path}/${a4c_src_dir}/alien4cloud-ui/target/alien4cloud-*standalone.war ${a4c_install_path}/${a4c_install_dir}/alien4cloud-standalone.war \
-  && rm -rf "${a4c_install_path}/${a4c_src_dir}" \
   # Compile and install the plugin
   && cd "${a4c_install_path}/indigodc-orchestrator-plugin" \
   && mvn -U -e clean package \
@@ -127,12 +123,13 @@ RUN \
   && npm list -g --depth=0. | awk -F ' ' '{print $2}' | awk -F '@' '{print $1}'  | xargs npm remove -g \
   && rm -rf ${a4c_install_path}/indigodc-orchestrator-plugin \
     ${a4c_install_path}/alien4cloud-settings-manager/ \
-    /usr/lib/ruby \
-    ${a4c_install_path}/indigodc-2-a4c.py \
     ${a4c_install_path}/tosca-templates \
-  && rm -rf $HOME/..?* $HOME/.[!.]* $HOME/* \
-  && rm ${a4c_install_path}/TOSCA_normative_types_* \
-  && rm -R "${a4c_install_path}/indigo-dc-tosca-types" \
+    /usr/lib/ruby \
+    ${a4c_install_path}/tosca-templates \
+    $HOME/..?* $HOME/.[!.]* $HOME/* \
+    ${a4c_install_path}/TOSCA_normative_types_* \
+    ${a4c_install_path}/indigo-dc-tosca-types \
+    ${a4c_install_path}/${a4c_src_dir} \
   && apk del build-dependencies  \
   # Install the a4c runtime dependencies
   && apk --no-cache add openjdk8-jre-base bash su-exec nss
