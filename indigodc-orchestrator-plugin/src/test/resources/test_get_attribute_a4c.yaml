@@ -5,8 +5,6 @@ metadata:
   template_version: "0.1.0-SNAPSHOT"
   template_author: "admin"
 
-description: ""
-
 imports:
   - indigo-types:1.0.0
   - tosca-normative-types:1.0.0-ALIEN14

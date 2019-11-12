@@ -54,6 +54,7 @@ public class IndigoDcOrchestratorTest {
 	public static final String ORCHESTRATOR_ID = "orcId";
 	public static final String ALIEN_DEPLOYMENT_ID = "alienDeploymentId";
 	public static final String ALIEN_DEPLOYMENT_PAAS_ID = "alienDeploymentPaasId";
+	public static final String ALIEN_DEPLOYMENT_TOPOLOGY_ID = "alienDeploymentTopologyId";
 	public static final String ALIEN_DEPLOYMENT_ID_NULL_ORCHESTRATOR_DEPLOYMENT_ID = "alienDeploymentIdNull";
 	public static final String ALIEN_DEPLOYMENT_ID_INVALID = "none";
 	public static final String ORCHESTRATOR_DEPLOYMENT_ID = "orchestratorDeploymentId";
@@ -406,8 +407,20 @@ public class IndigoDcOrchestratorTest {
 		
 		Deployment deployment = Mockito.mock(Deployment.class);
 		DeploymentTopology deploymentTopology =  Mockito.mock(DeploymentTopology.class);
+		Map<String, AbstractPropertyValue> vals = new HashMap<>();
+		AbstractPropertyValue abstractPropertyValue =  Mockito.mock(AbstractPropertyValue.class);
+		PropertyValue propertyValue =  Mockito.mock(PropertyValue.class);
+		vals.put("AbstractPropertyValue", abstractPropertyValue);
+		vals.put("PropertyValue", propertyValue);
+		Mockito.when(deploymentContext.getDeploymentTopology()).thenReturn(deploymentTopology);
+		Mockito.when(deploymentContext.getDeploymentTopology().getAllInputProperties()).thenReturn(vals);
+		Mockito.when(deploymentContext.getDeploymentTopology().getInitialTopologyId()).thenReturn("initialTopologyId");
+		Mockito.when(deploymentTopology.getId()).thenReturn(ALIEN_DEPLOYMENT_TOPOLOGY_ID);
+		Mockito.when(deploymentContext.getDeploymentTopology()).thenReturn(deploymentTopology);
 		Mockito.when(deploymentContext.getDeployment()).thenReturn(deployment);
 		Mockito.when(deploymentContext.getDeployment().getOrchestratorId()).thenReturn(ORCHESTRATOR_ID);
+		Mockito.when(deploymentContext.getDeployment().getOrchestratorDeploymentId()).thenReturn(ORCHESTRATOR_DEPLOYMENT_ID);
+		Mockito.when(deploymentContext.getDeployment().getLocationIds()).thenReturn(new String[0]);
 		Mockito.when(deploymentContext.getDeployment().getId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		
 
@@ -432,14 +445,7 @@ public class IndigoDcOrchestratorTest {
 
 		TestUtil.setPrivateField(idco, "mappingService", mappingService); 
 		
-		Map<String, AbstractPropertyValue> vals = new HashMap<>();
-		AbstractPropertyValue abstractPropertyValue =  Mockito.mock(AbstractPropertyValue.class);
-		PropertyValue propertyValue =  Mockito.mock(PropertyValue.class);
-		vals.put("AbstractPropertyValue", abstractPropertyValue);
-		vals.put("PropertyValue", propertyValue);
-		Mockito.when(deploymentContext.getDeploymentTopology()).thenReturn(deploymentTopology);
-		Mockito.when(deploymentContext.getDeploymentTopology().getAllInputProperties()).thenReturn(vals);
-		Mockito.when(deploymentContext.getDeploymentTopology().getInitialTopologyId()).thenReturn("initialTopologyId");
+
 		return idco;
 	}
 	

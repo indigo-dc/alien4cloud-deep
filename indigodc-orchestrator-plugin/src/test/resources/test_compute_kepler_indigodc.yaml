@@ -1,5 +1,5 @@
 tosca_definitions_version: "tosca_simple_yaml_1_0"
-description: "{\"deploymentPaasId\":\"a4c-paas-id\",\"deploymentId\":\"a4c-id\",\"locationIds\":[],\"orchestratorId\":\"a4c-orchestrator-id\",\"versionId\":\"a4c-version-id\"}"
+description: ""
 topology_template:
   node_templates:
     Compute:
@@ -29,5 +29,16 @@ topology_template:
           node: "Compute"
           capability: "tosca.capabilities.indigo.Container"
           relationship: "tosca.relationships.HostedOn"
+metadata:
+  template_name: "TestApp"
+  template_version: "0.1.0-SNAPSHOT"
+  template_author: "admin"
+  a4c_deployment_topology_id: "a4c-deployment-topology-id"
+  a4c_deployment_id: "a4c-id"
+  a4c_deployment_paas_id: "a4c-paas-id"
+  a4c_deployment_orchestrator_id: "a4c-orchestrator-id"
+  a4c_deployment_orchestrator_deployment_id: "a4c-deployment-orchestrator-deployment-id"
+  a4c_deployment_location_ids: "a4c-location-id1,a4c-location-id2"
+  a4c_deployment_version_id: "a4c-version-id"
 imports:
 - indigo_custom_types: "https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml"

@@ -50,6 +50,15 @@ import org.yaml.snakeyaml.DumperOptions;
 @Slf4j
 public class BuilderService {
 
+  public static final String A4C_DEPLOYMENT_LOCATIONS_IDS_SEPARATOR = ",";
+  public static final String METADATA_A4C_DEPLOYMENT_TOPOLOGY_ID = "a4c_deployment_topology_id";
+  public static final String METADATA_A4C_DEPLOYMENT_ID = "a4c_deployment_id";
+  public static final String METADATA_A4C_DEPLOYMENT_PAAS_ID = "a4c_deployment_paas_id";
+  public static final String METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_ID = "a4c_deployment_orchestrator_id";
+  public static final String METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID = "a4c_deployment_orchestrator_deployment_id";
+  public static final String METADATA_A4C_DEPLOYMENT_LOCATIONS_ID = "a4c_deployment_location_ids";
+  public static final String METADATA_A4C_DEPLOYMENT_VERSION_ID = "a4c_deployment_version_id";
+
   /** Gets the TOSCA topology in text format from the A4C topology editor. */
   @Inject
   protected ArchiveExportService exportService;
@@ -169,14 +178,14 @@ public class BuilderService {
       metadata = mapper.createObjectNode();
     }
     root.remove("metadata");
-    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
-    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
-    metadata.put("a4c_deployment_orchestrator_id", deploymentContext.getDeployment().getOrchestratorId());
-    metadata.putArray("a4c_deployment_location_ids").addAll(
-            Stream.of(deploymentContext.getDeployment().getLocationIds())
-                    .map(el -> JsonNodeFactory.instance.textNode(el))
-                    .collect(Collectors.toList()));
-    metadata.put("a4c_deployment_version_id", deploymentContext.getDeployment().getVersionId());
+    metadata.put(METADATA_A4C_DEPLOYMENT_TOPOLOGY_ID, deploymentContext.getDeploymentTopology().getId());
+    metadata.put(METADATA_A4C_DEPLOYMENT_ID, deploymentContext.getDeploymentId());
+    metadata.put(METADATA_A4C_DEPLOYMENT_PAAS_ID, deploymentContext.getDeploymentPaaSId());
+    metadata.put(METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_ID, deploymentContext.getDeployment().getOrchestratorId());
+    metadata.put(METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID, deploymentContext.getDeployment().getOrchestratorDeploymentId());
+    metadata.put(METADATA_A4C_DEPLOYMENT_LOCATIONS_ID, String.join(A4C_DEPLOYMENT_LOCATIONS_IDS_SEPARATOR,
+            deploymentContext.getDeployment().getLocationIds()));
+    metadata.put(METADATA_A4C_DEPLOYMENT_VERSION_ID, deploymentContext.getDeployment().getVersionId());
     root.put("metadata", metadata);
 
 
