@@ -21,7 +21,7 @@ if len(sys.argv) != 5:
 
 
 TOSCA_NORMATIVES_NAME = "normative-types"
-TOSCA_NORMATIVES_VERSION = "1.0.1"
+TOSCA_NORMATIVES_VERSION = "2.0.0"
 TOSCA_TEMPLATE_DEFAULT_VER = "1.0.0"
 TOSCA_FILES_MAX_COUNT = 999999
 TOSCA_FILES_MAX_COUNT_DIGITS = str(int(math.log10(TOSCA_FILES_MAX_COUNT))+1)
@@ -67,12 +67,18 @@ def processToscaNormatives(count, filePath, zipOutputFolder):
     with open(filePath, 'r') as streamN:
         normativesObj = yaml.load(streamN)
         count += 1
+        templateName = TOSCA_NORMATIVES_NAME
+        templateVersion = TOSCA_NORMATIVES_VERSION
         if not "metadata" in normativesObj:
             normativesObj["metadata"] = {}
         if not "template_name" in normativesObj["metadata"]:
             normativesObj["metadata"]["template_name"] = TOSCA_NORMATIVES_NAME
+        else:
+            templateName = normativesObj["metadata"]["template_name"]
         if not "template_version" in normativesObj["metadata"]:
             normativesObj["metadata"]["template_version"] = TOSCA_NORMATIVES_VERSION
+        else:
+            templateVersion = normativesObj["metadata"]["template_version"]
             #if not "template_author" in normativesObj["metadata"]:
             #    normativesObj["metadata"]["template_author"] = "OpenStack"
         if not "description" in normativesObj:
@@ -82,10 +88,10 @@ def processToscaNormatives(count, filePath, zipOutputFolder):
         z.close()
         result = collections.OrderedDict()
         result[filePath] = normativesObj
-        return result, count
+        return result, count, templateName, templateVersion
     raise Exception("Cannot open " + filePath)
 
-def processIndigoCustomTypes(count, rootPath, zipOutputFolder):
+def processIndigoCustomTypes(count, rootPath, zipOutputFolder, normativesName, normativesVersion):
     list = os.listdir(rootPath)
     customTypesYamlLst = []
     resourcesLst = []
@@ -102,9 +108,9 @@ def processIndigoCustomTypes(count, rootPath, zipOutputFolder):
             count += 1
             customsObj = yaml.load(streamC)
             if "imports" in customsObj:
-                customsObj["imports"].append({TOSCA_NORMATIVES_NAME: TOSCA_NORMATIVES_VERSION})
+                customsObj["imports"].append({normativesName: normativesVersion})
             else:
-                customsObj["imports"] = [{TOSCA_NORMATIVES_NAME: TOSCA_NORMATIVES_VERSION}]
+                customsObj["imports"] = [{normativesName: normativesVersion}]
             customTypesObjs[customsP] =  customsObj
             z = zipfile.ZipFile(os.path.join(zipOutputFolder, ('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" + customsPBase + ".zip"), 'w', zipfile.ZIP_DEFLATED)
             z.writestr(customsP, yaml.dump(customsObj, default_flow_style=False))
@@ -171,8 +177,8 @@ if __name__ == "__main__":
     outP = sys.argv[4]
 
     count = 1
-    normativesObjs, count = processToscaNormatives(count, normativesP, outP)
-    customTypesObjs, count = processIndigoCustomTypes(count, customsP, outP)
+    normativesObjs, count, normativesName, normativesVersion = processToscaNormatives(count, normativesP, outP)
+    customTypesObjs, count = processIndigoCustomTypes(count, customsP, outP, normativesName, normativesVersion)
     concaten = collections.OrderedDict(list(normativesObjs.items()) + list(customTypesObjs.items()))
     # /print(concaten)
     importTypes = createImportsForTemplates(concaten)
