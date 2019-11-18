@@ -31,7 +31,7 @@
 
         <!-- Libraries versions section -->
         <!-- DEEP Libraries versions section -->
-        <v.alien4cloud.alien4cloud-core>2.1.0-DEEP-1.1.0</v.alien4cloud.alien4cloud-core>
+        <v.alien4cloud.alien4cloud-core>2.1.0-DEEP-1.1.1</v.alien4cloud.alien4cloud-core>
         <v.org.springframework.social.spring-social-oidc-deep>1.4</v.org.springframework.social.spring-social-oidc-deep>
 
         <!-- External Libraries versions section -->
