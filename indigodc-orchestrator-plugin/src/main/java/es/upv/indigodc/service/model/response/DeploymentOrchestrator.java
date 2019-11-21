@@ -79,6 +79,10 @@ public class DeploymentOrchestrator {
      */
     protected String cloudProviderName;
     /**
+     * The name of the cloud provider where the deployment has been made / has been attempted
+     */
+    protected CloudProviderEndpoint cloudProviderEndpoint;
+    /**
      * Information about the creator of the deployment
      */
     protected DeploymentCreator createdBy;

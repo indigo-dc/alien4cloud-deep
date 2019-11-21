@@ -149,6 +149,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     event.setDate(date.getTime());
     event.setDeploymentId(deploymentContext.getDeployment().getId());
     event.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+    event.setDeploymentStatus(DeploymentStatus.INIT_DEPLOYMENT);
 
     try {
       final String yamlPaasTopology = builderService.buildApp(deploymentContext,
@@ -201,6 +202,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     event.setDate(date.getTime());
     event.setDeploymentId(deploymentContext.getDeployment().getId());
     event.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+    event.setDeploymentStatus(DeploymentStatus.UNDEPLOYMENT_IN_PROGRESS);
 
     try {
       DeploymentInfo deploymentInfo = mappingService.getByA4CDeploymentPaasId(a4cUuidDeployment);
@@ -499,6 +501,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
     event.setDate(date.getTime());
     event.setDeploymentId(deploymentContext.getDeployment().getId());
     event.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+    event.setDeploymentStatus(DeploymentStatus.UNKNOWN);
 
     if (di != null) {
 	    try {
@@ -554,6 +557,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       callback.onSuccess(di.getStatus());
       log.info("Get the orchestrators UUIDs for all deployments managed by the currently logged in user");
       OrchestratorResponse response = orchestratorConnector.callGetDeployments(configuration.getOrchestratorEndpoint());
+      log.info(response.getResponse().toString());
       final GetDeploymentsResponse gdr = response.<GetDeploymentsResponse>getResponse(GetDeploymentsResponse.class);
       final List<DeploymentOrchestrator> deployments = gdr.getContent();
       final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
