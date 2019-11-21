@@ -554,6 +554,7 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
       callback.onSuccess(di.getStatus());
       log.info("Get the orchestrators UUIDs for all deployments managed by the currently logged in user");
       OrchestratorResponse response = orchestratorConnector.callGetDeployments(configuration.getOrchestratorEndpoint());
+      log.info(response.getResponse().toString());
       final GetDeploymentsResponse gdr = response.<GetDeploymentsResponse>getResponse(GetDeploymentsResponse.class);
       final List<DeploymentOrchestrator> deployments = gdr.getContent();
       final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
