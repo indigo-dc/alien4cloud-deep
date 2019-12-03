@@ -21,7 +21,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 @Component("indigodc-orchestrator-factory")
 public class IndigoDcOrchestratorFactory
     implements IOrchestratorPluginFactory<IndigoDcOrchestrator, CloudConfiguration> {
@@ -32,11 +31,9 @@ public class IndigoDcOrchestratorFactory
       "Not set; No default conf file found in the package!";
   public static final int NO_DEFAULT_CONF_FILE_POLL = 5;
 
-  @Autowired
-  private BeanFactory beanFactory;
+  @Autowired private BeanFactory beanFactory;
 
-  @Autowired
-  private ArtifactRegistryService artifactRegistryService;
+  @Autowired private ArtifactRegistryService artifactRegistryService;
 
   @Override
   public void destroy(IndigoDcOrchestrator arg0) {
@@ -63,9 +60,13 @@ public class IndigoDcOrchestratorFactory
       conf = mapper.readValue(is, CloudConfiguration.class);
     } catch (IOException er) {
       er.printStackTrace();
-      conf = new CloudConfiguration(
-          NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE_POLL,
-          NO_DEFAULT_CONF_FILE, NO_DEFAULT_CONF_FILE);
+      conf =
+          new CloudConfiguration(
+              NO_DEFAULT_CONF_FILE,
+              NO_DEFAULT_CONF_FILE,
+              NO_DEFAULT_CONF_FILE_POLL,
+              NO_DEFAULT_CONF_FILE,
+              NO_DEFAULT_CONF_FILE);
     }
     return conf;
   }

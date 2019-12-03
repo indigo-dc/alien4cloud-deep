@@ -1,72 +1,62 @@
 package es.upv.indigodc.service.model;
 
-import java.io.Serializable;
-import java.util.Map;
+import alien4cloud.paas.model.DeploymentStatus;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import alien4cloud.paas.model.DeploymentStatus;
+import java.io.Serializable;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Maintains information pertinent to a deployment.
- */
+/** Maintains information pertinent to a deployment. */
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeploymentInfo implements Serializable {  
+public class DeploymentInfo implements Serializable {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 8452877443031991069L;
-  /**
-   * The Deployment PaaS ID as given by A4C.
-   */
+  /** The Deployment PaaS ID as given by A4C. */
   protected String a4cDeploymentPaasId;
-  /**
-   * The deployment UUID as returned by the orchestrator.
-   */
+  /** The deployment UUID as returned by the orchestrator. */
   protected String orchestratorDeploymentId;
-  /**
-   * The deployment ID as given by A4C.
-   */
+  /** The deployment ID as given by A4C. */
   protected String a4cDeploymentId;
-  /**
-   * The A4C ID of the orchestrator that manages this deployment.
-   */
+  /** The A4C ID of the orchestrator that manages this deployment. */
   protected String orchestratorId;
-  /**
-   * The current status of this deployment.
-   */
+  /** The current status of this deployment. */
   protected DeploymentStatus status;
-  /**
-   * The outputs returned by the orchestrator.
-   */
+  /** The outputs returned by the orchestrator. */
   protected Map<String, String> outputs;
-  
-  /** If an error occurred when trying to get the deployment **/
+
+  /** If an error occurred when trying to get the deployment. * */
   protected Throwable errorDeployment;
 
   /**
    * Check if this deployment has outputs.
+   *
    * @return true if the deployment has outputs; false otherwise.
    */
   @JsonIgnore
-  public synchronized boolean hasOutputs() {return outputs != null;}
+  public synchronized boolean hasOutputs() {
+    return outputs != null;
+  }
 
   /**
-   * Sets the deployment UUID as returned by the orchestrator if this deployment doesn have one already.
+   * Sets the deployment UUID as returned by the orchestrator if this deployment doesn have one
+   * already.
+   *
    * @param orchestratorDeploymentId The deployment UUID as returned by the orchestrator.
    * @return the old ID.
    */
   @JsonIgnore
   public synchronized String setOrchestratorDeploymentIdIfNull(String orchestratorDeploymentId) {
     String ret = this.orchestratorDeploymentId;
-    if (this.orchestratorDeploymentId == null)
+    if (this.orchestratorDeploymentId == null) {
       this.orchestratorDeploymentId = orchestratorDeploymentId;
+    }
     return ret;
   }
 

@@ -13,7 +13,6 @@ import okio.Buffer;
 import okio.ByteString;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Creates the context needed to communicate with different servers over HTTPS using custom
  * certificates. Some certificates may not be validaded automatically by the system, therefore we
@@ -55,8 +54,9 @@ public final class SslContextBuilder {
       int nextName = 1;
       for (String certificateBase64 : certificateBase64s) {
         Buffer certificateBuffer = new Buffer().write(ByteString.decodeBase64(certificateBase64));
-        X509Certificate certificate = (X509Certificate) certificateFactory
-            .generateCertificate(certificateBuffer.inputStream());
+        X509Certificate certificate =
+            (X509Certificate)
+                certificateFactory.generateCertificate(certificateBuffer.inputStream());
         keyStore.setCertificateEntry(Integer.toString(nextName++), certificate);
         certificateBuffer.close();
       }

@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 public class LocationConfiguratorFactory {
 
   /** The context of the whole application. */
-  @Inject
-  private ApplicationContext applicationContext;
+  @Inject private ApplicationContext applicationContext;
 
   /**
    * Generates a new instance for a location.
@@ -47,26 +46,27 @@ public class LocationConfiguratorFactory {
       return configurator;
     }
     return null;
-//    new ILocationConfiguratorPlugin() {
-//      @Override
-//      public List<PluginArchive> pluginArchives() {
-//        return new ArrayList<>();
-//      }
-//
-//      @Override
-//      public List<String> getResourcesTypes() {
-//        return new ArrayList<>();
-//      }
-//
-//      @Override
-//      public Map<String, MatchingConfiguration> getMatchingConfigurations() {
-//        return new HashMap<>();
-//      }
-//
-//      @Override
-//      public List<LocationResourceTemplate> instances(ILocationResourceAccessor resourceAccessor) {
-//        return null;
-//      }
-//    };
+    //    new ILocationConfiguratorPlugin() {
+    //      @Override
+    //      public List<PluginArchive> pluginArchives() {
+    //        return new ArrayList<>();
+    //      }
+    //
+    //      @Override
+    //      public List<String> getResourcesTypes() {
+    //        return new ArrayList<>();
+    //      }
+    //
+    //      @Override
+    //      public Map<String, MatchingConfiguration> getMatchingConfigurations() {
+    //        return new HashMap<>();
+    //      }
+    //
+    //      @Override
+    //      public List<LocationResourceTemplate> instances(ILocationResourceAccessor
+    // resourceAccessor) {
+    //        return null;
+    //      }
+    //    };
   }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,24 +39,15 @@ public class OrchestratorResponse {
 
   /**
    * Build a response object.
-   * @param e status code exception
-   * @throws OrchestratorIamException
-   */
-  public OrchestratorResponse(HttpStatusCodeException e) throws OrchestratorIamException {
-    throw new OrchestratorIamException(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseBodyAsString());
-  }
-
-  /**
-   *
-   * Build a response object.
    *
    * @param response the response from the orchestrator
-   * @throws IOException
-   * @throws OrchestratorIamException
+   * @throws IOException if converting the JSON response from the orchestrator fails
    */
-  public OrchestratorResponse(ResponseEntity<String> response) throws IOException, OrchestratorIamException {
-    this(response.getStatusCode().value(), response.getBody() == null ? new StringBuilder() :
-            new StringBuilder(response.getBody()));
+  public OrchestratorResponse(ResponseEntity<String> response)
+      throws IOException {
+    this(
+        response.getStatusCode().value(),
+        response.getBody() == null ? new StringBuilder() : new StringBuilder(response.getBody()));
   }
 
   /**
@@ -110,8 +101,7 @@ public class OrchestratorResponse {
       Iterator<Entry<String, JsonNode>> outputFields = output.fields();
       while (outputFields.hasNext()) {
         Entry<String, JsonNode> field = outputFields.next();
-        result.put(field.getKey(),
-            objectMapper.writeValueAsString(field.getValue()));
+        result.put(field.getKey(), objectMapper.writeValueAsString(field.getValue()));
       }
       // return objectMapper.convertValue(outputs.get(0), new TypeReference<Map<String, String>>()
       // {});
@@ -156,13 +146,14 @@ public class OrchestratorResponse {
   }
 
   /**
-   * Convert a string response from the orchestrator to a Java class hierarchy
+   * Convert a string response from the orchestrator to a Java class hierarchy.
+   *
    * @param clazz The root class that maps onto the orchestrator response as a Java class
    * @param <T> The root class that maps onto the orchestrator response as a Java template
    * @return the Java object representing the orchestrator response
    * @throws IOException thrown by the JSON parser
    */
-  public  <T> T getResponse(Class<T> clazz) throws IOException {
+  public <T> T getResponse(Class<T> clazz) throws IOException {
     return objectMapper.readValue(this.response.toString(), objectMapper.constructType(clazz));
   }
 
@@ -175,5 +166,4 @@ public class OrchestratorResponse {
       return null;
     }
   }
-
 }

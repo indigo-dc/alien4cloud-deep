@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
+import es.upv.indigodc.service.model.A4cOrchestratorInfo;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 
-import es.upv.indigodc.service.model.A4cOrchestratorInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,17 +54,17 @@ public class BuilderService {
   public static final String METADATA_A4C_DEPLOYMENT_TOPOLOGY_ID = "a4c_deployment_topology_id";
   public static final String METADATA_A4C_DEPLOYMENT_ID = "a4c_deployment_id";
   public static final String METADATA_A4C_DEPLOYMENT_PAAS_ID = "a4c_deployment_paas_id";
-  public static final String METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_ID = "a4c_deployment_orchestrator_id";
-  public static final String METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID = "a4c_deployment_orchestrator_deployment_id";
+  public static final String METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_ID =
+      "a4c_deployment_orchestrator_id";
+  public static final String METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID =
+      "a4c_deployment_orchestrator_deployment_id";
   public static final String METADATA_A4C_DEPLOYMENT_LOCATIONS_ID = "a4c_deployment_location_ids";
   public static final String METADATA_A4C_DEPLOYMENT_VERSION_ID = "a4c_deployment_version_id";
 
   /** Gets the TOSCA topology in text format from the A4C topology editor. */
-  @Inject
-  protected ArchiveExportService exportService;
+  @Inject protected ArchiveExportService exportService;
   /** Initializes the the manager of the TOSCA editor for a certain deployment. */
-  @Inject
-  protected EditionContextManager editionContextManager;
+  @Inject protected EditionContextManager editionContextManager;
   /** Retrieves the configuration for the plugin. */
   @Autowired
   @Qualifier("cloud-configuration-manager")
@@ -127,8 +127,8 @@ public class BuilderService {
    */
   public static String encodeToscaMethods(String a4cTopologyYaml) {
     StringBuffer newa4cTopologyYaml = new StringBuffer();
-    Pattern pattern = Pattern.compile(
-        "(:){1}(\\s)*(\\\"){0}(\\s)*(\\{){1}(.?)+(\\}){1}(\\s)*(\\\"){0}");
+    Pattern pattern =
+        Pattern.compile("(:){1}(\\s)*(\\\"){0}(\\s)*(\\{){1}(.?)+(\\}){1}(\\s)*(\\\"){0}");
     Matcher matcher = pattern.matcher(a4cTopologyYaml);
     while (matcher.find()) {
       StringBuilder group = new StringBuilder(matcher.group());
@@ -152,16 +152,22 @@ public class BuilderService {
    *
    * @param a4cTopologyYaml The A4C topology that can be seen in the A4C text TOSCA editor
    * @param importIndigoCustomTypes The path to the repository (file) containing the TOSCA types
-   *        used by the Orchestrator
+   *     used by the Orchestrator
    * @return The textual representation of the topology that will be sent to the Orchestrator
    * @throws JsonProcessingException when parsing the YAML topology
    * @throws IOException when parsing the YAML topology
    */
-  public static String getIndigoDcTopologyYaml(PaaSTopologyDeploymentContext deploymentContext,
-                                               String a4cTopologyYaml,
-      String importIndigoCustomTypes) throws JsonProcessingException, IOException {
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER)
-        .disable(Feature.SPLIT_LINES).disable(Feature.CANONICAL_OUTPUT));
+  public static String getIndigoDcTopologyYaml(
+      PaaSTopologyDeploymentContext deploymentContext,
+      String a4cTopologyYaml,
+      String importIndigoCustomTypes)
+      throws JsonProcessingException, IOException {
+    ObjectMapper mapper =
+        new ObjectMapper(
+            new YAMLFactory()
+                .disable(Feature.WRITE_DOC_START_MARKER)
+                .disable(Feature.SPLIT_LINES)
+                .disable(Feature.CANONICAL_OUTPUT));
     a4cTopologyYaml = a4cTopologyYaml.replaceAll("\"", "\'");
     String a4cTopologyYamlIgnoreMethods = encodeToscaMethods(a4cTopologyYaml);
     ObjectNode rootNode = mapper.createObjectNode();
@@ -178,38 +184,48 @@ public class BuilderService {
       metadata = mapper.createObjectNode();
     }
     root.remove("metadata");
-    metadata.put(METADATA_A4C_DEPLOYMENT_TOPOLOGY_ID, deploymentContext.getDeploymentTopology().getId());
+    metadata.put(
+        METADATA_A4C_DEPLOYMENT_TOPOLOGY_ID, deploymentContext.getDeploymentTopology().getId());
     metadata.put(METADATA_A4C_DEPLOYMENT_ID, deploymentContext.getDeploymentId());
     metadata.put(METADATA_A4C_DEPLOYMENT_PAAS_ID, deploymentContext.getDeploymentPaaSId());
-    metadata.put(METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_ID, deploymentContext.getDeployment().getOrchestratorId());
-    metadata.put(METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID, deploymentContext.getDeployment().getOrchestratorDeploymentId());
-    metadata.put(METADATA_A4C_DEPLOYMENT_LOCATIONS_ID, String.join(A4C_DEPLOYMENT_LOCATIONS_IDS_SEPARATOR,
+    metadata.put(
+        METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_ID,
+        deploymentContext.getDeployment().getOrchestratorId());
+    metadata.put(
+        METADATA_A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID,
+        deploymentContext.getDeployment().getOrchestratorDeploymentId());
+    metadata.put(
+        METADATA_A4C_DEPLOYMENT_LOCATIONS_ID,
+        String.join(
+            A4C_DEPLOYMENT_LOCATIONS_IDS_SEPARATOR,
             deploymentContext.getDeployment().getLocationIds()));
-    metadata.put(METADATA_A4C_DEPLOYMENT_VERSION_ID, deploymentContext.getDeployment().getVersionId());
+    metadata.put(
+        METADATA_A4C_DEPLOYMENT_VERSION_ID, deploymentContext.getDeployment().getVersionId());
     root.put("metadata", metadata);
 
+    //    ObjectNode metadata = (ObjectNode) root.get("metadata");
+    //    if (metadata == null) {
+    //      metadata = mapper.createObjectNode();
+    //      root.set("metadata", metadata);
+    //    }
+    //    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
+    //    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
+    // TextNode description = (TextNode) root.get("description");
+    //    A4cOrchestratorInfo a4cOrchestratorInfo = new A4cOrchestratorInfo();
+    //    a4cOrchestratorInfo.setDeploymentId(deploymentContext.getDeploymentId());
+    //    a4cOrchestratorInfo.setDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
+    //    a4cOrchestratorInfo.setLocationIds(deploymentContext.getDeployment().getLocationIds());
+    //
+    // a4cOrchestratorInfo.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
+    //    a4cOrchestratorInfo.setVersionId(deploymentContext.getDeployment().getVersionId());
 
-//    ObjectNode metadata = (ObjectNode) root.get("metadata");
-//    if (metadata == null) {
-//      metadata = mapper.createObjectNode();
-//      root.set("metadata", metadata);
-//    }
-//    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
-//    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
-    //TextNode description = (TextNode) root.get("description");
-//    A4cOrchestratorInfo a4cOrchestratorInfo = new A4cOrchestratorInfo();
-//    a4cOrchestratorInfo.setDeploymentId(deploymentContext.getDeploymentId());
-//    a4cOrchestratorInfo.setDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
-//    a4cOrchestratorInfo.setLocationIds(deploymentContext.getDeployment().getLocationIds());
-//    a4cOrchestratorInfo.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
-//    a4cOrchestratorInfo.setVersionId(deploymentContext.getDeployment().getVersionId());
-
-//    ObjectMapper mapperJson = new ObjectMapper();
-//    if (description == null) {
-//      root.put("description", mapperJson.writeValueAsString(a4cOrchestratorInfo));
-//    } else {
-//      root.put("description", description.asText() +  mapperJson.writeValueAsString(a4cOrchestratorInfo));
-//    }
+    //    ObjectMapper mapperJson = new ObjectMapper();
+    //    if (description == null) {
+    //      root.put("description", mapperJson.writeValueAsString(a4cOrchestratorInfo));
+    //    } else {
+    //      root.put("description", description.asText() +
+    // mapperJson.writeValueAsString(a4cOrchestratorInfo));
+    //    }
     root.remove("imports");
     ObjectNode imports = mapper.createObjectNode();
     imports.put("indigo_custom_types", importIndigoCustomTypes);
@@ -235,8 +251,8 @@ public class BuilderService {
           Entry<String, JsonNode> firstField = requirement.fields().next();
           if (firstField.getValue().has("type_requirement")) {
             requirement.remove(firstField.getKey());
-            requirement.set(firstField.getValue().get("type_requirement").asText(),
-                firstField.getValue());
+            requirement.set(
+                firstField.getValue().get("type_requirement").asText(), firstField.getValue());
             ((ObjectNode) firstField.getValue()).remove("type_requirement");
           }
         }
@@ -250,7 +266,7 @@ public class BuilderService {
    * modifies the properties that it receives.
    *
    * @param properties The array of properties of a node_template (can include inherited ones). Can
-   *        be null, in which case nothing is done, null is returned
+   *     be null, in which case nothing is done, null is returned
    * @return The input parameter after modification, null if input is null
    */
   public static ObjectNode rmNullProps(ObjectNode properties) {
@@ -269,8 +285,8 @@ public class BuilderService {
   }
 
   /**
-   * Executes the uncomment of the TOSCA methods that where commented using
-   * {@link #encodeTOSCAMethods}.
+   * Executes the uncomment of the TOSCA methods that where commented using {@link
+   * #encodeTOSCAMethods}.
    *
    * @param topologyYaml The modified TOSCA topology that is accepted by the Orchestrator
    * @return The textual representation of the TOSCA topology with uncommented TOSCA methods
@@ -278,9 +294,10 @@ public class BuilderService {
   public static String toscaMethodsStrToMethod(String topologyYaml) {
     StringBuffer newTopologyYaml = new StringBuffer();
 
-    Pattern pattern = Pattern.compile(
-        "(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*"
-        + "[a-zA-Z_\\-0-9]+(\\s)*(:){1}(\\s)*(.?)+(\\s)*(\\}){1}(\\s)*(\\\"){1}");
+    Pattern pattern =
+        Pattern.compile(
+            "(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*"
+                + "[a-zA-Z_\\-0-9]+(\\s)*(:){1}(\\s)*(.?)+(\\s)*(\\}){1}(\\s)*(\\\"){1}");
 
     Matcher matcher = pattern.matcher(topologyYaml);
     while (matcher.find()) {
@@ -293,8 +310,8 @@ public class BuilderService {
       if (pos >= 0) {
         group.replace(pos, pos + 1, "");
       }
-      matcher.appendReplacement(newTopologyYaml,
-          group.toString().replaceAll("(\\n){0,1}(\\s)*(-){1}", ""));
+      matcher.appendReplacement(
+          newTopologyYaml, group.toString().replaceAll("(\\n){0,1}(\\s)*(-){1}", ""));
     }
     matcher.appendTail(newTopologyYaml);
 
@@ -305,24 +322,28 @@ public class BuilderService {
    * Creates the payload that will be sent to the Orchestrator.
    *
    * @param deploymentContext The deployment object that represents the whole deployment process,
-   *        including the TOSCA topology represented as A4C Java classes
+   *     including the TOSCA topology represented as A4C Java classes
    * @param importIndigoCustomTypes The path to the repository (file) containing the TOSCA types
-   *        used by the Orchestrator
+   *     used by the Orchestrator
    * @param callbackUrl The url used by the orchestrator for the callback when a deployment is made
    * @return The textual representation of the topology that will be sent to the Orchestrator
    * @throws IOException when parsing the YAML topology
    */
-  public String buildApp(PaaSTopologyDeploymentContext deploymentContext,
-      String importIndigoCustomTypes, String callbackUrl) throws IOException {
+  public String buildApp(
+      PaaSTopologyDeploymentContext deploymentContext,
+      String importIndigoCustomTypes,
+      String callbackUrl)
+      throws IOException {
     Deployment deployment = new Deployment();
     deployment.setParameters(getParameters(deploymentContext));
     deployment.setCallback(callbackUrl);
     editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
         exportService.getYaml(getEditionContextManagerCsar(), getEditionContextManagerTopology());
-//    Csar csar = csarService.get(deploymentContext.getDeploymentTopology().getArchiveName(),
-//            deploymentContext.getDeploymentTopology().getArchiveVersion());
-    String yamlIndigoD = getIndigoDcTopologyYaml(deploymentContext, a4cTopologyYaml, importIndigoCustomTypes);
+    //    Csar csar = csarService.get(deploymentContext.getDeploymentTopology().getArchiveName(),
+    //            deploymentContext.getDeploymentTopology().getArchiveVersion());
+    String yamlIndigoD =
+        getIndigoDcTopologyYaml(deploymentContext, a4cTopologyYaml, importIndigoCustomTypes);
     deployment.setTemplate(yamlIndigoD);
     return deployment.toOrchestratorString();
   }
@@ -340,9 +361,9 @@ public class BuilderService {
    * generated by A4C.
    *
    * @param deploymentContext The deployment object that represents the whole deployment process,
-   *        including the TOSCA topology represented as A4C Java classes
+   *     including the TOSCA topology represented as A4C Java classes
    * @return A map having the keys as the input name and the values as the corresponding A4C objects
-   *         describing the TOSCA inputs
+   *     describing the TOSCA inputs
    */
   public Map<String, Object> getParameters(PaaSTopologyDeploymentContext deploymentContext) {
     final Map<String, Object> params = new HashMap<>();
