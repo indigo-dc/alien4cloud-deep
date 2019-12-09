@@ -37,6 +37,7 @@ ENV A4C_SPRING_OIDC_CLIENT_SECRET=<none>
 # at least one element is necessary
 ENV A4C_SPRING_OIDC_ROLES=<none>
 
+
 ENV A4C_ORCHESTRATOR_URL=https://deep-paas.cloud.ba.infn.it/orchestrator
 ENV A4C_ORCHESTRATOR_ENABLE_KEYSTORE=false
 ENV A4C_ORCHESTRATOR_KEYSTORE_PASSWORD=default
