@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import es.upv.indigodc.configuration.CloudConfigurationManager;
-import es.upv.indigodc.service.model.A4cOrchestratorInfo;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -211,13 +210,6 @@ public class BuilderService {
     //    metadata.put("a4c_deployment_paas_id", deploymentContext.getDeploymentPaaSId());
     //    metadata.put("a4c_deployment_id", deploymentContext.getDeploymentId());
     // TextNode description = (TextNode) root.get("description");
-    //    A4cOrchestratorInfo a4cOrchestratorInfo = new A4cOrchestratorInfo();
-    //    a4cOrchestratorInfo.setDeploymentId(deploymentContext.getDeploymentId());
-    //    a4cOrchestratorInfo.setDeploymentPaasId(deploymentContext.getDeploymentPaaSId());
-    //    a4cOrchestratorInfo.setLocationIds(deploymentContext.getDeployment().getLocationIds());
-    //
-    // a4cOrchestratorInfo.setOrchestratorId(deploymentContext.getDeployment().getOrchestratorId());
-    //    a4cOrchestratorInfo.setVersionId(deploymentContext.getDeployment().getVersionId());
 
     //    ObjectMapper mapperJson = new ObjectMapper();
     //    if (description == null) {
@@ -286,7 +278,7 @@ public class BuilderService {
 
   /**
    * Executes the uncomment of the TOSCA methods that where commented using {@link
-   * #encodeTOSCAMethods}.
+   * #encodeToscaMethods}.
    *
    * @param topologyYaml The modified TOSCA topology that is accepted by the Orchestrator
    * @return The textual representation of the TOSCA topology with uncommented TOSCA methods
@@ -321,11 +313,13 @@ public class BuilderService {
   /**
    * Creates the payload that will be sent to the Orchestrator.
    *
-   * @param deploymentContext The deployment object that represents the whole deployment process,
+   * @param deploymentContext The deployment object that represents
+   *     the whole deployment process,
    *     including the TOSCA topology represented as A4C Java classes
    * @param importIndigoCustomTypes The path to the repository (file) containing the TOSCA types
    *     used by the Orchestrator
-   * @param callbackUrl The url used by the orchestrator for the callback when a deployment is made
+   * @param callbackUrl The url used by the orchestrator
+   *     for the callback when a deployment is made
    * @return The textual representation of the topology that will be sent to the Orchestrator
    * @throws IOException when parsing the YAML topology
    */
@@ -337,10 +331,13 @@ public class BuilderService {
     Deployment deployment = new Deployment();
     deployment.setParameters(getParameters(deploymentContext));
     deployment.setCallback(callbackUrl);
-    editionContextManager.init(deploymentContext.getDeploymentTopology().getInitialTopologyId());
+    editionContextManager.init(
+          deploymentContext.getDeploymentTopology().getInitialTopologyId());
     String a4cTopologyYaml =
-        exportService.getYaml(getEditionContextManagerCsar(), getEditionContextManagerTopology());
-    //    Csar csar = csarService.get(deploymentContext.getDeploymentTopology().getArchiveName(),
+        exportService.getYaml(getEditionContextManagerCsar(),
+          getEditionContextManagerTopology());
+    //    Csar csar = csarService.get(deploymentContext
+    //            .getDeploymentTopology().getArchiveName(),
     //            deploymentContext.getDeploymentTopology().getArchiveVersion());
     String yamlIndigoD =
         getIndigoDcTopologyYaml(deploymentContext, a4cTopologyYaml, importIndigoCustomTypes);

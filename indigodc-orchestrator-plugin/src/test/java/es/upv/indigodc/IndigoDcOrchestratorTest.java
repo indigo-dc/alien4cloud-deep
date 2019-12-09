@@ -5,17 +5,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import es.upv.indigodc.IndigoDcOrchestrator;
 import es.upv.indigodc.service.BuilderServiceTest;
-import es.upv.indigodc.service.model.response.DeploymentOrchestrator;
-import es.upv.indigodc.service.model.response.GetDeploymentsResponse;
+import es.upv.indigodc.service.model.response.*;
 import org.alien4cloud.tosca.editor.EditionContextManager;
 import org.alien4cloud.tosca.exporter.ArchiveExportService;
 import org.alien4cloud.tosca.model.Csar;
@@ -50,6 +47,11 @@ import es.upv.indigodc.service.model.DeploymentInfo;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
 import es.upv.indigodc.service.model.StatusNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.oidc.deep.api.DeepOrchestrator;
 
 public class IndigoDcOrchestratorTest {
 
@@ -105,7 +107,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 
@@ -142,7 +146,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		Mockito.when(orchestratorConnector.callDeploy(Mockito.<String>any(), Mockito.<String>any()))
@@ -158,7 +164,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 
@@ -194,7 +202,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		Mockito.when(orchestratorConnector.callUndeploy(Mockito.<String>any(), Mockito.<String>any()))
@@ -210,7 +220,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		OrchestratorResponse response = new OrchestratorResponse(200,
@@ -222,23 +234,61 @@ public class IndigoDcOrchestratorTest {
 		idco.destroy();
 	}
 
-//	@Test
-//	public void getMockInstancesInformationNoErrorsTriggerGetTemplateUnkStatus() throws IllegalAccessException,
-//			PluginConfigurationException, NoSuchFieldException, OrchestratorIamException, IOException {
-//		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-//		GetDeploymentsResponse gdr = new GetDeploymentsResponse();
-//		List<DeploymentOrchestrator> deployments = new ArrayList<>();
-//		DeploymentOrchestrator deployment = Mockito.mock(DeploymentOrchestrator.class);
-//		Mockito.when(deployment.getUuid()).thenReturn("uuid");
-//		deployments.add(deployment);
-//		gdr.setContent(deployments);
-//
-//		OrchestratorResponse getDeploymentsResponse = new OrchestratorResponse(200,
-//				new StringBuilder(mapper.writeValueAsString(gdr)));
-//		OrchestratorResponse getTemplateResponse = new OrchestratorResponse(200, 
-//		        new StringBuilder());
-//		updateStatusGetTemplates(getDeploymentsResponse, getTemplateResponse);
-//	}
+	@Test
+	public void getMockInstancesInformationNoErrorsTriggerGetTemplateUnkStatus() throws IllegalAccessException,
+			PluginConfigurationException, NoSuchFieldException, OrchestratorIamException, IOException {
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+		GetDeploymentsResponse gdr = new GetDeploymentsResponse();
+		List<DeploymentOrchestrator> deployments = new ArrayList<>();
+		DeploymentOrchestrator deployment = getDeploymentOrchestrator("uuid");
+		deployments.add(deployment);
+		gdr.setContent(deployments);
+		gdr.setPage(new Page(1, 1, 1,1));
+
+		OrchestratorResponse getDeploymentsResponse = new OrchestratorResponse(200,
+				new StringBuilder(mapper.writeValueAsString(gdr)));
+		OrchestratorResponse getTemplateResponse = new OrchestratorResponse(200,
+		        new StringBuilder("metadata:\n  a4c_deployment_paas_id: " + ALIEN_DEPLOYMENT_ID));
+		updateStatusGetTemplates(getDeploymentsResponse, getTemplateResponse);
+	}
+
+	@Test
+	public void getMockInstancesInformationNoErrorsTriggerGetTemplateEmptyTemplate() throws IllegalAccessException,
+			PluginConfigurationException, NoSuchFieldException, OrchestratorIamException, IOException {
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+		GetDeploymentsResponse gdr = new GetDeploymentsResponse();
+		List<DeploymentOrchestrator> deployments = new ArrayList<>();
+		DeploymentOrchestrator deployment = getDeploymentOrchestrator("uuid");
+		deployments.add(deployment);
+		gdr.setContent(deployments);
+		gdr.setPage(new Page(0, 0, 1,1));
+
+		updateStatusGetTemplates(new OrchestratorResponse(200, new StringBuilder(mapper.writeValueAsString(gdr))),
+				new OrchestratorResponse(200, new StringBuilder()));
+	}
+
+	@Disabled
+	protected DeploymentOrchestrator getDeploymentOrchestrator(String uuid) {
+		DeploymentOrchestrator deployment = new DeploymentOrchestrator();
+		deployment.setUuid(uuid);
+		deployment.setCallback("callback");
+		deployment.setCloudProviderEndpoint(new CloudProviderEndpoint("cpEndpoint", "cpComputeServiceId",
+				"deploymentType", "vaultUri"));
+		deployment.setCloudProviderName("cloudProviderName");
+		deployment.setCreatedBy(new DeploymentCreator("issuer", "subject"));
+		deployment.setCreationTime(LocalDateTime.now().toString());
+		deployment.setUpdateTime(LocalDateTime.now().toString());
+		deployment.setLinks(Arrays.asList(new Link("rel", "href")));
+		deployment.setOutputs(new HashMap<String, Object>());
+		deployment.setStatus(IndigoDcDeploymentStatus.UNKNOWN);
+		deployment.setPhysicalId("physicalId");
+		deployment.setStatusReason("statusReason");
+		deployment.setTask("task");
+
+		return deployment;
+	}
 
 	@Test
 	public void getMockInstancesInformationNoErrorsInvalidA4CUuidDeployment()
@@ -247,7 +297,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 
@@ -289,7 +341,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		OrchestratorResponse response = new OrchestratorResponse(200,
@@ -308,7 +362,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(), Mockito.<String>any()))
@@ -324,7 +380,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSDeploymentContext deploymentContext = Mockito.mock(PaaSDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<DeploymentStatus> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		OrchestratorResponse response = new OrchestratorResponse(200,
@@ -344,7 +402,9 @@ public class IndigoDcOrchestratorTest {
 		Mockito.when(deploymentContext.getDeploymentPaaSId())
 				.thenReturn(ALIEN_DEPLOYMENT_ID_NULL_ORCHESTRATOR_DEPLOYMENT_ID);
 		IPaaSCallback<DeploymentStatus> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		OrchestratorResponse response = new OrchestratorResponse(200,
@@ -385,7 +445,9 @@ public class IndigoDcOrchestratorTest {
 		PaaSDeploymentContext deploymentContext = Mockito.mock(PaaSDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<DeploymentStatus> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		IndigoDcOrchestrator idco = setupIndigoDcOrchestratorWithTestConfigDeploy(deploymentContext, callback,
 				orchestratorConnector);
 		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(), Mockito.<String>any()))
@@ -401,20 +463,8 @@ public class IndigoDcOrchestratorTest {
 			throws JsonProcessingException, IOException, PluginConfigurationException, NoSuchFieldException,
 			OrchestratorIamException, IllegalArgumentException, IllegalAccessException {
 		IndigoDcOrchestrator idco = getIndigoDcOrchestratorWithTestConfig();
-		OrchestratorResponse response = new OrchestratorResponse(200,
-				new StringBuilder(
-						String.format("{\"uuid\": \"%s\", \"response\": {\"uuid\": \"none\"}, \"status\": \"%s\"}",
-								ORCHESTRATOR_DEPLOYMENT_ID, ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));// Mockito.mock(OrchestratorResponse.class);
-		// Mockito.when(response.getOrchestratorUuidDeployment()).thenReturn("orchestratorUuidDeployment");
-		Mockito.when(orchestratorConnector.callDeploy(Mockito.<String>any(), Mockito.<String>any()))
-				.thenReturn(response);
-		Mockito.when(orchestratorConnector.callDeploymentStatus(Mockito.<String>any(), Mockito.<String>any()))
-				.thenReturn(response);
-		Mockito.when(orchestratorConnector.callUndeploy(Mockito.<String>any(), Mockito.<String>any()))
-				.thenReturn(response);
-		Mockito.when(orchestratorConnector.callGetDeployments(Mockito.<String>any())).thenReturn(response);
-		Mockito.when(orchestratorConnector.callGetTemplate(Mockito.<String>any(), Mockito.<String>any()))
-				.thenReturn(response);
+		BuilderService builderService = Mockito.mock(BuilderService.class);
+		TestUtil.setPrivateField(idco, "builderService", builderService);
 
 		TestUtil.setPrivateField(idco, "orchestratorConnector", orchestratorConnector);
 
@@ -462,13 +512,66 @@ public class IndigoDcOrchestratorTest {
 	}
 
 	@Disabled
+	protected OrchestratorConnector setupSpiedOrchestratorConnector(ConnectionRepository connectionRepository)
+			throws OrchestratorIamException, NoSuchFieldException, IOException {
+		OrchestratorConnector orchestratorConnectorReal = new OrchestratorConnector();
+		TestUtil.setPrivateField(orchestratorConnectorReal, "repository", connectionRepository);
+		OrchestratorConnector orchestratorConnector = Mockito.spy(orchestratorConnectorReal);
+		OrchestratorResponse response = new OrchestratorResponse(200,
+				new StringBuilder(
+						String.format("{\"uuid\": \"%s\", \"response\": {\"uuid\": \"none\"}, \"status\": \"%s\"}",
+								ORCHESTRATOR_DEPLOYMENT_ID, ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS)));// Mockito.mock(OrchestratorResponse.class);
+		// Mockito.when(response.getOrchestratorUuidDeployment()).thenReturn("orchestratorUuidDeployment");
+		Mockito.doReturn(response).when(orchestratorConnector).callDeploy(Mockito.<String>any(), Mockito.<String>any());
+		Mockito.doReturn(response).when(orchestratorConnector).callDeploymentStatus(Mockito.<String>any(), Mockito.<String>any());
+		Mockito.doReturn(response).when(orchestratorConnector).callUndeploy(Mockito.<String>any(), Mockito.<String>any());
+		Mockito.doReturn(response).when(orchestratorConnector).callGetDeployments(Mockito.<String>any());
+		Mockito.doReturn(response).when(orchestratorConnector).callGetTemplate(Mockito.<String>any(), Mockito.<String>any());
+		return orchestratorConnector;
+	}
+
+	@Disabled
+	public static ConnectionRepository setupMockConnectionRepository(DeepOrchestrator deepOrchestrator) {
+		ConnectionRepository connectionRepository = Mockito.mock(ConnectionRepository.class);
+		Connection<DeepOrchestrator> connection = Mockito.mock(Connection.class);
+		Mockito.when(connection.hasExpired()).thenReturn(false);
+		Mockito.when(connection.getApi()).thenReturn(deepOrchestrator);
+		Mockito.when(connectionRepository.findPrimaryConnection(DeepOrchestrator.class)).thenReturn(connection);
+
+		return connectionRepository;
+	}
+
+	@Disabled
+	public static DeepOrchestrator setupMockDeepOrchestrator() throws IOException {
+		ResponseEntity<String> re = new ResponseEntity<>(String.format("{\"uuid\": \"%s\", \"response\": {\"uuid\": \"none\"}, \"status\": \"%s\"}",
+				ORCHESTRATOR_DEPLOYMENT_ID, ORCHESTRATOR_STATUS_DEPLOYMENT_CREATE_IN_PROGRESS),
+			HttpStatus.OK);
+		DeepOrchestrator deepOrchestrator = Mockito.mock(DeepOrchestrator.class);
+
+		Mockito.when(deepOrchestrator.callUndeploy(Mockito.<String>any(), Mockito.<String>any()))
+				.thenReturn(re);
+		Mockito.when(deepOrchestrator.callDeploy(Mockito.<String>any(), Mockito.<String>any()))
+				.thenReturn(re);
+		Mockito.when(deepOrchestrator.callDeploymentStatus(Mockito.<String>any(), Mockito.<String>any()))
+				.thenReturn(re);
+		Mockito.when(deepOrchestrator.callGetDeployments(Mockito.<String>any()))
+				.thenReturn(re);
+		Mockito.when(deepOrchestrator.callGetTemplate(Mockito.<String>any(), Mockito.<String>any()))
+				.thenReturn(re);
+
+		return deepOrchestrator;
+	}
+
+	@Disabled
 	protected void updateStatusGetTemplates(OrchestratorResponse getDeploymentsResponse,
 			OrchestratorResponse getTemplateResponse) throws OrchestratorIamException, NoSuchFieldException,
 			IOException, PluginConfigurationException, IllegalAccessException {
 		PaaSTopologyDeploymentContext deploymentContext = Mockito.mock(PaaSTopologyDeploymentContext.class);
 		Mockito.when(deploymentContext.getDeploymentPaaSId()).thenReturn(ALIEN_DEPLOYMENT_ID);
 		IPaaSCallback<Map<String, Map<String, InstanceInformation>>> callback = Mockito.mock(IPaaSCallback.class);
-		OrchestratorConnector orchestratorConnector = Mockito.mock(OrchestratorConnector.class);
+		DeepOrchestrator deepOrchestrator = setupMockDeepOrchestrator();
+		ConnectionRepository connectionRepository = setupMockConnectionRepository(deepOrchestrator);
+		OrchestratorConnector orchestratorConnector = setupSpiedOrchestratorConnector(connectionRepository);
 		Mockito.when(orchestratorConnector.callGetDeployments(Mockito.<String>any()))
 				.thenReturn(getDeploymentsResponse);
 		Mockito.when(orchestratorConnector.callGetTemplate(Mockito.any(), Mockito.<String>any()))

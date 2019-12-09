@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetDeploymentsResponse extends AbstractResponse {
+public class GetDeploymentsResponse {
 
   /** The list of links. */
   protected List<Link> links;

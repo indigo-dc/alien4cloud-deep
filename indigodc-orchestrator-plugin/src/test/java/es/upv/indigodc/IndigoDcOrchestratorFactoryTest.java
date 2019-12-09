@@ -3,6 +3,7 @@ package es.upv.indigodc;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.upv.indigodc.service.ArtifactRegistryService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -78,6 +79,22 @@ public class IndigoDcOrchestratorFactoryTest {
 		Mockito.when(bf.getBean(IndigoDcOrchestrator.class)).thenReturn(new IndigoDcOrchestrator());
 		TestUtil.setPrivateField(fact, "beanFactory", bf);
 		Assertions.assertEquals(fact.newInstance().getClass(), IndigoDcOrchestrator.class);
+	}
+
+	@Test
+	public void getArtifactSupport_with_empty_artifacts() {
+		ArtifactRegistryService ars = Mockito.mock(ArtifactRegistryService.class);
+		Mockito.when(ars.getSupportedArtifactTypes()).thenReturn(new String[0]);
+		IndigoDcOrchestratorFactory factory = new IndigoDcOrchestratorFactory();
+		TestUtil.setPrivateField(factory, "artifactRegistryService", ars);
+		Assertions.assertTrue(factory.getArtifactSupport().getTypes().length == 0);
+	}
+
+	@Test
+	public void getConfigurationType_is_CloudConfiguration() {
+		IndigoDcOrchestratorFactory factory = new IndigoDcOrchestratorFactory();
+		Assertions.assertTrue(factory.getConfigurationType().getCanonicalName()
+				.equals(CloudConfiguration.class.getCanonicalName()));
 	}
 
 }

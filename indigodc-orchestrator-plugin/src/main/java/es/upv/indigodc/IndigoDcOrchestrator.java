@@ -626,31 +626,38 @@ public class IndigoDcOrchestrator implements IOrchestratorPlugin<CloudConfigurat
         JsonNode root = mapper.readTree(response.getResponse().toString());
         //        JsonNode metadata = root.get("metadata");
         //        if (metadata != null) {
-        JsonNode metadata = root.get("metadata");
-        if (metadata != null) {
-          JsonNode deploymentPaasId = metadata.get(BuilderService.METADATA_A4C_DEPLOYMENT_PAAS_ID);
-          if (deploymentPaasId != null) {
-            DeploymentInfo tmpDi =
-                mappingService.getByA4CDeploymentPaasId(deploymentPaasId.asText());
+        if (root != null) {
+          JsonNode metadata = root.get("metadata");
+          if (metadata != null) {
+            JsonNode deploymentPaasId =
+                    metadata.get(BuilderService.METADATA_A4C_DEPLOYMENT_PAAS_ID);
+            if (deploymentPaasId != null) {
+              DeploymentInfo tmpDi =
+                      mappingService.getByA4CDeploymentPaasId(deploymentPaasId.asText());
 
-            if (tmpDi != null) {
-              tmpDi.setOrchestratorDeploymentIdIfNull(deployment.getUuid());
+              if (tmpDi != null) {
+                tmpDi.setOrchestratorDeploymentIdIfNull(deployment.getUuid());
+              } else {
+                log.warn(
+                        "Update deployment statuses encountered a deployment with template name "
+                                + deploymentPaasId.asText()
+                                + "that is not registered in the mapping service");
+              }
             } else {
               log.warn(
-                  "Update deployment statuses encountered a deployment with template name "
-                      + deploymentPaasId.asText()
-                      + "that is not registered in the mapping service");
+                      "Unable to find additional information needed "
+                              + "to match the orchestrator deployment with what we have on A4C");
             }
           } else {
             log.warn(
-                "Unable to find additional information needed "
-                    + "to match the orchestrator deployment with what we have on A4C");
+                    "Deployment with UUID "
+                            + deployment.getUuid()
+                            + " doesn't have A4C info in the metadata");
           }
         } else {
           log.warn(
-              "Deployment with UUID "
-                  + deployment.getUuid()
-                  + " doesn't have A4C info in the metadata");
+                  "Empty response for deployment with UUID "
+                          + deployment.getUuid());
         }
 
       }
