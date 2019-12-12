@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Information about the creator of a deployment
- */
+/** Information about the creator of a deployment. */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +14,6 @@ import lombok.Setter;
 @JsonIgnoreProperties
 public class DeploymentCreator {
 
-    protected String issuer;
-    protected String subject;
-
+  protected String issuer;
+  protected String subject;
 }

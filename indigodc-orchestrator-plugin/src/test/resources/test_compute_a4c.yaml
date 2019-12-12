@@ -12,6 +12,10 @@ imports:
   - tosca-normative-types:1.0.0-ALIEN14
 
 topology_template:
+  inputs:
+    min_instances:
+      type: integer
+      description: "none"
   node_templates:
     Compute:
       metadata:
@@ -25,7 +29,7 @@ topology_template:
       capabilities:
         scalable:
           properties:
-            min_instances: 1
+            min_instances: { get_input: min_instances }
             max_instances: 1
             count: 1
             default_instances: 1

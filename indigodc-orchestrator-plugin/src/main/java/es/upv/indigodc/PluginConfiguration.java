@@ -16,25 +16,25 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableAsync
 @EnableScheduling
 public class PluginConfiguration {
-    
-//    @Bean(name = "statusObtainerScheduler")
-//    @Scope("prototype")
-//    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
-//        ThreadPoolTaskScheduler sched = new ThreadPoolTaskScheduler();
-//        sched.setPoolSize(1);
-//        sched.initialize();
-//        return sched;
-//    }
-    
-//    @Bean(name = "statusObtainerScheduler")
-//   // @Scope("prototype")
-//    public Executor taskExecutor() {
-//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-//        executor.setCorePoolSize(2);
-//        executor.setMaxPoolSize(2);
-//        executor.setQueueCapacity(500);
-//        executor.setThreadNamePrefix("IndigoDCOrchestrator-");
-//        executor.initialize();
-//        return executor;
-//    }
+
+  //    @Bean(name = "statusObtainerScheduler")
+  //    @Scope("prototype")
+  //    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+  //        ThreadPoolTaskScheduler sched = new ThreadPoolTaskScheduler();
+  //        sched.setPoolSize(1);
+  //        sched.initialize();
+  //        return sched;
+  //    }
+
+  //    @Bean(name = "statusObtainerScheduler")
+  //   // @Scope("prototype")
+  //    public Executor taskExecutor() {
+  //        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+  //        executor.setCorePoolSize(2);
+  //        executor.setMaxPoolSize(2);
+  //        executor.setQueueCapacity(500);
+  //        executor.setThreadNamePrefix("IndigoDCOrchestrator-");
+  //        executor.initialize();
+  //        return executor;
+  //    }
 }

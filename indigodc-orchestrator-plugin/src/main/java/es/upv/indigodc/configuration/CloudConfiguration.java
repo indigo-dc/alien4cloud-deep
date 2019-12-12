@@ -16,37 +16,37 @@ import lombok.Setter;
 @Getter
 @Setter
 @FormProperties({
-//"clientId", "clientSecret", "tokenEndpoint", "tokenEndpointCert", "clientScopes", "iamHost", "iamHostCert",
-    "orchestratorEndpoint", "orchestratorEndpointCert", 
-    "orchestratorPollInterval", "importIndigoCustomTypes",
-        "callbackUrl"
+          // "clientId", "clientSecret", 
+          // "tokenEndpoint", "tokenEndpointCert", "clientScopes", "iamHost",
+          // "iamHostCert",
+          "orchestratorEndpoint",
+          "orchestratorEndpointCert",
+          "orchestratorPollInterval",
+          "importIndigoCustomTypes",
+          "callbackUrl"
 })
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloudConfiguration {
 
-//  @NotNull
-//  private String clientId;
-//  @NotNull
-//  private String clientSecret;
-//  @NotNull
-//  private String tokenEndpoint;
-//  @NotNull
-//  private String tokenEndpointCert;
-//  @NotNull
-//  private String iamHost;
-//  @NotNull
-//  private String iamHostCert;
-//  @NotNull
-//  private String clientScopes;
-  
-  @NotNull
-  private String orchestratorEndpoint;
-  @NotNull
-  private String orchestratorEndpointCert;
+  //  @NotNull
+  //  private String clientId;
+  //  @NotNull
+  //  private String clientSecret;
+  //  @NotNull
+  //  private String tokenEndpoint;
+  //  @NotNull
+  //  private String tokenEndpointCert;
+  //  @NotNull
+  //  private String iamHost;
+  //  @NotNull
+  //  private String iamHostCert;
+  //  @NotNull
+  //  private String clientScopes;
+
+  @NotNull private String orchestratorEndpoint;
+  @NotNull private String orchestratorEndpointCert;
   private int orchestratorPollInterval;
-  @NotNull
-  private String importIndigoCustomTypes;
-  @NotNull
-  private String callbackUrl;
+  @NotNull private String importIndigoCustomTypes;
+  @NotNull private String callbackUrl;
 }

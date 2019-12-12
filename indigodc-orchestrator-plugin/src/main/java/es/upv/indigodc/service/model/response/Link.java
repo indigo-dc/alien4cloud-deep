@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * A link container.
- */
+/** A link container. */
 @Getter
 @Setter
 @JsonIgnoreProperties
@@ -16,12 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Link {
 
-    /**
-     * The rel field.
-     */
-    protected String rel;
-    /**
-     * The href.
-     */
-    protected String href;
+  /** The rel field. */
+  protected String rel;
+  /** The href. */
+  protected String href;
 }

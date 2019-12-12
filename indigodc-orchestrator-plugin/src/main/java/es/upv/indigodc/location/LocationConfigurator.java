@@ -35,13 +35,11 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
   /** The name of the location. */
   public static final String LOCATION_TYPE = "Deep Orchestrator Location";
 
-  @Inject
-  protected ManagedPlugin selfContext;
+  @Inject protected ManagedPlugin selfContext;
 
   // @Inject private ArchiveParser archiveParser;
 
-  @Inject
-  protected MatchingConfigurationsParser matchingConfigurationsParser;
+  @Inject protected MatchingConfigurationsParser matchingConfigurationsParser;
 
   protected List<PluginArchive> archives;
   protected Map<String, MatchingConfiguration> matchingConfigurations;
@@ -70,19 +68,19 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
       ILocationResourceAccessor locationResourceAccessor) {
     return Lists.newArrayList();
   }
-  
+
   @Override
   public Map<String, MatchingConfiguration> getMatchingConfigurations() {
-     return getMatchingConfigurations(getMatchingConfigurationsPath());
+    return getMatchingConfigurations(getMatchingConfigurationsPath());
   }
 
   /**
    * Returns the matching nodes provided by a location.
    *
    * @param matchingConfigRelativePath file containing the the rules used to match the nodes of the
-   *        location
+   *     location
    * @return A list of locations resources templates that users can define or null if the plugin
-   *         doesn't support auto-configuration of resources..
+   *     doesn't support auto-configuration of resources..
    */
   protected Map<String, MatchingConfiguration> getMatchingConfigurations(
       String matchingConfigRelativePath) {
@@ -90,10 +88,12 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
       try {
         Path matchingConfigPath = selfContext.getPluginPath().resolve(matchingConfigRelativePath);
         if (Files.exists(matchingConfigPath)) {
-          ParsingResult<MatchingConfigurations> pr = matchingConfigurationsParser.parseFile(matchingConfigPath);
+          ParsingResult<MatchingConfigurations> pr =
+              matchingConfigurationsParser.parseFile(matchingConfigPath);
           this.matchingConfigurations = pr.getResult().getMatchingConfigurations();
-        } else
+        } else {
           return null;
+        }
       } catch (InvalidPathException | ParsingException er) {
         er.printStackTrace();
         return null;
@@ -101,9 +101,9 @@ public class LocationConfigurator implements ILocationConfiguratorPlugin {
     }
     return matchingConfigurations;
   }
-  
+
   protected String getMatchingConfigurationsPath() {
-	  return "provider/common/matching/config.yml";
+    return "provider/common/matching/config.yml";
   }
 
   protected List<String> getAllResourcesTypes() {

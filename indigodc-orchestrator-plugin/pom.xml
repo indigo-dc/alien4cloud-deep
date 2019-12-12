@@ -26,7 +26,7 @@
         <provider.common.clientSecret>none</provider.common.clientSecret>
         <provider.common.user>none</provider.common.user>
         <provider.common.password>none</provider.common.password>
-        <coverage.threshold.percentage>0.7</coverage.threshold.percentage>
+        <coverage.threshold.percentage>0.75</coverage.threshold.percentage>
         <!--checkstyle.config.location>${basedir}/checkstyle_google.xml</checkstyle.config.location -->
 
         <!-- Libraries versions section -->
@@ -61,8 +61,8 @@
         <v.org.apache.maven.plugins.maven-javadoc-plugin>2.9</v.org.apache.maven.plugins.maven-javadoc-plugin>
         <v.org.codehaus.mojo.build-helper-maven-plugin>1.5</v.org.codehaus.mojo.build-helper-maven-plugin>
         <v.org.apache.maven.plugins.maven-jar-plugin>2.6</v.org.apache.maven.plugins.maven-jar-plugin>
-        <v.org.apache.maven.plugins.maven-checkstyle-plugin>3.0.0</v.org.apache.maven.plugins.maven-checkstyle-plugin>
-        <v.com.puppycrawl.tools.checkstyle>8.20</v.com.puppycrawl.tools.checkstyle>
+        <v.org.apache.maven.plugins.maven-checkstyle-plugin>3.1.0</v.org.apache.maven.plugins.maven-checkstyle-plugin>
+        <v.com.puppycrawl.tools.checkstyle>8.26</v.com.puppycrawl.tools.checkstyle>
     </properties>
 
 
@@ -279,89 +279,89 @@
 
         </resources>
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
-<!--                <version>${v.org.apache.maven.plugins.maven-checkstyle-plugin}</version>-->
-<!--                <dependencies>-->
-<!--                    <dependency>-->
-<!--                        <groupId>com.puppycrawl.tools</groupId>-->
-<!--                        <artifactId>checkstyle</artifactId>-->
-<!--                        <version>${v.com.puppycrawl.tools.checkstyle}</version>-->
-<!--                    </dependency>-->
-<!--                </dependencies>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>validate</id>-->
-<!--                        <phase>validate</phase>-->
-<!--                        <configuration>-->
-<!--                            <logViolationsToConsole>true</logViolationsToConsole>-->
-<!--                            <violationSeverity>warning</violationSeverity>-->
-<!--                            <encoding>UTF-8</encoding>-->
-<!--                            <consoleOutput>true</consoleOutput>-->
-<!--                            <failsOnError>false</failsOnError>-->
-<!--                            <linkXRef>false</linkXRef>-->
-<!--                            <configLocation>google_checks.xml</configLocation>-->
-<!--                        </configuration>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-checkstyle-plugin</artifactId>
+               <version>${v.org.apache.maven.plugins.maven-checkstyle-plugin}</version>
+               <dependencies>
+                   <dependency>
+                       <groupId>com.puppycrawl.tools</groupId>
+                       <artifactId>checkstyle</artifactId>
+                       <version>${v.com.puppycrawl.tools.checkstyle}</version>
+                   </dependency>
+               </dependencies>
+               <executions>
+                   <execution>
+                       <id>validate</id>
+                       <phase>validate</phase>
+                       <configuration>
+                           <logViolationsToConsole>true</logViolationsToConsole>
+                           <violationSeverity>warning</violationSeverity>
+                           <encoding>UTF-8</encoding>
+                           <consoleOutput>true</consoleOutput>
+                           <failsOnError>false</failsOnError>
+                           <linkXRef>false</linkXRef>
+                           <configLocation>google_checks.xml</configLocation>
+                       </configuration>
+                       <goals>
+                           <goal>check</goal>
+                       </goals>
+                   </execution>
+               </executions>
+           </plugin>
 
 
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                <version>${v.org.jacoco.jacoco-maven-plugin}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>pre-unit-test</id>-->
-<!--                        <goals>-->
-<!--                            <goal>prepare-agent</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <destFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</destFile>-->
-<!--                            <propertyName>surefireArgLine</propertyName>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>check</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <dataFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</dataFile>-->
-<!--                            <rules>-->
-<!--                                <rule implementation="org.jacoco.maven.RuleConfiguration">-->
-<!--                                    <element>BUNDLE</element>-->
-<!--                                    <limits>-->
-<!--                                        <limit implementation="org.jacoco.report.check.Limit">-->
-<!--                                            <counter>INSTRUCTION</counter>-->
-<!--                                            <value>COVEREDRATIO</value>-->
-<!--                                            <minimum>${coverage.threshold.percentage}</minimum>-->
-<!--                                        </limit>-->
-<!--                                    </limits>-->
-<!--                                </rule>-->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${v.org.jacoco.jacoco-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</destFile>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</dataFile>
+                            <rules>
+                                <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit implementation="org.jacoco.report.check.Limit">
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.threshold.percentage}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
 
-<!--                            </rules>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>post-unit-test</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>report</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <dataFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</dataFile>-->
-<!--                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-deep</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+                            </rules>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-deep.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-deep</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
 
             <plugin>

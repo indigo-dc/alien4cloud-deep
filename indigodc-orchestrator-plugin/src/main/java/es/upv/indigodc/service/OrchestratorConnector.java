@@ -3,6 +3,9 @@ package es.upv.indigodc.service;
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.service.model.OrchestratorIamException;
 import es.upv.indigodc.service.model.OrchestratorResponse;
+import java.io.IOException;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +15,6 @@ import org.springframework.social.oidc.deep.api.DeepOrchestrator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import java.io.IOException;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 /**
  * Manage and do the calls to the REST API exposed by the IndigoDC Orchestrator; Connect to the
@@ -24,20 +24,21 @@ import java.util.logging.Logger;
  */
 @Slf4j
 @Service("orchestrator-connector")
-public class OrchestratorConnector {  
-  
+public class OrchestratorConnector {
+
   /** Web service path for deployments operations; It is appended to the orchestrator endpoint. */
   public static final String WS_PATH_DEPLOYMENTS = "/deployments";
 
   private static final Logger LOGGER = Logger.getLogger(OrchestratorConnector.class.getName());
 
-  @Autowired
-  protected ConnectionRepository repository;
+  @Autowired protected ConnectionRepository repository;
 
   private DeepOrchestrator getClient() {
-    Connection<DeepOrchestrator> connection = repository.findPrimaryConnection(DeepOrchestrator.class);
-    if (connection.hasExpired())
+    Connection<DeepOrchestrator> connection =
+        repository.findPrimaryConnection(DeepOrchestrator.class);
+    if (connection.hasExpired()) {
       connection.refresh();
+    }
     DeepOrchestrator deepOrchestrator = connection != null ? connection.getApi() : null;
     return deepOrchestrator;
   }
@@ -48,10 +49,10 @@ public class OrchestratorConnector {
    *
    * @return The response from the orchestrator
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *         data.
+   *     data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *         and 299.
+   *     and 299.
    */
   public OrchestratorResponse callGetDeployments(String orchestrarorUrl)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
@@ -63,34 +64,33 @@ public class OrchestratorConnector {
    * Orchestrator.
    *
    * @param yamlTopology The actual topology accepted by the orchestrator. It is a string formated
-   *        and packed for the orchestrator e.g. new lines are replaced with their representation of
-   *        '\n'.
+   *     and packed for the orchestrator e.g. new lines are replaced with their representation of
+   *     '\n'.
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *         data.
+   *     data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *         and 299.
+   *     and 299.
    */
-  public OrchestratorResponse callDeploy(String orchestratorUrl,
-      String yamlTopology)
+  public OrchestratorResponse callDeploy(String orchestratorUrl, String yamlTopology)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call Deploy");
     log.info("Topology to be sent to the orchestrator: \n" + yamlTopology);
-    return buildResponse(() ->
-            getClient().callDeploy(orchestratorUrl, yamlTopology));
+    return buildResponse(() -> getClient().callDeploy(orchestratorUrl, yamlTopology));
   }
 
   /**
    * Get the status of a deployment with a given deployment ID.
    *
-   * @param deploymentId The id of the deployment given by the orchestrator we need the information for
+   * @param deploymentId The id of the deployment given by the orchestrator we need the information
+   *     for
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *         data.
+   *     data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *         and 299.
+   *     and 299.
    */
   public OrchestratorResponse callDeploymentStatus(String orchestrarorUrl, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
@@ -99,21 +99,22 @@ public class OrchestratorConnector {
   }
 
   /**
+   * Obtain the TOSCA YAML template for a deployment from the Orchestrator.
    *
-   * @param deploymentId The id of the deployment given by the orchestrator we need the information for
+   * @param deploymentId The id of the deployment given by the orchestrator we need the information
+   *     for
    * @return The orchestrator REST response to this call
-   * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *    *         data.
+   * @throws IOException when cannot read from the stream sent by the server or cannot send the *
+   *     data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
-   * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *    *         and 299.
+   * @throws OrchestratorIamException when response code from the orchestrator is not between 200 *
+   *     and 299.
    */
   public OrchestratorResponse callGetTemplate(String orchestrarorUrl, String deploymentId)
-          throws IOException, NoSuchFieldException, OrchestratorIamException {
+      throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call get template for UUID " + deploymentId);
     return buildResponse(() -> getClient().callGetTemplate(orchestrarorUrl, deploymentId));
   }
-
 
   /**
    * Invoke the undeploy REST API for a given deployment ID.
@@ -121,19 +122,19 @@ public class OrchestratorConnector {
    * @param deploymentId The id of the deployment we need to undeploy
    * @return The orchestrator REST response to this call
    * @throws IOException when cannot read from the stream sent by the server or cannot send the
-   *         data.
+   *     data.
    * @throws NoSuchFieldException when cannot parse the JSOn response.
    * @throws OrchestratorIamException when response code from the orchestrator is not between 200
-   *         and 299.
+   *     and 299.
    */
-  public OrchestratorResponse callUndeploy(String orchestrarorUrl,
-      String deploymentId)
+  public OrchestratorResponse callUndeploy(String orchestrarorUrl, String deploymentId)
       throws IOException, NoSuchFieldException, OrchestratorIamException {
     log.info("call undeploy");
     return buildResponse(() -> getClient().callUndeploy(orchestrarorUrl, deploymentId));
   }
 
-  private OrchestratorResponse buildResponse(Supplier<ResponseEntity<String>> func) throws OrchestratorIamException, IOException {
+  private OrchestratorResponse buildResponse(Supplier<ResponseEntity<String>> func)
+      throws OrchestratorIamException, IOException {
     try {
       ResponseEntity<String> response = func.get();
       int responseCode = response.getStatusCode().value();
@@ -142,7 +143,8 @@ public class OrchestratorConnector {
       }
       return new OrchestratorResponse(response);
     } catch (HttpStatusCodeException e) {
-      throw new OrchestratorIamException(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseBodyAsString());
+      throw new OrchestratorIamException(
+          e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseBodyAsString());
     }
   }
 }

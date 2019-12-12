@@ -1,8 +1,8 @@
 package es.upv.indigodc.location;
 
 import es.upv.indigodc.TestUtil;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 

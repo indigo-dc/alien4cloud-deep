@@ -96,38 +96,38 @@ public class Util {
     try {
       switch (IndigoDcDeploymentStatus.valueOf(status)) {
         case UNKNOWN:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.UNKNOWN.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.UNKNOWN.name());
         case CREATE_COMPLETE:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.CREATE_COMPLETE.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.CREATE_COMPLETE.name());
         case CREATE_FAILED:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.CREATE_FAILED.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.CREATE_FAILED.name());
         case CREATE_IN_PROGRESS:
-          return new InstanceStatusInfo(InstanceStatus.PROCESSING,
-              IndigoDcDeploymentStatus.CREATE_IN_PROGRESS.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.CREATE_IN_PROGRESS.name());
         case DELETE_COMPLETE:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.DELETE_COMPLETE.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.DELETE_COMPLETE.name());
         case DELETE_FAILED:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.DELETE_FAILED.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.DELETE_FAILED.name());
         case DELETE_IN_PROGRESS:
-          return new InstanceStatusInfo(InstanceStatus.PROCESSING,
-              IndigoDcDeploymentStatus.DELETE_IN_PROGRESS.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.DELETE_IN_PROGRESS.name());
         case UPDATE_COMPLETE:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.UPDATE_COMPLETE.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.UPDATE_COMPLETE.name());
         case UPDATE_FAILED:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.UPDATE_FAILED.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.UPDATE_FAILED.name());
         case UPDATE_IN_PROGRESS:
-          return new InstanceStatusInfo(InstanceStatus.PROCESSING,
-              IndigoDcDeploymentStatus.UPDATE_IN_PROGRESS.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.UPDATE_IN_PROGRESS.name());
         case UNDEPLOYED:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-                  IndigoDcDeploymentStatus.UNDEPLOYED.name());
+          return new InstanceStatusInfo(
+              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.UNDEPLOYED.name());
         default:
           throw new StatusNotFoundException(status);
       }
@@ -135,45 +135,51 @@ public class Util {
       throw new StatusNotFoundException(status);
     }
   }
-  
-  public static InstanceStatusInfo deploymentStatusToInstanceStatus(final DeploymentStatus status)
-      throws StatusNotFoundException {
-    try {
-      switch (status) {
-        case UNKNOWN:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.UNKNOWN.name());
-        case DEPLOYED:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.CREATE_COMPLETE.name());
-        case FAILURE:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.CREATE_FAILED.name());
-        case DEPLOYMENT_IN_PROGRESS:
-          return new InstanceStatusInfo(InstanceStatus.PROCESSING,
-              IndigoDcDeploymentStatus.CREATE_IN_PROGRESS.name());
-        case UNDEPLOYED:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.UNDEPLOYED.name());
-        case UNDEPLOYMENT_IN_PROGRESS:
-          return new InstanceStatusInfo(InstanceStatus.PROCESSING,
-              IndigoDcDeploymentStatus.DELETE_IN_PROGRESS.name());
-        case UPDATED:
-          return new InstanceStatusInfo(InstanceStatus.SUCCESS,
-              IndigoDcDeploymentStatus.UPDATE_COMPLETE.name());
-        case UPDATE_FAILURE:
-          return new InstanceStatusInfo(InstanceStatus.FAILURE,
-              IndigoDcDeploymentStatus.UPDATE_FAILED.name());
-        case UPDATE_IN_PROGRESS:
-          return new InstanceStatusInfo(InstanceStatus.PROCESSING,
-              IndigoDcDeploymentStatus.UPDATE_IN_PROGRESS.name());
-        default:
-          throw new StatusNotFoundException(status.name());
-      }
-    } catch (IllegalArgumentException ex) {
-      throw new StatusNotFoundException(status.name());
-    }
-  }
-  
-  
+
+  //  /**
+  //   * Convert between the Alien4cCloud DeploymentStatus and the ones used by the Orchestrator.
+  //   *
+  //   * @param status the Alien4cCloud status
+  //   * @return the status in the Orchestrator format
+  //   * @throws StatusNotFoundException The status is not handled
+  //   */
+  //  public static InstanceStatusInfo deploymentStatusToInstanceStatus(
+  //    final DeploymentStatus status)
+  //      throws StatusNotFoundException {
+  //    try {
+  //      switch (status) {
+  //        case UNKNOWN:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.UNKNOWN.name());
+  //        case DEPLOYED:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.CREATE_COMPLETE.name());
+  //        case FAILURE:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.CREATE_FAILED.name());
+  //        case DEPLOYMENT_IN_PROGRESS:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.CREATE_IN_PROGRESS.name());
+  //        case UNDEPLOYED:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.UNDEPLOYED.name());
+  //        case UNDEPLOYMENT_IN_PROGRESS:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.DELETE_IN_PROGRESS.name());
+  //        case UPDATED:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.SUCCESS, IndigoDcDeploymentStatus.UPDATE_COMPLETE.name());
+  //        case UPDATE_FAILURE:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.FAILURE, IndigoDcDeploymentStatus.UPDATE_FAILED.name());
+  //        case UPDATE_IN_PROGRESS:
+  //          return new InstanceStatusInfo(
+  //              InstanceStatus.PROCESSING, IndigoDcDeploymentStatus.UPDATE_IN_PROGRESS.name());
+  //        default:
+  //          throw new StatusNotFoundException(status.name());
+  //      }
+  //    } catch (IllegalArgumentException ex) {
+  //      throw new StatusNotFoundException(status.name());
+  //    }
+  //  }
 }
