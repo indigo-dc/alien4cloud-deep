@@ -1,21 +1,62 @@
 # Alien4Cloud DEEP Docker
 
+
 [![GitHub license](https://img.shields.io/github/license/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)](https://github.com/indigo-dc/alien4cloud-deep/blob/master/LICENSE)
 ![Repo size](https://img.shields.io/github/repo-size/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)
 [![Build Status](https://jenkins.indigo-datacloud.eu/buildStatus/icon?job=Pipeline-as-code/alien4cloud-deep/master)](https://jenkins.indigo-datacloud.eu/job/Pipeline-as-code/job/alien4cloud-deep/job/master/)
 
 
+
+Documentation version 3.0.0
+
+[Intro](#intro)  
+[Administration Guide](#administration-guide)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Getting Started](#getting-started)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Prerequisites](#prerequisites)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Docker Container](#docker-container)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Parameters](#parameters)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Variables](#variables)
+&nbsp;&nbsp;&nbsp;&nbsp;[Settings Manager](#settings-manager)
+&nbsp;&nbsp;&nbsp;&nbsp;[SSL](#ssl)
+&nbsp;&nbsp;&nbsp;&nbsp;[Deployment](#deployment)
+&nbsp;&nbsp;&nbsp;&nbsp;[Upgrade](#upgrade)
+&nbsp;&nbsp;&nbsp;&nbsp;[REST API](#rest-api)
+&nbsp;&nbsp;&nbsp;&nbsp;[Usage](#usage)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Plugin Activation](#plugin-activation)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Instance Creation](#instance-creation)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Users](#users)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Plugin Parameters](#plugin-parameters)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Obtain Certificate](#obtain-certificate)
+&nbsp;&nbsp;&nbsp;&nbsp;[Testing](#testing)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Coverage](#coverage)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Style](#style)
+[User Guide](#user-guide)
+&nbsp;&nbsp;&nbsp;&nbsp;[Registration](#registration)
+&nbsp;&nbsp;&nbsp;&nbsp;[Login](#login)
+&nbsp;&nbsp;&nbsp;&nbsp;[Topology](#topology)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Creation](#creation)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Editor](#editor)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[UI Editor](#ui-editor)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Text Editor](#text-editor)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Inputs](#inputs)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Deployment](#deployment)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Undeployment](#undeployment)
+[Authors](#authors)
+[License](#license)
+[Acknowledgments](#acknowledgments)
+[Resources](#resources)
+
+## Intro
+
+([Top](#alien4cloud-deep-docker))
 This repository contains the necessary parts needed to create a Docker image holding the Alien4cloud application, along with the DEEP - Indigo Data Cloud TOSCA types, and the plugin which connects Alien4Cloud (A4C) to the orchestrator used in DEEP.
 Each time the Docker image is created, the latest version of the normative TOSCA used by IndigoDataCloud and the latest version of the plugin are integrated in this image.
-
-## Documentation version
-
-2.1.0
 
 ## Administration Guide
 
 ### Getting Started
 
+([Top](#alien4cloud-deep-docker))
 Right now, we use a customized version of A4C 2.0.
 The code for our version is in the *a4c* directory in the root of this repository.
 The plugin code is in the *indigodc-orchestrator-plugin* directory.
@@ -26,13 +67,21 @@ The default username / password are *admin*/*admin*. Please change them!
 
 ### Prerequisites
 
+([Top](#alien4cloud-deep-docker))
 Aside of the official requirements found at [[Res2]](#res2), Alien4Cloud needs at least 3GB of RAM to run and a dual core CPU.
 
 You also need Docker, we tested with the CE version 17.03 and above.
 We strongly advise you to install the latest version from the official Docker site.
 
-### Docker Arguments
+### Docker Container
 
+([Top](#alien4cloud-deep-docker))
+This repository contains a *Dockerfile* that allows the creation of a container with A4C ready to be used by the final user.
+Due to various requirements determined during development, we expose a number of container runtime parameters and environment variables that allow the customization of the container.
+
+#### Parameters
+
+([Top](#alien4cloud-deep-docker))
 We defined a number of constants to allow easy parametrisation of the container.
 
 * **user_uid** - the UID of the non-priviledged user that runs the A4C server
@@ -53,8 +102,9 @@ We defined a number of constants to allow easy parametrisation of the container.
 * **templates_deep_oc_branch** - The branch for the templates used in the DEEP project
 * **a4c_sh_name** - The name of the script that contains the A4C init commands and the launch itself
 
-### Docker Variables
+#### Variables
 
+([Top](#alien4cloud-deep-docker))
 The docker file contains environment variables.
 Some of them can be modified by the user when running a container.
 These are denoted by RW (read-write).
@@ -100,6 +150,7 @@ If the name of a variable is the same as the name of an argument, but with capit
 
 ### Settings Manager
 
+([Top](#alien4cloud-deep-docker))
 We included a small Java utility program that runs each time the container is started.
 It takes some of the values defined by the Docker ENV variables listed earlier, and modifies the config files of the a4c instance.
 The **A4C_ADMIN_USERNAME** defines a custom name for the admin user.
@@ -109,14 +160,16 @@ The code is in the _alien4cloud-settings-manager_ folder.
 We also use this application to convert the certificates provided as detailed in the next sections to a Java storing format.
 You can protect this way the a4c communication with SSL.
 
-### Security
+### SSL
 
+([Top](#alien4cloud-deep-docker))
 Skip this section if you don't want to deploy a secured A4C instance.
 
 If you want to activate the HTTPS protocol for the A4C instance, you must set the **A4C_ENABLE_SSL** ENV to "true", without double quotes. Furthermore, you must mount an external volume containing a ca pem certificate (with the file name controlled by the **A4C_PEM_CERT_FILE** ENV) and a ca pem key (with the file name controlled by the **A4C_PEM_KEY_FILE** ENV). Finally, since the previous two files must be just file names, you can control the path inside the container for the mount using the **A4C_CERTS_ROOT_PATH** ENV. You can control the Java keystore password by the means of the **A4C_KEY_STORE_PASSWORD** ENV, and set the password for your key using the **A4C_KEY_PASSWORD** ENV. Take a look at the examples in the _Deployment_ section.
 
 ### Deployment
 
+([Top](#alien4cloud-deep-docker))
 You can get the docker image from DockerHub IndigoDC repo [[Res5]](#res5).
 
 
@@ -132,7 +185,7 @@ docker pull indigodatacloud/alien4cloud-deep
 docker run -d --name alien4cloud-deep  -p ${A4C_PORT_HTTP}:${A4C_PORT_HTTP} -e ${A4C_SPRING_OIDC_CLIENT_ID}=<IAM client ID> -e ${A4C_SPRING_OIDC_CLIENT_SECRET}=<IAM client secret> -e ${A4C_SPRING_OIDC_ROLES}=<list of roles>  indigodatacloud/alien4cloud-deep
 ```
 
-where ${A4C_PORT}, ${A4C_SPRING_OIDC_CLIENT_ID}, ${A4C_SPRING_OIDC_CLIENT_SECRET}, ${A4C_SPRING_OIDC_ROLES} are explained in the *Docker Variables* section of this README.
+where the **A4C_PORT**, **A4C_SPRING_OIDC_CLIENT_ID**, **A4C_SPRING_OIDC_CLIENT_SECRET**, **A4C_SPRING_OIDC_ROLES** run parameter values are explained in the *Docker Variables* section of this README.
 
 * Follow the logs (and wait for the web app to start up):
 
@@ -146,7 +199,7 @@ docker logs -f alien4cloud-deep
 docker run -d --name alien4cloud-deep  -p ${A4C_PORT_HTTP}:${A4C_PORT_HTTP} -e ${A4C_SPRING_OIDC_CLIENT_ID}=<IAM client ID> -e ${A4C_SPRING_OIDC_CLIENT_SECRET}=<IAM client secret> -e ${A4C_SPRING_OIDC_ROLES}=<list of roles> -e A4C_RUNTIME_DIR=${A4C_RUNTIME_DIR_MINE} -v /mnt/a4c_runtime:${A4C_RUNTIME_DIR_MINE} indigodatacloud/alien4cloud-deep
 ```
 
-where ${A4C_VOLUME_DIR}, ${A4C_PORT}, ${A4C_SPRING_OIDC_CLIENT_ID}, ${A4C_SPRING_OIDC_CLIENT_SECRET}, ${A4C_SPRING_OIDC_ROLES} are explained in the *Docker Variables* section of this README.
+where the **A4C_VOLUME_DIR**, **A4C_PORT**, **A4C_SPRING_OIDC_CLIENT_ID**, **A4C_SPRING_OIDC_CLIENT_SECRET**, **A4C_SPRING_OIDC_ROLES** run parameter values are explained in the *Docker Variables* section of this README.
 
 * In order to secure the A4C connection you can use the following:
 
@@ -156,8 +209,9 @@ docker run -d --name alien4cloud-deep  -p ${A4C_PORT_HTTPS}:${A4C_PORT_HTTPS} -e
 
 where you have to specify the secure port, the root path where the certificates are on the host and its mapping inside the container, the names of the key and certificates pems and to enable SSL
 
-### Upgrade from older release
+### Upgrade
 
+([Top](#alien4cloud-deep-docker))
 The upgrade process involves pulling the desired version of the container _alien4cloud-deep__ from the DockerHub repository [[Res5]](#res5).
 The new version can be executed along with the old one, provided that there are no conflicts.
 We do not support sharing of any kind of the data related to a container between two running at the same time.
@@ -170,6 +224,7 @@ All in all, be sure to backup your data before any upgrade.
 
 ### REST API
 
+([Top](#alien4cloud-deep-docker))
 A4C supports a REST API [[Res4]](#res4) that can be used for many operations.
 We list some examples in the following paragraphs.
 
@@ -206,33 +261,47 @@ curl -k -b "${ALIEN_COOKIE}" -XPUT -H 'Content-Type: application/json; charset=U
 
 ### Usage
 
+([Top](#alien4cloud-deep-docker))
 Once Alien4Cloud started, you can connect to it using a supported browser [[Res3]](#res3).
 Before anything else, one should take a look at the [[Res2]](#res2).
 
-#### Plugin activation
+#### Plugin Activation
 
+([Top](#alien4cloud-deep-docker))
 The IndigoDataCloud Orchestrator plugin comes preinstalled in the Docker container. It should also be activated by default. Please check the list from **Administration** -> **Plugins**. The switch on the right should be green.
 
 #### Instance Creation
 
+([Top](#alien4cloud-deep-docker))
 First and foremost, one should create and instance of the DEEP - IndigoDataCloud Orchestrator plugin.
 Next, the values for the parameters should be set (explanation for each in the *Plugin Parameters* subsection.
 Finally, on the same page, one has to create a location.
 We support only one location, that is *Deep Orchestrator Location*.
 
-#### Users
+#### Users & Authorization
 
-For the moment, the plugin uses the username and password utilized during the A4C login.
-As a result, once you have A4C up and running, please create a new user having the same username and password as in IAM.
-A user can be added using the  **Administration** -> **Users** -> **New User** functionality.
+([Top](#alien4cloud-deep-docker))
+The DEEP orchestrator plugin uses the token obtained when the user logs in with the IAM instance.
+Due to the token based authorization of the orchestrator used in DEEP, the local users cannot connect to the orchestrator.
+
+A local user can be added using the  **Administration** -> **Users** -> **New User** functionality.
+The same location allows the modification of various user specific settings.
 The web application stores the information locally.
 If you change it in the IAM, you have to manually update it for each A4C instance.
 
 The A4C user roles are not taken in consideration by the plugin.
 The admin should consider the proper role(s) for a user only in the context of the A4C running instance.
+In order to allow a user that is not an *admin* to modify his/her own settings, the role *USER_SPECIFIC_SETTINGS_EDITOR* must be enabled.
+
+A *non-admin* user cannot use a location, unless an *admin* adds the username to the list of authorized users for each location.
+This is done by going to a  **Administration** -> **Orchestrators** -> *instance of the orchestrator* -> **Location(s)** -> **Security** -> **Authorize users**.
+The user(s) selected from the list appear on the **Security** page.
+They can now access the instance & location offered by the orchestrator plugin.
+If the access must be revoked for whatever reason, the red delete button de-authorizes a user for the selected combination of orchestrator instance and location.  
 
 #### Plugin Parameters
 
+([Top](#alien4cloud-deep-docker))
 <!---* **user** - The user used to obtain the authorization token to deploy topologies on the DEEP orchestrator. One can register on the page defined by the **iamHost** variable.
 * **password** - The password used in conjuction with **user** to obtain the authorization token to deploy topologies on the DEEP orchestrator. One can register on the page defined by the **iamHost** variable.
 * **clientId** - Once one has an account on the **iamHost**, an application can be registered. After registration, the IAM server generates a unique pair of a **clientId** and a **clientSecret** that is needed to get a token.
@@ -250,6 +319,7 @@ The admin should consider the proper role(s) for a user only in the context of t
 
 #### Obtain Certificate
 
+([Top](#alien4cloud-deep-docker))
 In order to obtain the certificates used by the plugin and stored in the **tokenEndpointCert**, **orchestratorEndpointCert**, and **iamHostCert** respectively, you should follow the steps described in this subsection for each different server.
 We refer to servers as in the following unit: _*.domain.extension_.
 Two variables may point towards the same server, but with different paths.
@@ -288,6 +358,7 @@ cat crt_solos.tmp | tr -d '\n'
 
 ### Testing
 
+([Top](#alien4cloud-deep-docker))
 We implemented a series of tests that should be executed during the maven building step.
 You can find them in the **indigodc-orchestrator-plugin/src/test/** directory.
 
@@ -299,6 +370,7 @@ mvn clean test
 
 #### Coverage
 
+([Top](#alien4cloud-deep-docker))
 During the plugin building process, we use Jacoco (through the Eclipse plugin for fast coverage execution, or Maven for automatic release).
 Jacoco generates the _jacoco-deep.exec_ file in the target/coverage-reports/ directory, after running the maven **test** lifecycle.
 
@@ -312,12 +384,14 @@ We require a minimum of 70% overall coverage by unit tests. When the plugin is b
 
 #### Style
 
+([Top](#alien4cloud-deep-docker))
 The A4C orchestrator plugin's Java code must respect the Google Java formatting style [[Res6]](#res6).
 
 We use checkstyle with Maven, as a plugin. This way we can rest assured that the committed code, that passes the continuous integration testing, respects the required formatting. The building process fails when warnings are encountered. We use the oficial checkstyle repository [[Res7]](#res7) to obtain a stable version of _com.puppycrawl.tools.checkstyle_ dependency of the _org.apache.maven.plugins.maven-checkstyle-plugin_ plugin. The checkstyle team includes a formatter ready to be used that respects Google's rules.
 
 ## User Guide
 
+([Top](#alien4cloud-deep-docker))
 This section contains the information necessary for the user to use an already deployed instance of Alien4Cloud-deep.
 We consider that the administrator(s) followed the guidelines from the previous section to set up a Docker container ready to be used.
 Please contact your administrator if you encounter any problem.
@@ -327,28 +401,46 @@ We try to summarize the steps in the following sub-sections.
 
 ### Registration
 
+([Top](#alien4cloud-deep-docker))
 Alien4Cloud can only be used by registered users.
 Before anything, please be sure that you have an account registered with [[Res1]](#res1).
 
 ### Login
 
+([Top](#alien4cloud-deep-docker))
 You have to use the user name and password as entered during the registration process on [[Res1]](#res1).
 Alien4Cloud cannot be used without login.
 Once you logged in successfully, you can access different parts of the web platform.
 We use rights associated with each user, therefore it may be possible that you can't perform some actions (e.g. add new TOSCA custom types in the catalog).
 
-### Topology creation
+### Topology
+
+#### Creation
+
+([Top](#alien4cloud-deep-docker))
 
 Once you have logged in, go to the **Applications** tab.
 Open the *New application* window by clicking the button with the same name.
-Give a name to your app and, optionally, a description.
-A4C automatically generates the *Archive Id*.
-After you press the *Create* button, a new screen with the application details greets you.
+You have two options here: either start with a new topology or use an existing template
+
+
+If you select the former option, A4c allows you to give a name to your app and, optionally, a description.
+A4C automatically generates the *Archive Id* for you from the name you gave to the topology.
+
+Should you prefer to use an existing template, then you can use the **Topology template** menu in the *New application* window.
+Our distribution of A4C includes a number of ready-to-be-used topologies created during the project and available at [[Res10]](#res10).
+A4C lists them in the **Catalog** -> **Browse topologies** window.
+Just click on the desired template to select, and fill the fields *Name* and *Description* (optional).
+
+
+Either path you have chosen, you have to press the *Create* button in order to actually create the topology.
+A new screen with the application details greets you.
 In the *Work on an environment* paragraph, you can click on the element on the row of the table listing all the environments.
 A screen with the steps to follow to launch your topology should be displayed to you.
 
-### Topology editor
+#### Edit
 
+([Top](#alien4cloud-deep-docker))
 The **Topology** step should be selected, and an *Edit* button available.
 You shouldn't be able to navigate further until you create a topology, and it is valid.
 The **Matching** step should run without any problems, as we support all nodes from TOSCA standard and IndigoDataCloud.
@@ -356,8 +448,9 @@ The **Matching** step should run without any problems, as we support all nodes f
 The web platform offers two editors.
 To exit the editor, click on the *Environment* or *Topology* arrow-buttons on the top-left.
 
-#### UI editor
+##### UI editor
 
+([Top](#alien4cloud-deep-docker))
 The main one is the graphical interface, pre-selected once you start editing the topology.
 Using the vertical buttons on right, you can display the list of TOSCA nodes available for deployment.
 Clicking on a button opens a window with the nodes.
@@ -366,8 +459,9 @@ You can add a node by simply drag and drop it on the available central space.
 Selecting a node by clicking it brings up a window with the list of properties for that node.
 Do not forget to save the topology using the button from the top-left.
 
-#### Text editor
+##### Text editor
 
+([Top](#alien4cloud-deep-docker))
 Using the *Archive content* button on the left, you can see the topology in text mode.
 Once you open this ditor view, click on the *topology.yml* file to display its content in the editor.
 
@@ -384,34 +478,40 @@ As explained earlier, some changes may not be reflected in the topology and may 
 Always save and then switch to the UI editor to see if the changes were actually applied.
 Then switch back to the text editor to see if they are still there.
 
-### Topology inputs
+#### Inputs
 
+([Top](#alien4cloud-deep-docker))
 Alien4Cloud has a separate screen that allows you to define the values for the inputs.
 It cannot proceed further until you do so.
 
-### Topology deployment
+#### Deployment
 
+([Top](#alien4cloud-deep-docker))
 Once you created your topology, selected a  location, set the inputs, set the matching nodes if required, you can proceed to deploy the application.
 Once you launched your topology, you have to wait until it is deployed.
 Please refresh your browser if nothing happens for a while.
 The **Manage current deployment** tab contains the details about your deployment.
 We currently do not support showing information about individual nodes of the deployment.
 
-### Topology undeployment
+#### Undeployment
 
+([Top](#alien4cloud-deep-docker))
 If there has been an error during deployment on the orchestrator responded or the deployment has been successfully created, you can use the *Undeploy* button in order to undeploy the application.
 It is accessible in the **Manage current deployment** tab.
 
 ## Authors
 
+([Top](#alien4cloud-deep-docker))
 * **Andy S Alic** - *Main Dev* - [asalic](https://github.com/asalic)
 
 ## License
 
+([Top](#alien4cloud-deep-docker))
 This project is licensed under the Apache License version 2.0 - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
+([Top](#alien4cloud-deep-docker))
 Thanks for help go to:
 
 * **Miguel Caballer** - [micafer](https://github.com/micafer)
@@ -420,6 +520,7 @@ Thanks for help go to:
 
 ## Resources
 
+([Top](#alien4cloud-deep-docker))
 #### [Res1]
 IAM authentication portal: https://iam.deep-hybrid-datacloud.eu
 
@@ -446,3 +547,6 @@ Spring social OIDC A4C plugin repository for OAuth2 authentication: https://gith
 
 #### [Res9]
 Java Xmx and Xms nomenclature: https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html#BABDJJFI
+
+#### [Res10]
+DEEP topologies repository: https://github.com/indigo-dc/tosca-templates
