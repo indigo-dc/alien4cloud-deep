@@ -5,6 +5,7 @@
 ![Repo size](https://img.shields.io/github/repo-size/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)
 [![Build Status](https://jenkins.indigo-datacloud.eu/buildStatus/icon?job=Pipeline-as-code/alien4cloud-deep/master)](https://jenkins.indigo-datacloud.eu/job/Pipeline-as-code/job/alien4cloud-deep/job/master/)
 
+<<<<<<< HEAD
 
 
 Documentation version 3.0.0
@@ -49,6 +50,8 @@ Documentation version 3.0.0
 ## Intro
 
 ([Top](#alien4cloud-deep-docker))
+=======
+>>>>>>> 0d6f99e6d42ed8d7fca4d33f3ca4d1d0f0e73976
 This repository contains the necessary parts needed to create a Docker image holding the Alien4cloud application, along with the DEEP - Indigo Data Cloud TOSCA types, and the plugin which connects Alien4Cloud (A4C) to the orchestrator used in DEEP.
 Each time the Docker image is created, the latest version of the normative TOSCA used by IndigoDataCloud and the latest version of the plugin are integrated in this image.
 
