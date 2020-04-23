@@ -1,8 +1,8 @@
 # Alien4Cloud DEEP Docker
 
 
-[![GitHub license](https://img.shields.io/github/license/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)](https://github.com/indigo-dc/alien4cloud-deep/blob/master/LICENSE)
-![Repo size](https://img.shields.io/github/repo-size/indigo-dc/alien4cloud-deep.svg?maxAge=2592000&style=flat-square)
+[![GitHub license](https://img.shields.io/github/license/indigo-dc/alien4cloud-deep.svg?style=flat-square)](https://github.com/indigo-dc/alien4cloud-deep/blob/master/LICENSE)
+![Repo size](https://img.shields.io/github/repo-size/indigo-dc/alien4cloud-deep.svg?style=flat-square)
 [![Build Status](https://jenkins.indigo-datacloud.eu/buildStatus/icon?job=Pipeline-as-code/alien4cloud-deep/master)](https://jenkins.indigo-datacloud.eu/job/Pipeline-as-code/job/alien4cloud-deep/job/master/)
 
 Documentation version 3.0.0
