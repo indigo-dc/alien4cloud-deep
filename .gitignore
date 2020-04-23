@@ -4,3 +4,6 @@
 indigodc-orchestrator-plugin/target/
 indigodc-orchestrator-plugin/lib/
 a4c-tmp/**
+indigodc-orchestrator-plugin/.idea
+indigodc-orchestrator-plugin/nb-configuration.xml
+
