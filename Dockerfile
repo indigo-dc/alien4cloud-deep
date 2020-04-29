@@ -15,6 +15,7 @@ ARG tosca_normative_name=normative-types
 ARG tosca_indigo_types_branch=stable/v4.0.1
 ARG spring_social_oidc_branch=master
 ARG a4c_deep_branch=deep-dev-UPV
+ARG a4c_elasticsearch-mapping_branch=v1.7.8
 ARG templates_deep_oc_branch=stable/v4.0.1
 ARG a4c_sh_name=alien4cloud.sh
 
@@ -99,6 +100,10 @@ RUN \
   # Compile and install locally the Spring Social OIDC plugin
   && git clone --single-branch  --branch ${spring_social_oidc_branch} https://github.com/indigo-dc/spring-social-oidc "${a4c_install_path}/spring_social_oidc" \
   && cd "${a4c_install_path}/spring_social_oidc" \
+  && mvn -U clean install \
+  # Get & Compile A4C  dependencies
+  && git clone --single-branch  --branch ${a4c_elasticsearch-mapping_branch} https://github.com/indigo-dc/elasticsearch-mapping-parent "${a4c_install_path}/elasticsearch-mapping-parent" \
+  && cd "${a4c_install_path}/elasticsearch-mapping-parent" \
   && mvn -U clean install \
   # Compile the A4C source code
   && git clone --single-branch  --branch ${a4c_deep_branch} https://github.com/indigo-dc/alien4cloud "${a4c_install_path}/${a4c_src_dir}" \
