@@ -21,8 +21,8 @@ if len(sys.argv) != 5:
 
 
 TOSCA_NORMATIVES_NAME = "normative-types"
-TOSCA_NORMATIVES_VERSION = "2.0.0"
-TOSCA_TEMPLATE_DEFAULT_VER = "1.0.0"
+TOSCA_NORMATIVES_VERSION = "1.0.0"
+TOSCA_TEMPLATE_DEFAULT_VER = "4.0.1"
 TOSCA_FILES_MAX_COUNT = 999999
 TOSCA_FILES_MAX_COUNT_DIGITS = str(int(math.log10(TOSCA_FILES_MAX_COUNT))+1)
 
@@ -65,7 +65,7 @@ def createImportsForTemplates(toscaObjs):
 
 def processToscaNormatives(count, filePath, zipOutputFolder):
     with open(filePath, 'r') as streamN:
-        normativesObj = yaml.load(streamN)
+        normativesObj = yaml.load(streamN, Loader=yaml.FullLoader)
         count += 1
         templateName = TOSCA_NORMATIVES_NAME
         templateVersion = TOSCA_NORMATIVES_VERSION
@@ -83,7 +83,9 @@ def processToscaNormatives(count, filePath, zipOutputFolder):
             #    normativesObj["metadata"]["template_author"] = "OpenStack"
         if not "description" in normativesObj:
             normativesObj["description"] = "Contains the normative types definition as defined by the OpenStack distro"
-        z = zipfile.ZipFile(os.path.join(zipOutputFolder, ('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" + TOSCA_NORMATIVES_NAME + ".zip"), 'w', zipfile.ZIP_DEFLATED)
+        z = zipfile.ZipFile(os.path.join(zipOutputFolder,
+            #('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" +
+            TOSCA_NORMATIVES_NAME + ".zip"), 'w', zipfile.ZIP_DEFLATED)
         z.writestr(TOSCA_NORMATIVES_NAME + ".yaml", yaml.dump(normativesObj, default_flow_style=False))
         z.close()
         result = collections.OrderedDict()
@@ -106,13 +108,15 @@ def processIndigoCustomTypes(count, rootPath, zipOutputFolder, normativesName, n
         with open(os.path.join(rootPath, customsP), 'r') as streamC:
             customsPBase = os.path.splitext(os.path.basename(customsP))[0]
             count += 1
-            customsObj = yaml.load(streamC)
+            customsObj = yaml.load(streamC, Loader=yaml.FullLoader)
             if "imports" in customsObj:
                 customsObj["imports"].append({normativesName: normativesVersion})
             else:
                 customsObj["imports"] = [{normativesName: normativesVersion}]
             customTypesObjs[customsP] =  customsObj
-            z = zipfile.ZipFile(os.path.join(zipOutputFolder, ('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" + customsPBase + ".zip"), 'w', zipfile.ZIP_DEFLATED)
+            z = zipfile.ZipFile(os.path.join(zipOutputFolder,
+                #('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" +
+                customsPBase + ".zip"), 'w', zipfile.ZIP_DEFLATED)
             z.writestr(customsP, yaml.dump(customsObj, default_flow_style=False))
             addFolderToZip(z, rootPath, "")
             z.close()
@@ -130,7 +134,7 @@ def processTemplates(rootTemplateDir, zipOutputFolder, importTypes, count):
             filename = os.fsdecode(file)
             if filename.lower().endswith( ('.yml', '.yaml') ): # whatever file types you're using...
                 with open(os.path.join(templatesP, filename), 'r') as stream:
-                    templateObj = yaml.load(stream)
+                    templateObj = yaml.load(stream, Loader=yaml.FullLoader)
                     filenameBase = os.path.splitext(os.path.basename(filename))[0]
                     templateObj.move_to_end("tosca_definitions_version", last=False)
                     #bak = templateObj["tosca_definitions_version"]
@@ -163,7 +167,9 @@ def processTemplates(rootTemplateDir, zipOutputFolder, importTypes, count):
                         templateObj["description"] = "DEEP template"
 
                     # Zip the template
-                    z = zipfile.ZipFile(os.path.join(outP, ('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" + filenameBase + ".zip"), 'w', zipfile.ZIP_DEFLATED)
+                    z = zipfile.ZipFile(os.path.join(outP,
+                        #('{:0' + TOSCA_FILES_MAX_COUNT_DIGITS + 'd}').format(count) + "_" +
+                        filenameBase + ".zip"), 'w', zipfile.ZIP_DEFLATED)
                     z.writestr(filename, yaml.dump(templateObj, default_flow_style=False))
                     if not icon == None:
                         z.writestr(os.path.join("images", iconName), icon)
