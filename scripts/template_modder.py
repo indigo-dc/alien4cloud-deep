@@ -65,7 +65,7 @@ def createImportsForTemplates(toscaObjs):
 
 def processToscaNormatives(count, filePath, zipOutputFolder):
     with open(filePath, 'r') as streamN:
-        normativesObj = yaml.load(streamN)
+        normativesObj = yaml.load(streamN, Loader=yaml.FullLoader)
         count += 1
         templateName = TOSCA_NORMATIVES_NAME
         templateVersion = TOSCA_NORMATIVES_VERSION
@@ -108,7 +108,7 @@ def processIndigoCustomTypes(count, rootPath, zipOutputFolder, normativesName, n
         with open(os.path.join(rootPath, customsP), 'r') as streamC:
             customsPBase = os.path.splitext(os.path.basename(customsP))[0]
             count += 1
-            customsObj = yaml.load(streamC)
+            customsObj = yaml.load(streamC, Loader=yaml.FullLoader)
             if "imports" in customsObj:
                 customsObj["imports"].append({normativesName: normativesVersion})
             else:
@@ -134,7 +134,7 @@ def processTemplates(rootTemplateDir, zipOutputFolder, importTypes, count):
             filename = os.fsdecode(file)
             if filename.lower().endswith( ('.yml', '.yaml') ): # whatever file types you're using...
                 with open(os.path.join(templatesP, filename), 'r') as stream:
-                    templateObj = yaml.load(stream)
+                    templateObj = yaml.load(stream, Loader=yaml.FullLoader)
                     filenameBase = os.path.splitext(os.path.basename(filename))[0]
                     templateObj.move_to_end("tosca_definitions_version", last=False)
                     #bak = templateObj["tosca_definitions_version"]
