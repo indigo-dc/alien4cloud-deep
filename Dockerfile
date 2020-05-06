@@ -101,13 +101,6 @@ RUN \
   && git clone --single-branch  --branch ${spring_social_oidc_branch} https://github.com/indigo-dc/spring-social-oidc "${a4c_install_path}/spring_social_oidc" \
   && cd "${a4c_install_path}/spring_social_oidc" \
   && mvn -U clean install \
-<<<<<<< HEAD
-  # Get & Compile A4C  dependencies
-  && git clone --single-branch  --branch ${a4c_elasticsearch_mapping_branch} https://github.com/indigo-dc/elasticsearch-mapping-parent "${a4c_install_path}/elasticsearch-mapping-parent" \
-  && cd "${a4c_install_path}/elasticsearch-mapping-parent" \
-  && mvn -U clean install \
-=======
->>>>>>> 9e75b8ce7eabe6a8b804937c00566cfe50061d1f
   # Compile the A4C source code
   && git clone --single-branch  --branch ${a4c_deep_branch} https://github.com/indigo-dc/alien4cloud "${a4c_install_path}/${a4c_src_dir}" \
   && cd "${a4c_install_path}/${a4c_src_dir}" \
