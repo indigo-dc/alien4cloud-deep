@@ -1,4 +1,4 @@
-FROM alpine:3.9.4
+FROM alpine:3.10.1
 
 ARG user_uid=1000
 ARG user_gid=1000
@@ -15,7 +15,7 @@ ARG tosca_normative_name=normative-types
 ARG tosca_indigo_types_branch=stable/v4.0.1
 ARG spring_social_oidc_branch=master
 ARG a4c_deep_branch=deep-dev-UPV
-ARG a4c_elasticsearch-mapping_branch=v1.7.8
+ARG a4c_elasticsearch_mapping_branch=v1.7.8
 ARG templates_deep_oc_branch=stable/v4.0.1
 ARG a4c_sh_name=alien4cloud.sh
 
@@ -102,7 +102,7 @@ RUN \
   && cd "${a4c_install_path}/spring_social_oidc" \
   && mvn -U clean install \
   # Get & Compile A4C  dependencies
-  && git clone --single-branch  --branch ${a4c_elasticsearch-mapping_branch} https://github.com/indigo-dc/elasticsearch-mapping-parent "${a4c_install_path}/elasticsearch-mapping-parent" \
+  && git clone --single-branch  --branch ${a4c_elasticsearch_mapping_branch} https://github.com/indigo-dc/elasticsearch-mapping-parent "${a4c_install_path}/elasticsearch-mapping-parent" \
   && cd "${a4c_install_path}/elasticsearch-mapping-parent" \
   && mvn -U clean install \
   # Compile the A4C source code
