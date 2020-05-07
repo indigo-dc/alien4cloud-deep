@@ -11,14 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Holds the response received after a call to the Orchestrator.

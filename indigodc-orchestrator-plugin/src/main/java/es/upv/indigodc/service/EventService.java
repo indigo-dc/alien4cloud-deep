@@ -1,11 +1,8 @@
 package es.upv.indigodc.service;
 
 import alien4cloud.paas.model.AbstractMonitorEvent;
-import es.upv.indigodc.configuration.CloudConfiguration;
-
 import java.util.ArrayList;
 import java.util.Date;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.BufferUtils;

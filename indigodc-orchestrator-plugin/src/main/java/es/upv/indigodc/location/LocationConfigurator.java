@@ -11,9 +11,6 @@ import alien4cloud.plugin.model.ManagedPlugin;
 import alien4cloud.tosca.parser.ParsingException;
 import alien4cloud.tosca.parser.ParsingResult;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;

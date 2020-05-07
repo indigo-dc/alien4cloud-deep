@@ -1,4 +1,4 @@
-FROM alpine:3.10.1
+FROM alpine:3.11.2
 
 ARG user_uid=1000
 ARG user_gid=1000

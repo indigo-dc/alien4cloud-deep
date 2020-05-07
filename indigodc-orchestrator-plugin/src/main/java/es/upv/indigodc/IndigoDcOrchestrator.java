@@ -1,6 +1,5 @@
 package es.upv.indigodc;
 
-import alien4cloud.exception.NotFoundException;
 import alien4cloud.model.deployment.DeploymentTopology;
 import alien4cloud.orchestrators.plugin.ILocationConfiguratorPlugin;
 import alien4cloud.orchestrators.plugin.IOrchestratorPlugin;
@@ -17,7 +16,6 @@ import alien4cloud.paas.model.NodeOperationExecRequest;
 import alien4cloud.paas.model.PaaSDeploymentContext;
 import alien4cloud.paas.model.PaaSDeploymentStatusMonitorEvent;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -34,12 +32,7 @@ import es.upv.indigodc.service.model.OrchestratorResponse;
 import es.upv.indigodc.service.model.StatusNotFoundException;
 import es.upv.indigodc.service.model.response.DeploymentOrchestrator;
 import es.upv.indigodc.service.model.response.GetDeploymentsResponse;
-
 import java.io.IOException;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.TemporalField;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,13 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
-
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.alien4cloud.tosca.catalog.index.CsarService;
 import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
