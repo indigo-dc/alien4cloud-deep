@@ -4,12 +4,10 @@ import alien4cloud.paas.model.DeploymentStatus;
 import alien4cloud.paas.model.PaaSTopologyDeploymentContext;
 import com.google.common.collect.Maps;
 import es.upv.indigodc.service.model.DeploymentInfo;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;

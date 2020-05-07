@@ -3,19 +3,14 @@ package es.upv.indigodc;
 import alien4cloud.model.orchestrators.ArtifactSupport;
 import alien4cloud.model.orchestrators.locations.LocationSupport;
 import alien4cloud.orchestrators.plugin.IOrchestratorPluginFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.google.common.collect.Maps;
-
 import es.upv.indigodc.configuration.CloudConfiguration;
 import es.upv.indigodc.location.LocationConfigurator;
 import es.upv.indigodc.service.ArtifactRegistryService;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
-
 import org.alien4cloud.tosca.model.definitions.PropertyDefinition;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,16 +1,11 @@
 package es.upv.indigodc.service.model;
 
 import alien4cloud.paas.model.DeploymentStatus;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serializable;
 import java.util.Map;
-
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /** Maintains information pertinent to a deployment. */
 @AllArgsConstructor
