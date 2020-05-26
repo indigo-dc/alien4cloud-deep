@@ -77,7 +77,7 @@ RUN \
     libxrender libxtst alsa-lib libbz2 libpng freetype \
     giflib openjdk8-jre openjdk8 maven gdbm xz-libs python3 \
     yaml py3-yaml ruby-dev nodejs git npm gcc make libffi-dev \
-    build-base ruby-rdoc python \
+    build-base ruby-rdoc \
   # Prepare the a4c directories
   && mkdir -p ${a4c_install_path}/${a4c_install_dir} \
   && cd ${a4c_install_path}/${a4c_install_dir} \
@@ -127,7 +127,7 @@ RUN \
     ${a4c_install_path}/alien4cloud-settings-manager/ \
     ${a4c_install_path}/tosca-templates \
     /usr/lib/ruby \
-    ${a4c_install_path}/tosca-templates \
+    ${a4c_install_path}/spring_social_oidc \
     $HOME/..?* $HOME/.[!.]* $HOME/* \
     ${a4c_install_path}/TOSCA_normative_types_* \
     ${a4c_install_path}/indigo-dc-tosca-types \
