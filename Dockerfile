@@ -1,4 +1,4 @@
-FROM alpine:3.11.2
+FROM alpine:3.10
 
 ARG user_uid=1000
 ARG user_gid=1000
@@ -76,8 +76,9 @@ RUN \
     libxdmcp libxcb libx11 libxcomposite libxext libxi \
     libxrender libxtst alsa-lib libbz2 libpng freetype \
     giflib openjdk8-jre openjdk8 maven gdbm xz-libs python3 \
-    yaml py3-yaml ruby-dev nodejs git npm gcc make libffi-dev \
+    ruby-dev nodejs git npm gcc make libffi-dev \
     build-base ruby-rdoc \
+  && pip3 install pyyaml \
   # Prepare the a4c directories
   && mkdir -p ${a4c_install_path}/${a4c_install_dir} \
   && cd ${a4c_install_path}/${a4c_install_dir} \
@@ -127,6 +128,7 @@ RUN \
     ${a4c_install_path}/alien4cloud-settings-manager/ \
     ${a4c_install_path}/tosca-templates \
     /usr/lib/ruby \
+    ${a4c_install_path}/a4c/node_modules \
     ${a4c_install_path}/spring_social_oidc \
     $HOME/..?* $HOME/.[!.]* $HOME/* \
     ${a4c_install_path}/TOSCA_normative_types_* \
