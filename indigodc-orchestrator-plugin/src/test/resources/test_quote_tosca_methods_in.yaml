@@ -10,5 +10,5 @@ topology_template:
         p2: { get_attribute : [ mesos_master_server, public_address ] }
         p3: { concat: [ "a", "b" ] }
         p4:   {   concat : [ 'http://', get_attribute : [ lrms_server, public_address, 0 ], ':8000' ] }  
-        p5:  " { get_attribute : [ mesos_master_server, public_address ] } "  
+        p5:  ' { get_attribute : [ mesos_master_server, public_address ] } '  
         
