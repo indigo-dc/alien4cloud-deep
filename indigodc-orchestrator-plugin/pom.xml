@@ -61,8 +61,8 @@
         <v.org.apache.maven.plugins.maven-javadoc-plugin>2.9</v.org.apache.maven.plugins.maven-javadoc-plugin>
         <v.org.codehaus.mojo.build-helper-maven-plugin>1.5</v.org.codehaus.mojo.build-helper-maven-plugin>
         <v.org.apache.maven.plugins.maven-jar-plugin>2.6</v.org.apache.maven.plugins.maven-jar-plugin>
-        <v.org.apache.maven.plugins.maven-checkstyle-plugin>3.1.0</v.org.apache.maven.plugins.maven-checkstyle-plugin>
-        <v.com.puppycrawl.tools.checkstyle>8.29</v.com.puppycrawl.tools.checkstyle>
+        <v.org.apache.maven.plugins.maven-checkstyle-plugin>3.1.1</v.org.apache.maven.plugins.maven-checkstyle-plugin>
+        <v.com.puppycrawl.tools.checkstyle>8.33</v.com.puppycrawl.tools.checkstyle>
     </properties>
 
 
