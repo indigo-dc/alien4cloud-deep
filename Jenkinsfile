@@ -23,7 +23,7 @@ pipeline {
                      checkout([$class: 'GitSCM', branches: [[name: 'master']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/spring-social-oidc.git']]])
 		}
 		dir("$WORKSPACE/alien4cloud") {
-                     checkout([$class: 'GitSCM', branches: [[name: 'deep-dev-UPV']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
+                     checkout([$class: 'GitSCM', branches: [[name: 'deep-dev']],  extensions: [[$class: 'CleanCheckout']], userRemoteConfigs: [[url: 'https://github.com/indigo-dc/alien4cloud.git']]])
                 }
             }
         }
@@ -36,7 +36,7 @@ pipeline {
           }
         }
 
-        stage('Build local A4C (UPV flavour)') {
+        stage('Build local A4C (DEEP flavour)') {
           steps {
             dir("$WORKSPACE/alien4cloud") {
                 MavenRun('-U clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true')
