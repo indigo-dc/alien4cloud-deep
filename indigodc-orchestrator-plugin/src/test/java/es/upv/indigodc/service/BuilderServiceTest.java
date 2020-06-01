@@ -137,31 +137,31 @@ public class BuilderServiceTest {
         BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
-  @Test
-  public void getAttributeFromStrToMethod() throws URISyntaxException, IOException {
-    URL url = BuilderServiceTest.class.getClassLoader().getResource("test_get_attribute_a4c.yaml");
-    String yamlA4c =
-        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    url = BuilderServiceTest.class.getClassLoader().getResource("test_get_attribute_indigodc.yaml");
-    String yamlIndigoDC =
-        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
-    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
-    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
-    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
-    Deployment depl = Mockito.mock(Deployment.class);
-    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
-    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
-    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
-    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
-    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
-    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
-    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
-    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
-    Assertions.assertEquals(
-        yamlIndigoDC,
-        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
-  }
+//  @Test
+//  public void getAttributeFromStrToMethod() throws URISyntaxException, IOException {
+//    URL url = BuilderServiceTest.class.getClassLoader().getResource("test_get_attribute_a4c.yaml");
+//    String yamlA4c =
+//        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+//    url = BuilderServiceTest.class.getClassLoader().getResource("test_get_attribute_indigodc.yaml");
+//    String yamlIndigoDC =
+//        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+//    CloudConfiguration cc = TestUtil.getTestConfiguration("cloud_conf_import_master_test.json");
+//    PaaSTopologyDeploymentContext ptdc = Mockito.mock(PaaSTopologyDeploymentContext.class);
+//    DeploymentTopology deploymentTopology = Mockito.mock(DeploymentTopology.class);
+//    Mockito.when(deploymentTopology.getId()).thenReturn(A4C_DEPLOYMENT_TOPOLOGY_ID);
+//    Deployment depl = Mockito.mock(Deployment.class);
+//    Mockito.when(ptdc.getDeploymentTopology()).thenReturn(deploymentTopology);
+//    Mockito.when(ptdc.getDeploymentPaaSId()).thenReturn(A4C_PAAS_ID);
+//    Mockito.when(ptdc.getDeploymentId()).thenReturn(A4C_ID);
+//    Mockito.when(ptdc.getDeployment()).thenReturn(depl);
+//    Mockito.when(depl.getLocationIds()).thenReturn( A4C_LOCATIONS_IDS);
+//    Mockito.when(depl.getOrchestratorId()).thenReturn(A4C_ORCHESTRATOR_ID);
+//    Mockito.when(depl.getOrchestratorDeploymentId()).thenReturn(A4C_DEPLOYMENT_ORCHESTRATOR_DEPLOYMENT_ID);
+//    Mockito.when(depl.getVersionId()).thenReturn(A4C_VERSION_ID);
+//    Assertions.assertEquals(
+//        yamlIndigoDC,
+//        BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
+//  }
 
   @Test
   public void rmEmptyNullPropertiesNodes() throws URISyntaxException, IOException {
@@ -228,18 +228,18 @@ public class BuilderServiceTest {
         BuilderService.getIndigoDcTopologyYaml(ptdc, yamlA4c, cc.getImportIndigoCustomTypes()));
   }
 
-  @Test
-  public void quoteAllToscaMethods() throws URISyntaxException, IOException {
-    URL url =
-        BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_in.yaml");
-    String yamlA4c =
-        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    url =
-        BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_out.yaml");
-    String yamlIndigoDC =
-        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
-    Assertions.assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
-  }
+//  @Test
+//  public void quoteAllToscaMethods() throws URISyntaxException, IOException {
+//    URL url =
+//        BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_in.yaml");
+//    String yamlA4c =
+//        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+//    url =
+//        BuilderServiceTest.class.getClassLoader().getResource("test_quote_tosca_methods_out.yaml");
+//    String yamlIndigoDC =
+//        new String(Files.readAllBytes(Paths.get(url.getPath())), StandardCharsets.UTF_8);
+//    Assertions.assertEquals(yamlIndigoDC, BuilderService.encodeToscaMethods(yamlA4c));
+//  }
 
   @Test
   public void getEditionContextManagerCsarNullWhenNotExecutedByA4c() {

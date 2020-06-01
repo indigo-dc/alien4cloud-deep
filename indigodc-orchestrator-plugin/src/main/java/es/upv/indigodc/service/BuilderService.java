@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -113,25 +114,29 @@ public class BuilderService {
    * methods as strings in order to be processed by YAML parser (which doesn't discern between a
    * TOSCA method and a a value).
    *
+   * @param functionDb Keep an index of functions
    * @param a4cTopologyYaml The A4C topology that can be seen in the A4C text TOSCA editor
    * @return The A4C topology with the TOSCA methods commented
    */
-  public static String encodeToscaMethods(String a4cTopologyYaml) {
+  public static String encodeToscaMethods(Map<String, String> functionDb, String a4cTopologyYaml) {
     StringBuffer newa4cTopologyYaml = new StringBuffer();
     Pattern pattern =
-        Pattern.compile("(:){1}(\\s)*(\\\"){0}(\\s)*(\\{){1}(.?)+(\\}){1}(\\s)*(\\\"){0}");
+        Pattern.compile("(:){1}(\\s)*(\\\'){0}(\\s)*(\\{){1}(.?)+(\\}){1}(\\s)*(\\\'){0}");
     Matcher matcher = pattern.matcher(a4cTopologyYaml);
     while (matcher.find()) {
-      StringBuilder group = new StringBuilder(matcher.group());
-      int pos = group.lastIndexOf("}");
-      if (pos >= 0) {
-        group.replace(pos, pos + 1, "}\"");
+      String group = matcher.group();
+      //StringBuilder group = new StringBuilder();
+      int posEnd = group.lastIndexOf("}");
+      int posStart = group.indexOf("{");
+      String uuid = UUID.randomUUID().toString();
+      while (a4cTopologyYaml.indexOf(uuid) != -1) {
+        uuid = UUID.randomUUID().toString();
       }
-      pos = group.indexOf("{");
-      if (pos >= 0) {
-        group.replace(pos, pos + 1, "\"{");
-      }
-      matcher.appendReplacement(newa4cTopologyYaml, group.toString());
+      String val = group.substring(0, posStart) + uuid + group.substring(posEnd + 1);
+      //String function = group.substring(posStart, posEnd + 1);
+      log.info("Found method: " + group + " replace with " + val);
+      matcher.appendReplacement(newa4cTopologyYaml, val);
+      functionDb.put(val, group);
     }
     matcher.appendTail(newa4cTopologyYaml);
     log.info("Topo with methods changed: " + newa4cTopologyYaml.toString());
@@ -156,11 +161,13 @@ public class BuilderService {
     ObjectMapper mapper =
         new ObjectMapper(
             new YAMLFactory()
+                .enable(Feature.MINIMIZE_QUOTES)
                 .disable(Feature.WRITE_DOC_START_MARKER)
                 .disable(Feature.SPLIT_LINES)
                 .disable(Feature.CANONICAL_OUTPUT));
-    a4cTopologyYaml = a4cTopologyYaml.replaceAll("\"", "\'");
-    String a4cTopologyYamlIgnoreMethods = encodeToscaMethods(a4cTopologyYaml);
+    //a4cTopologyYaml = a4cTopologyYaml.replaceAll("\"", "\'");
+    Map<String, String> functionDb = new HashMap<>();
+    String a4cTopologyYamlIgnoreMethods = encodeToscaMethods(functionDb, a4cTopologyYaml);
     ObjectNode rootNode = mapper.createObjectNode();
     ObjectNode root = (ObjectNode) mapper.readTree(a4cTopologyYamlIgnoreMethods);
     root.remove("tosca_definitions_version");
@@ -221,7 +228,7 @@ public class BuilderService {
       // Eliminate metadata info
       nodeTemplate.remove("metadata");
 
-      ObjectNode properties = rmNullProps((ObjectNode) nodeTemplate.get("properties"));
+      JsonNode properties = rmNullProps(nodeTemplate.get("properties"));
       if (properties == null) {
         nodeTemplate.remove("properties");
       }
@@ -242,7 +249,7 @@ public class BuilderService {
         }
       }
     }
-    return toscaMethodsStrToMethod(mapper.writer().writeValueAsString(root));
+    return toscaMethodsStrToMethod(functionDb, mapper.writer().writeValueAsString(root));
   }
 
   /**
@@ -253,16 +260,21 @@ public class BuilderService {
    *     be null, in which case nothing is done, null is returned
    * @return The input parameter after modification, null if input is null
    */
-  public static ObjectNode rmNullProps(ObjectNode properties) {
+  public static JsonNode rmNullProps(JsonNode properties) {
     if (properties != null) {
-      Iterator<Map.Entry<String, JsonNode>> itProperties = properties.fields();
-      while (itProperties.hasNext()) {
-        Map.Entry<String, JsonNode> property = itProperties.next();
-        if (property.getValue().isNull()) {
-          itProperties.remove();
+      if (properties.isObject()) {
+        ObjectNode properties2 = (ObjectNode) properties;  
+        Iterator<Map.Entry<String, JsonNode>> itProperties = properties2.fields();
+        while (itProperties.hasNext()) {
+          Map.Entry<String, JsonNode> property = itProperties.next();
+          if (property.getValue().isNull()) {
+            itProperties.remove();
+          }
         }
+        return properties2.size() > 0 ? properties2 : null;
+      } else {
+        return properties;
       }
-      return properties.size() > 0 ? properties : null;
     } else {
       return null;
     }
@@ -272,34 +284,39 @@ public class BuilderService {
    * Executes the uncomment of the TOSCA methods that where commented using {@link
    * #encodeToscaMethods}.
    *
+   * @param functionDb Keep an index of functions
    * @param topologyYaml The modified TOSCA topology that is accepted by the Orchestrator
    * @return The textual representation of the TOSCA topology with uncommented TOSCA methods
    */
-  public static String toscaMethodsStrToMethod(String topologyYaml) {
-    StringBuffer newTopologyYaml = new StringBuffer();
-
-    Pattern pattern =
-        Pattern.compile(
-            "(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\"){1}(\\s)*(\\{){1}(\\s)*"
-                + "[a-zA-Z_\\-0-9]+(\\s)*(:){1}(\\s)*(.?)+(\\s)*(\\}){1}(\\s)*(\\\"){1}");
-
-    Matcher matcher = pattern.matcher(topologyYaml);
-    while (matcher.find()) {
-      StringBuilder group = new StringBuilder(matcher.group());
-      int pos = group.lastIndexOf("\"");
-      if (pos >= 0) {
-        group.replace(pos, pos + 1, "");
-      }
-      pos = group.indexOf("\"");
-      if (pos >= 0) {
-        group.replace(pos, pos + 1, "");
-      }
-      matcher.appendReplacement(
-          newTopologyYaml, group.toString().replaceAll("(\\n){0,1}(\\s)*(-){1}", ""));
+  public static String toscaMethodsStrToMethod(Map<String, String> functionDb, 
+          String topologyYaml) {
+    //    StringBuffer newTopologyYaml = new StringBuffer();
+    //
+    //    Pattern pattern =
+    //        Pattern.compile(
+    //            "(\n){0,1}(\\s)*(-){0,1}(\\s)*(\\\'){1}(\\s)*(\\{){1}(\\s)*"
+    //                + "[a-zA-Z_\\-0-9]+(\\s)*(:){1}(\\s)*(.?)+(\\s)*(\\}){1}(\\s)*(\\\'){1}");
+    //
+    //    Matcher matcher = pattern.matcher(topologyYaml);
+    //    while (matcher.find()) {
+    //      StringBuilder group = new StringBuilder(matcher.group());
+    //      int pos = group.lastIndexOf("\'");
+    //      if (pos >= 0) {
+    //        group.replace(pos, pos + 1, "");
+    //      }
+    //      pos = group.indexOf("\'");
+    //      if (pos >= 0) {
+    //        group.replace(pos, pos + 1, "");
+    //      }
+    //      matcher.appendReplacement(
+    //          newTopologyYaml, group.toString().replaceAll("(\\n){0,1}(\\s)*(-){1}", ""));
+    //    }
+    //    matcher.appendTail(newTopologyYaml);
+    for (Map.Entry<String, String> func: functionDb.entrySet()) {
+      topologyYaml = topologyYaml.replaceAll(func.getKey(), func.getValue());
     }
-    matcher.appendTail(newTopologyYaml);
 
-    return newTopologyYaml.toString();
+    return topologyYaml;
   }
 
   /**

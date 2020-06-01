@@ -14,6 +14,5 @@ topology_template:
     Compute:
       type: tosca.nodes.indigo.Compute
       properties:
-        ips: 
-          - "{ get_attribute: [ HOST, private_address ] }"
-        dns: "{ get_attribute: [ HOST, dns ] }"
+        ips: { get_attribute: [ HOST, private_address ] }
+        dns: { get_attribute: [ HOST, dns ] }

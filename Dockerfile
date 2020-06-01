@@ -1,4 +1,4 @@
-FROM alpine:3.11.2
+FROM alpine:3.10
 
 ARG user_uid=1000
 ARG user_gid=1000
@@ -14,7 +14,7 @@ ARG tosca_normative_version=1.0.0
 ARG tosca_normative_name=normative-types
 ARG tosca_indigo_types_branch=stable/v4.0.1
 ARG spring_social_oidc_branch=master
-ARG a4c_deep_branch=deep-dev-UPV
+ARG a4c_deep_branch=deep-dev
 ARG a4c_elasticsearch_mapping_branch=v1.7.8
 ARG templates_deep_oc_branch=stable/v4.0.1
 ARG a4c_sh_name=alien4cloud.sh
@@ -76,8 +76,9 @@ RUN \
     libxdmcp libxcb libx11 libxcomposite libxext libxi \
     libxrender libxtst alsa-lib libbz2 libpng freetype \
     giflib openjdk8-jre openjdk8 maven gdbm xz-libs python3 \
-    yaml py3-yaml ruby-dev nodejs git npm gcc make libffi-dev \
-    build-base ruby-rdoc python \
+    ruby-dev nodejs git npm gcc make libffi-dev \
+    build-base ruby-rdoc \
+  && pip3 install pyyaml \
   # Prepare the a4c directories
   && mkdir -p ${a4c_install_path}/${a4c_install_dir} \
   && cd ${a4c_install_path}/${a4c_install_dir} \
@@ -127,7 +128,8 @@ RUN \
     ${a4c_install_path}/alien4cloud-settings-manager/ \
     ${a4c_install_path}/tosca-templates \
     /usr/lib/ruby \
-    ${a4c_install_path}/tosca-templates \
+    ${a4c_install_path}/a4c/node_modules \
+    ${a4c_install_path}/spring_social_oidc \
     $HOME/..?* $HOME/.[!.]* $HOME/* \
     ${a4c_install_path}/TOSCA_normative_types_* \
     ${a4c_install_path}/indigo-dc-tosca-types \
