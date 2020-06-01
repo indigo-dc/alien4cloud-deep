@@ -55,9 +55,9 @@ pipeline {
         stage('Style analysis') {
             steps {
                 dir("indigodc-orchestrator-plugin") {
-                    sh 'wget https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml'
-                    sh 'wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.25/checkstyle-8.25-all.jar'
-                    sh 'java -jar checkstyle-8.25-all.jar -c google_checks.xml src/ -e src/test/ -e src/main/assembly/ -f xml -o checkstyle-result.xml'
+                    sh 'wget https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-8.33/src/main/resources/google_checks.xml'
+                    sh 'wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.33/checkstyle-8.33-all.jar'
+                    sh 'java -jar checkstyle-8.33-all.jar -c google_checks.xml src/ -e src/test/ -e src/main/assembly/ -f xml -o checkstyle-result.xml'
                 }
             }
             post {
