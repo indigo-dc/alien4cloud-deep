@@ -43,7 +43,7 @@
         <v.org.junit.jupiter.junit-jupiter-api>5.3.1</v.org.junit.jupiter.junit-jupiter-api>
         <v.commons-cli.commons-cli>1.4</v.commons-cli.commons-cli>
         <v.org.projectlombok.lombok>1.18.6</v.org.projectlombok.lombok>
-        <v.org.apache.httpcomponents.httpclient>4.5.8</v.org.apache.httpcomponents.httpclient>
+        <v.org.apache.httpcomponents.httpclient>4.5.13</v.org.apache.httpcomponents.httpclient>
         <v.org.apache.httpcomponents.httpcore>4.4.11</v.org.apache.httpcomponents.httpcore>
         <v.com.fasterxml.jackson.core>2.9.9</v.com.fasterxml.jackson.core>
         <v.com.fasterxml.jackson.core.jackson-databind>2.9.10.4</v.com.fasterxml.jackson.core.jackson-databind>
