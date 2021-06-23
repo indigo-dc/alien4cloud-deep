@@ -35,7 +35,7 @@
         <v.org.springframework.social.spring-social-oidc-deep>1.4</v.org.springframework.social.spring-social-oidc-deep>
 
         <!-- External Libraries versions section -->
-        <v.org.eclipse.jetty>9.4.18.v20190429</v.org.eclipse.jetty>
+        <v.org.eclipse.jetty>9.4.41.v20210516</v.org.eclipse.jetty>
         <v.org.yaml.snakeyaml>1.24</v.org.yaml.snakeyaml>
         <v.org.mockito.mockito-core>2.27.0</v.org.mockito.mockito-core>
         <v.org.mockito.mockito-junit-jupiter>2.27.0</v.org.mockito.mockito-junit-jupiter>
