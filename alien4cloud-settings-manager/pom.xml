@@ -27,7 +27,7 @@
 		<dep.ver.jetty>9.4.9.v20180320</dep.ver.jetty>
 		<dep.ver.snakeyaml>1.18</dep.ver.snakeyaml>
 		<dep.ver.jetty.servlet>9.4.9.v20180320</dep.ver.jetty.servlet>
-		<dep.ver.bouncycastle>1.60</dep.ver.bouncycastle>
+		<dep.ver.bouncycastle>1.67</dep.ver.bouncycastle>
 		<dep.ver.jackson.dataformat>2.9.9</dep.ver.jackson.dataformat>
 		<dep.ver.jackson.core>2.9.9</dep.ver.jackson.core>
 		<v.com.fasterxml.jackson.core.jackson-databind>2.9.10.4</v.com.fasterxml.jackson.core.jackson-databind>
