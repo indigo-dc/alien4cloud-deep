@@ -35,7 +35,7 @@
 		<dep.ver.junit>4.12</dep.ver.junit>
 		<dep.ver.projectlombok>1.18.2</dep.ver.projectlombok>
 		<dep.ver.okio>2.1.0</dep.ver.okio>
-		<dep.ver.apache.logging.log4j>2.9.0</dep.ver.apache.logging.log4j>
+		<dep.ver.apache.logging.log4j>2.16.0</dep.ver.apache.logging.log4j>
 
 		<!-- Plugins versions section -->
 		<dep.ver.plugin.surefire>2.22.1</dep.ver.plugin.surefire>
