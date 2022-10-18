@@ -46,7 +46,7 @@
         <v.org.apache.httpcomponents.httpclient>4.5.8</v.org.apache.httpcomponents.httpclient>
         <v.org.apache.httpcomponents.httpcore>4.4.11</v.org.apache.httpcomponents.httpcore>
         <v.com.fasterxml.jackson.core>2.9.9</v.com.fasterxml.jackson.core>
-        <v.com.fasterxml.jackson.core.jackson-databind>2.9.10.4</v.com.fasterxml.jackson.core.jackson-databind>
+        <v.com.fasterxml.jackson.core.jackson-databind>2.13.4.1</v.com.fasterxml.jackson.core.jackson-databind>
         <v.com.squareup.okio.okio>2.2.2</v.com.squareup.okio.okio>
         <v.org.junit.platform.junit-platform-surefire-provider>1.3.1
         </v.org.junit.platform.junit-platform-surefire-provider>
