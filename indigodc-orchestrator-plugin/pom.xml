@@ -36,7 +36,7 @@
 
         <!-- External Libraries versions section -->
         <v.org.eclipse.jetty>9.4.18.v20190429</v.org.eclipse.jetty>
-        <v.org.yaml.snakeyaml>1.24</v.org.yaml.snakeyaml>
+        <v.org.yaml.snakeyaml>1.32</v.org.yaml.snakeyaml>
         <v.org.mockito.mockito-core>2.27.0</v.org.mockito.mockito-core>
         <v.org.mockito.mockito-junit-jupiter>2.27.0</v.org.mockito.mockito-junit-jupiter>
         <v.org.powermock>1.7.4</v.org.powermock>
