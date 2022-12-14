@@ -25,7 +25,7 @@
 		
 		<!-- Libraries versions section -->
 		<dep.ver.jetty>9.4.9.v20180320</dep.ver.jetty>
-		<dep.ver.snakeyaml>1.18</dep.ver.snakeyaml>
+		<dep.ver.snakeyaml>1.32</dep.ver.snakeyaml>
 		<dep.ver.jetty.servlet>9.4.9.v20180320</dep.ver.jetty.servlet>
 		<dep.ver.bouncycastle>1.60</dep.ver.bouncycastle>
 		<dep.ver.jackson.dataformat>2.9.9</dep.ver.jackson.dataformat>
